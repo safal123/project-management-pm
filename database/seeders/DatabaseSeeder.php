@@ -1,0 +1,33 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use App\Models\Workspace;
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        // User::factory(10)->create();
+
+        User::factory()->create([
+            'name' => 'Safal Pokharel',
+            'email' => 'safal@safal.com',
+            'password' => bcrypt('password'),
+        ]);
+
+        Workspace::factory(2)
+            ->create(['created_by' => User::first()->id])
+            ->each(function (Workspace $workspace) {
+                // Here is problem
+                $workspace
+                    ->users()
+                    ->attach(User::all()->random());
+            });
+    }
+}
