@@ -1,18 +1,19 @@
 import React from 'react'
-import { type WorkspaceSelectorProps } from '../types/index'
+import { SharedData, Workspace, type WorkspaceSelectorProps } from '../types/index'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from './ui/sidebar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { ChevronsUpDown, Plus } from 'lucide-react'
+import { Check, ChevronsUpDown } from 'lucide-react'
 import { DropdownMenuLabel } from './ui/dropdown-menu'
 import { Separator } from './ui/separator'
-import { Button } from './ui/button'
 import { AddNewWorkspace } from './modals/add-new-workspace'
+import { router, usePage } from '@inertiajs/react'
 
 const WorkspaceSelector = ({ workspaces }: WorkspaceSelectorProps) => {
+  const { auth } = usePage<SharedData>().props;
   const { state } = useSidebar();
   const isMobile = useIsMobile();
-  const activeTeam = workspaces[0];
+  const activeTeam = auth.user.current_workspace as Workspace;
 
   return (
     <SidebarMenu>
@@ -44,10 +45,17 @@ const WorkspaceSelector = ({ workspaces }: WorkspaceSelectorProps) => {
             </DropdownMenuLabel>
             <Separator />
             {workspaces.map((workspace) => (
-              <DropdownMenuItem key={workspace.id} className="mt-1 px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md">
-                <span className="text-sm font-medium">
-                  {workspace.name.substring(0, 20)}
-                </span>
+              <DropdownMenuItem
+                onClick={() => router.visit(route('workspace.switcher', { workspace: workspace.id }), { method: 'post' })}
+                key={workspace.id} className="mt-1 px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">
+                    {workspace.name.substring(0, 20)}
+                  </span>
+                  {auth.user.current_workspace_id === workspace.id && (
+                    <Check className="ml-auto size-4 text-primary" />
+                  )}
+                </div>
               </DropdownMenuItem>
             ))}
             {/* Add a new workspace button */}

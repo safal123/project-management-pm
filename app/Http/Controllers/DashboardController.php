@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Project;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        return Inertia::render('dashboard');
+        $projects = Project::where('workspace_id', auth()->user()->currentWorkspace()->first()->id)->get();
+        $workspaces = auth()->user()->workspaces;
+        return Inertia::render('dashboard', [
+            'projects' => $projects,
+            'workspaces' => $workspaces,
+        ]);
     }
 }

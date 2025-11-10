@@ -21,6 +21,8 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'workspaces' => WorkspaceResource::collection($this->whenLoaded('workspaces')),
+            'current_workspace_id' => $this->current_workspace_id,
+            'current_workspace' => new WorkspaceResource($this->whenLoaded('currentWorkspace')),
         ];
     }
 }

@@ -137,4 +137,16 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    ::-webkit-scrollbar {
+        width: 1px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--primary);
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--background);
+    }
 }

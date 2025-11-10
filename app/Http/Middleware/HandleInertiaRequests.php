@@ -47,7 +47,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user()
                     ? (new UserResource($request
                         ->user()
-                        ->load('workspaces', 'workspaces.createdBy', 'workspaces.users')))
+                        ->load('workspaces', 'currentWorkspace')))
                     : null,
             ],
         ];

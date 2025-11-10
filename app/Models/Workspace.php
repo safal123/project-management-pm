@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class Workspace extends Pivot
 {
-    use HasUlids, HasFactory;
+    use HasFactory, HasUlids;
 
     public $fillable = [
         'name',

@@ -8,26 +8,26 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
+        // Create one main user (Safal)
+        $user = User::factory()->create([
             'name' => 'Safal Pokharel',
             'email' => 'safal@safal.com',
             'password' => bcrypt('password'),
         ]);
 
-        Workspace::factory(2)
-            ->create(['created_by' => User::first()->id])
-            ->each(function (Workspace $workspace) {
-                // Here is problem
-                $workspace
-                    ->users()
-                    ->attach(User::all()->random());
-            });
+        // Create 2 workspaces owned by that user
+        $workspaces = Workspace::factory(2)
+            ->create(['created_by' => $user->id]);
+
+        // Attach the user to all created workspaces
+        foreach ($workspaces as $workspace) {
+            $workspace->users()->attach($user->id);
+        }
+
+        // Set one workspace as Safal’s current active workspace
+        $user->currentWorkspace()->associate($workspaces->first());
+        $user->save();
     }
 }

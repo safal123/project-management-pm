@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasUlids;
+    use HasFactory, HasUlids, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -51,5 +51,10 @@ class User extends Authenticatable
     public function workspaces()
     {
         return $this->belongsToMany(Workspace::class, 'user_workspaces', 'user_id', 'workspace_id');
+    }
+
+    public function currentWorkspace()
+    {
+        return $this->belongsTo(Workspace::class, 'current_workspace_id');
     }
 }
