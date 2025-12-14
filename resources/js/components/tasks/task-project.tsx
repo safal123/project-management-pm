@@ -24,7 +24,7 @@ export default function TaskProject({ task, project, className = '' }: TaskProje
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <Label className="w-24 text-sm text-muted-foreground">Project</Label>
+      <Label className="w-24 text-sm">Project</Label>
       <div className="flex items-center gap-2 flex-1">
         <div className="h-2 w-2 rounded-full bg-cyan-500" />
         <span className="text-sm">{project.name}</span>

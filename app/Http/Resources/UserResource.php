@@ -20,6 +20,7 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'profile_picture' => $this->profile_picture ? new MediaResource($this->profile_picture) : null,
             'workspaces' => WorkspaceResource::collection($this->whenLoaded('workspaces')),
             'current_workspace_id' => $this->current_workspace_id,
             'current_workspace' => new WorkspaceResource($this->whenLoaded('currentWorkspace')),

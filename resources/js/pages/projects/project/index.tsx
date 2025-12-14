@@ -4,11 +4,12 @@ import { Head, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, User, FileText, LayoutDashboard, Kanban, ListTodo } from 'lucide-react';
-import KanbanBoard from '@/components/projects/kanban';
-import KanbanV2 from '@/components/projects/kanban-v2';
+import { KanbanBoard } from '@/components/projects/kanban/kanban-board';
+import { InviteMembersModal } from '@/components/projects/invite-members-modal';
+import { Button } from '@/components/ui/button';
 
 export default function ProjectShow() {
-  const { project, tasks } = usePage<SharedData & { project: Project; tasks: Task[] }>().props;
+  const { project } = usePage<SharedData & { project: Project; tasks: Task[] }>().props;
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,7 +29,7 @@ export default function ProjectShow() {
       <div className="h-full flex flex-col">
         {/* Tabs */}
         <Tabs defaultValue="board" className="flex-1 flex flex-col">
-          <div className="px-12 pt-8 pb-4">
+          <div className="px-12 pt-8 pb-4 flex items-center justify-between">
             <TabsList>
               <TabsTrigger value="board" className="gap-2">
                 <Kanban className="h-4 w-4" />
@@ -43,19 +44,11 @@ export default function ProjectShow() {
                 Dashboard
               </TabsTrigger>
             </TabsList>
+            <InviteMembersModal />
           </div>
 
-          {/* Board Tab */}
-          {/* <TabsContent value="board" className="flex-1 overflow-hidden">
-            <div className="h-[calc(100vh-250px)] px-12 overflow-hidden">
-              <div className="h-full overflow-x-auto overflow-y-hidden">
-                <KanbanBoard tasks={tasks} project={project} />
-              </div>
-            </div>
-          </TabsContent> */}
           <TabsContent value="board" className="flex-1 overflow-hidden">
-            {/* <KanbanBoard tasks={tasks} project={project} /> */}
-            <KanbanV2 />
+            <KanbanBoard />
           </TabsContent>
 
           {/* Overview Tab */}
@@ -137,6 +130,16 @@ export default function ProjectShow() {
                       Activity tracking coming soon
                     </p>
                   </div>
+                </CardContent>
+              </Card>
+              {/* Danger Zone */}
+              <Card className="dark:border-red-900 border-red-300">
+                <CardHeader>
+                  <CardTitle>Danger Zone</CardTitle>
+                  <CardDescription>Dangerous actions that can be taken in this project</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="destructive">Delete Project</Button>
                 </CardContent>
               </Card>
             </div>

@@ -34,6 +34,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
+  profile_picture?: Media | null;
   email_verified_at: string | null;
   created_at: string;
   updated_at: string;
@@ -60,11 +61,28 @@ export interface Project {
   workspace_id: string;
   created_by: string;
   created_at: string;
+  users: User[]
+}
+
+export interface Media {
+  id: string;
+  url: string;
+  filename?: string;
+  original_filename?: string;
+  mime_type?: string;
+  path?: string;
+  filesize?: number;
+  filetype?: string;
+  disk?: string;
+  created_by?: string;
+  workspace_id?: string;
+  created_at: string;
 }
 
 export interface Task {
   id: string;
   title: string;
+  name: string;
   slug: string;
   parent_task_id: string | null;
   description: string;
@@ -77,6 +95,8 @@ export interface Task {
   status: string | null;
   priority: string | null;
   order: number | null;
+  project: Project | null;
+  media?: Media[];
 }
 
 // Kanban Board Types

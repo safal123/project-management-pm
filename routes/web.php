@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\S3UploadController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\WorkspaceSwitcherController;
@@ -23,6 +25,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('projects', ProjectController::class)
         ->only(['index', 'store', 'show']);
 
+    Route::post('projects/{project}/members/invite', [ProjectController::class, 'inviteMember'])
+        ->name('projects.members.invite');
+    Route::post('projects/{project}/members/{action}', [ProjectController::class, 'respondToInvitation'])
+        ->whereIn('action', ['accept', 'reject'])
+        ->name('projects.members.respond');
+    Route::delete('projects/{project}/members/{user}', [ProjectController::class, 'removeMember'])
+        ->name('projects.members.remove');
+
     Route::resource('calendar', CalendarController::class)
         ->only(['index']);
 
@@ -35,6 +45,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('tasks/reorder', [TaskController::class, 'reorder'])
         ->name('tasks.reorder');
+
+    Route::post('tasks/move', [TaskController::class, 'move'])
+        ->name('tasks.move');
+
+    // S3 Upload
+    Route::post('s3/upload', [S3UploadController::class, 'generateSignedUrl'])
+        ->name('s3.upload');
+    // Media Upload
+    Route::post('media', [MediaController::class, 'uploadMedia'])
+        ->name('media.upload');
+    // Get media url
+    Route::get('media/{media}', [MediaController::class, 'getMedia'])
+        ->name('media.get-url');
+    // Delete media
+    Route::delete('media/{media}', [MediaController::class, 'deleteMedia'])
+        ->name('media.delete');
 });
 
 require __DIR__ . '/settings.php';

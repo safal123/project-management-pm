@@ -6,10 +6,11 @@ import { cn } from '@/lib/utils';
 interface EditableTaskTitleProps {
   task: Task;
   className?: string;
+  childTasksCount?: number;
   variant?: 'default' | 'small';
 }
 
-export default function EditableTaskTitle({ task, className = '', variant = 'default' }: EditableTaskTitleProps) {
+export default function EditableTaskTitle({ task, className = '', variant = 'default', childTasksCount = 0 }: EditableTaskTitleProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [title, setTitle] = useState(task.title);
   const [isSaving, setIsSaving] = useState(false);
@@ -42,7 +43,7 @@ export default function EditableTaskTitle({ task, className = '', variant = 'def
   };
 
   return (
-    <div className={className}>
+    <div className={cn(className, 'flex-1')}>
       {isEditingTitle ? (
         <input
           type="text"
@@ -59,15 +60,17 @@ export default function EditableTaskTitle({ task, className = '', variant = 'def
           style={{ boxShadow: 'none' }}
         />
       ) : (
-        <h2
-          className={cn(
-            'text-2xl leading-tight font-semibold cursor-pointer hover:bg-muted/50 rounded-lg p-3 -mx-3 transition-colors',
-            variant === 'small' && 'text-sm'
-          )}
-          onClick={() => setIsEditingTitle(true)}
-        >
-          {title}
-        </h2>
+        <div className="flex items-center gap-2 -ml-1">
+          <h2
+            className={cn(
+              'text-2xl leading-tight font-semibold cursor-pointer hover:bg-muted/50 rounded-lg p-3 -mx-3 transition-colors',
+              variant === 'small' && 'text-sm'
+            )}
+            onClick={() => setIsEditingTitle(true)}
+          >
+            {title} {childTasksCount > 0 && `(${childTasksCount})`}
+          </h2>
+        </div>
       )}
     </div>
   );

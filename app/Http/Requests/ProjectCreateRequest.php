@@ -24,7 +24,7 @@ class ProjectCreateRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
-            'workspace_id' => 'required|exists:workspaces,id',
+            'workspace_id' => 'sometimes|required|exists:workspaces,id',
         ];
     }
 }

@@ -35,6 +35,10 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected $appends = [
+        'profile_picture',
+    ];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -56,5 +60,15 @@ class User extends Authenticatable
     public function currentWorkspace()
     {
         return $this->belongsTo(Workspace::class, 'current_workspace_id');
+    }
+
+    public function media()
+    {
+        return $this->morphMany(Media::class, 'mediable');
+    }
+
+    public function getProfilePictureAttribute()
+    {
+        return $this->media()->latest()->first();
     }
 }

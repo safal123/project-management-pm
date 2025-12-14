@@ -28,6 +28,8 @@ class TaskCreateRequest extends FormRequest
             'workspace_id' => 'required|exists:workspaces,id',
             'parent_task_id' => 'nullable|exists:tasks,id',
             'due_date' => 'nullable|date',
+            'status' => 'sometimes|string|in:todo,in_progress,done',
+            'priority' => 'sometimes|string|in:low,medium,high',
         ];
     }
 }

@@ -95,36 +95,36 @@
   }
 
   .dark {
-    --background: oklch(0.141 0.005 285.823);
+    --background: oklch(0.20 0.005 285.823);
     --foreground: oklch(0.985 0 0);
-    --card: oklch(0.21 0.006 285.885);
+    --card: oklch(0.26 0.006 285.885);
     --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.21 0.006 285.885);
+    --popover: oklch(0.26 0.006 285.885);
     --popover-foreground: oklch(0.985 0 0);
     --primary: oklch(0.795 0.184 86.047);
     --primary-foreground: oklch(0.421 0.095 57.708);
-    --secondary: oklch(0.274 0.006 286.033);
+    --secondary: oklch(0.33 0.006 286.033);
     --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.274 0.006 286.033);
+    --muted: oklch(0.33 0.006 286.033);
     --muted-foreground: oklch(0.705 0.015 286.067);
-    --accent: oklch(0.274 0.006 286.033);
+    --accent: oklch(0.33 0.006 286.033);
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
+    --border: oklch(1 0 0 / 12%);
+    --input: oklch(1 0 0 / 18%);
     --ring: oklch(0.421 0.095 57.708);
     --chart-1: oklch(0.905 0.182 98.111);
     --chart-2: oklch(0.795 0.184 86.047);
     --chart-3: oklch(0.681 0.162 75.834);
     --chart-4: oklch(0.554 0.135 66.442);
     --chart-5: oklch(0.476 0.114 61.907);
-    --sidebar: oklch(0.21 0.006 285.885);
+    --sidebar: oklch(0.26 0.006 285.885);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.795 0.184 86.047);
     --sidebar-primary-foreground: oklch(0.987 0.026 102.212);
-    --sidebar-accent: oklch(0.274 0.006 286.033);
+    --sidebar-accent: oklch(0.33 0.006 286.033);
     --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-border: oklch(1 0 0 / 12%);
     --sidebar-ring: oklch(0.421 0.095 57.708);
   }
 
@@ -139,14 +139,38 @@
     }
 
     ::-webkit-scrollbar {
-        width: 1px;
+        width: 4px;
+        height: 4px;
     }
 
     ::-webkit-scrollbar-thumb {
-        background: var(--primary);
+        background: hsl(var(--primary) / 0.3);
+        border-radius: 2px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: hsl(var(--primary) / 0.5);
     }
 
     ::-webkit-scrollbar-track {
-        background: var(--background);
+        background: transparent;
     }
+
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: hsl(var(--primary) / 0.3) transparent;
+    }
+}
+
+.ql-editor {
+    @apply text-[16px];
+}
+
+.ql-code-block-container {
+    @apply bg-primary/10 rounded-md p-4;
+}
+
+.ql-editor ol li {
+    /* decrease the left margin */
+    @apply -ml-4;
 }

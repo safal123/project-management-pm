@@ -1,4 +1,4 @@
-export const getStatusColors = (status: string) => {
+export const getStatusColors = (status: string | null | undefined) => {
   switch (status) {
     case 'done':
       return 'bg-green-50/10 dark:bg-green-950/10 border-green-300 dark:border-green-800';
@@ -11,16 +11,16 @@ export const getStatusColors = (status: string) => {
   }
 };
 
-export const getPriorityColors = (priority: string) => {
+export const getPriorityColors = (priority: string | null | undefined) => {
   switch (priority) {
     case 'high':
-      return 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-300 dark:border-red-800';
-    case 'medium':
-      return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-800';
-    case 'low':
-      return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-800';
+      return 'border-red-200 dark:border-red-300 bg-red-50/10 dark:bg-red-950/10';
+    // case 'medium':
+    //   return 'border-amber-200 dark:border-amber-300';
+    // case 'low':
+    //   return 'border-blue-200 dark:border-blue-300';
     default:
-      return 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-300 dark:border-gray-800';
+      return 'border-gray-200 dark:border-gray-700';
   }
 };
 

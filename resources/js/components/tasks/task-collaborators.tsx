@@ -53,9 +53,9 @@ export default function TaskCollaborators({ task, className = '' }: TaskCollabor
         </div>
       </div>
       <Button
-        variant="ghost"
+        variant="destructive"
         size="sm"
-        className="text-sm text-muted-foreground hover:text-destructive"
+        className="text-sm"
         onClick={handleLeaveTask}
       >
         Leave task

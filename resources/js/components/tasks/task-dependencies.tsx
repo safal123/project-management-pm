@@ -16,7 +16,7 @@ export default function TaskDependencies({ task, className = '' }: TaskDependenc
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <Label className="w-24 text-sm text-muted-foreground">Dependencies</Label>
+      <Label className="w-24 text-sm">Dependencies</Label>
       <Button
         variant="outline"
         size="sm"

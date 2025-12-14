@@ -26,7 +26,8 @@ export function formatDueDate(date: string | null | undefined): DueDateInfo | nu
       isOverdue: true,
       isToday: false
     };
-  } else {
+  }
+  else {
     return {
       text: dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       isOverdue: false,

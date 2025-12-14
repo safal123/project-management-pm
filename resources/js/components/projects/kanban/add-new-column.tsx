@@ -24,7 +24,7 @@ const AddNewColumn = () => {
       <Button
         onClick={createNewColumn}
         variant="outline"
-        className="bg-primary/10 text-primary w-full h-[120px] flex flex-col items-center justify-center gap-2 border-2 border-dashed hover:border-primary/50 hover:bg-accent/5 transition-colors"
+        className="text-primary w-full h-[120px] flex flex-col items-center justify-center gap-2 border-2 border-dashed hover:border-primary/50 hover:bg-accent/5 transition-colors"
       >
         <Plus className="h-5 w-5" />
         <span className="text-sm font-medium">Add Column</span>

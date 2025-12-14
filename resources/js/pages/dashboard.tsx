@@ -93,8 +93,8 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             {recentProjects.length > 0 ? (
-              <div className="space-y-4">
-                {recentProjects.map((project) => (
+              <div className="flex flex-col gap-4">
+                {recentProjects?.map((project) => (
                   <Link
                     key={project.id}
                     href={`/projects/${project.slug}`}

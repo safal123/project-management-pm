@@ -12,15 +12,20 @@ class WorkspaceSwitcherController extends Controller
         $user = $request->user();
 
         $workspace = Workspace::where('id', $request->workspace)
-            ->whereHas('users', fn ($q) => $q->where('user_id', $user->id))
+            ->whereHas('users', fn($q) => $q->where('user_id', $user->id))
             ->first();
 
         if (! $workspace) {
             return back()->with('error', 'You are not authorized to switch to this workspace');
         }
 
-        $user->currentWorkspace()->associate($workspace)->save();
+        $user
+            ->currentWorkspace()
+            ->associate($workspace)
+            ->save();
 
-        return back()->with('success', 'Workspace switched successfully');
+        return redirect()
+            ->intended(route('dashboard'))
+            ->with('success', 'Workspace switched successfully');
     }
 }

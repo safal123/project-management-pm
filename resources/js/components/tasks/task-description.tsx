@@ -1,3 +1,6 @@
+// TODO: Remove this component as it is not used anymore.
+// It is replaced by the AppTextEditor component.
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';

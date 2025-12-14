@@ -31,6 +31,8 @@ class TaskController extends Controller
             'slug' => Str::slug($validated['title']) . '-' . Str::random(6),
             'assigned_by' => auth()->user()->id,
             'order' => ($maxOrder ?? 0) + 1,
+            'workspace_id' => auth()->user()->currentWorkspace()->first()->id,
+            'project_id' => $validated['project_id'],
         ];
 
         // Parse due_date if provided (handle ISO 8601 format from frontend)
@@ -76,33 +78,12 @@ class TaskController extends Controller
             'orderType' => 'nullable|string|in:column,task',
         ]);
 
-        // Debug: Log what we received
-        Log::info('Reorder request data:', [
-            'all' => $request->all(),
-            'parent_task_id_filled' => $request->filled('parent_task_id'),
-            'moved_task_id_filled' => $request->filled('moved_task_id'),
-            'parent_task_id_value' => $request->parent_task_id,
-            'moved_task_id_value' => $request->moved_task_id,
-        ]);
-
         DB::transaction(function () use ($request, $validated) {
-            // If moving a task across columns, update the parent_task_id first
             if ($request->filled('parent_task_id') && $request->filled('moved_task_id')) {
-                Log::info('Updating parent_task_id:', [
-                    'task_id' => $request->moved_task_id,
-                    'new_parent' => $request->parent_task_id
-                ]);
-
                 Task::where('id', $request->moved_task_id)
                     ->update(['parent_task_id' => $request->parent_task_id]);
-            } else {
-                Log::warning('Skipped parent_task_id update', [
-                    'parent_filled' => $request->filled('parent_task_id'),
-                    'moved_filled' => $request->filled('moved_task_id'),
-                ]);
             }
 
-            // Update the order for all tasks in the list
             $taskIds = $validated['taskIds'];
 
             if (!empty($taskIds)) {
@@ -121,5 +102,80 @@ class TaskController extends Controller
         return redirect()
             ->back()
             ->with('success', 'Tasks reordered successfully');
+    }
+
+    public function move(Request $request)
+    {
+        $validated = $request->validate([
+            'task_id' => 'required|exists:tasks,id',
+            'direction' => 'required|string|in:left,right,first,last',
+        ]);
+
+        $task = Task::findOrFail($validated['task_id']);
+
+        // Only allow moving parent tasks (columns)
+        if ($task->parent_task_id !== null) {
+            return redirect()->back()->with('error', 'Only columns can be moved');
+        }
+
+        DB::transaction(function () use ($task, $validated) {
+            $siblingTasks = Task::where('project_id', $task->project_id)
+                ->whereNull('parent_task_id')
+                ->where('id', '!=', $task->id)
+                ->orderBy('order')
+                ->get();
+
+            $currentIndex = $siblingTasks->search(fn($t) => $t->order > $task->order);
+
+            if ($currentIndex === false) {
+                $currentIndex = $siblingTasks->count();
+            }
+
+            switch ($validated['direction']) {
+                case 'left':
+                    if ($currentIndex > 0) {
+                        $targetTask = $siblingTasks[$currentIndex - 1];
+                        $newOrder = $targetTask->order;
+                        $targetTask->update(['order' => $task->order]);
+                        $task->update(['order' => $newOrder]);
+                    }
+                    break;
+
+                case 'right':
+                    if ($currentIndex < $siblingTasks->count()) {
+                        $targetTask = $siblingTasks[$currentIndex];
+                        $newOrder = $targetTask->order;
+                        $targetTask->update(['order' => $task->order]);
+                        $task->update(['order' => $newOrder]);
+                    }
+                    break;
+
+                case 'first':
+                    $minOrder = Task::where('project_id', $task->project_id)
+                        ->whereNull('parent_task_id')
+                        ->min('order') ?? 0;
+                    $task->update(['order' => $minOrder - 1]);
+                    break;
+
+                case 'last':
+                    $maxOrder = Task::where('project_id', $task->project_id)
+                        ->whereNull('parent_task_id')
+                        ->max('order') ?? 0;
+                    $task->update(['order' => $maxOrder + 1]);
+                    break;
+            }
+
+            // Reorder all parent tasks to ensure sequential ordering
+            $allParentTasks = Task::where('project_id', $task->project_id)
+                ->whereNull('parent_task_id')
+                ->orderBy('order')
+                ->get();
+
+            foreach ($allParentTasks as $index => $parentTask) {
+                $parentTask->update(['order' => $index + 1]);
+            }
+        });
+
+        return redirect()->back()->with('success', 'Column moved successfully');
     }
 }
