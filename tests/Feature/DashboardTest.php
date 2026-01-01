@@ -1,24 +1,21 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use App\Models\Workspace;
+use function Pest\Laravel\{actingAs, get};
 
-class DashboardTest extends TestCase
-{
-    use RefreshDatabase;
+test('guests cannot access the dashboard', function () {
+    $this
+        ->get(route('dashboard'))
+        ->assertRedirect(route('login'));
+});
 
-    public function test_guests_are_redirected_to_the_login_page()
-    {
-        $this->get('/dashboard')->assertRedirect('/login');
-    }
+test('authenticated user can access the dashboard', function () {
+    $user = User::factory()->verified()->create();
 
-    public function test_authenticated_users_can_visit_the_dashboard()
-    {
-        $this->actingAs($user = User::factory()->create());
+    // workspace + currentWorkspace already created by Registered event
 
-        $this->get('/dashboard')->assertOk();
-    }
-}
+    actingAs($user)
+        ->get(route('dashboard'))
+        ->assertOk();
+});

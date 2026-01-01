@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\S3UploadController;
@@ -23,20 +24,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->only(['store']);
 
     Route::resource('projects', ProjectController::class)
-        ->only(['index', 'store', 'show']);
+        ->only(['index', 'store', 'show', 'update', 'destroy']);
 
-    Route::post('projects/{project}/members/invite', [ProjectController::class, 'inviteMember'])
-        ->name('projects.members.invite');
-    Route::post('projects/{project}/members/{action}', [ProjectController::class, 'respondToInvitation'])
-        ->whereIn('action', ['accept', 'reject'])
-        ->name('projects.members.respond');
-    Route::delete('projects/{project}/members/{user}', [ProjectController::class, 'removeMember'])
-        ->name('projects.members.remove');
+    // TODO: Need to remove this.
+    // Route::post('projects/{project}/members/invite', [ProjectController::class, 'inviteMember'])
+    //     ->name('projects.members.invite');
+    // Route::post('projects/{project}/members/{action}', [ProjectController::class, 'respondToInvitation'])
+    //     ->whereIn('action', ['accept', 'reject'])
+    //     ->name('projects.members.respond');
+    // Route::delete('projects/{project}/members/{user}', [ProjectController::class, 'removeMember'])
+    //     ->name('projects.members.remove');
 
     Route::resource('calendar', CalendarController::class)
         ->only(['index']);
 
-    Route::post('workspace-switcher',  WorkspaceSwitcherController::class)
+    Route::post('workspace-switcher', WorkspaceSwitcherController::class)
         ->name('workspace.switcher');
 
     Route::resource('tasks', TaskController::class)
@@ -61,7 +63,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Delete media
     Route::delete('media/{media}', [MediaController::class, 'deleteMedia'])
         ->name('media.delete');
+
+    Route::post('invitations', [InvitationController::class, 'store'])
+        ->name('invitations.store');
+    Route::delete('invitations/{invitation}', [InvitationController::class, 'destroy'])
+        ->name('invitations.destroy');
+
+    Route::post('invitations/{invitation}/resend', [InvitationController::class, 'resend'])
+        ->name('invitations.resend');
 });
+
+Route::middleware(['signed'])->group(function () {
+    Route::get('invitations/{token}', [InvitationController::class, 'show'])
+        ->name('invitations.show');
+});
+
+Route::post('invitations/{token}', [InvitationController::class, 'update'])
+    ->name('invitations.update');
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

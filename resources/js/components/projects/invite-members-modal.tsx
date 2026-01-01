@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { router, usePage } from '@inertiajs/react'
-import { SharedData, User, Project } from '@/types'
+import { SharedData, Project, Invitation } from '@/types'
 import {
   Dialog,
   DialogContent,
@@ -17,21 +17,35 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { UserPlus, Search, Mail, X, Check, Clock } from 'lucide-react'
+import { UserPlus, Search, Mail, X, Clock, UserIcon, ClockIcon, RefreshCcwIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import AppAvatar from '../app-avatar'
+import AppEmpty from '../app-empty'
+import AppTooltip from '../app-tooltip'
+
+interface InviteMembersModalProps {
+  errors?: {
+    message?: string;
+    email?: string;
+  };
+}
 
 export const InviteMembersModal = () => {
-  const { auth, project, errors } = usePage<
-    SharedData & { project: Project; errors?: any }
+  const { project, errors, invitations } = usePage<
+    SharedData & { project: Project; errors?: InviteMembersModalProps['errors']; invitations?: Invitation[] }
   >().props
 
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [emailInput, setEmailInput] = useState('')
   const [isInviting, setIsInviting] = useState(false)
+  const [isResending, setIsResending] = useState(false)
 
   const projectMembers = project.users || []
+  const pendingInvitations = (invitations || []).filter(
+    (invitation) => invitation.status === 'pending'
+  )
 
   const filteredMembers = projectMembers.filter(
     (member) =>
@@ -39,13 +53,20 @@ export const InviteMembersModal = () => {
       member.email.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const handleInviteByEmail = () => {
-    if (!emailInput.trim()) return
+  const handleInviteByEmail = (email?: string) => {
+    if (!emailInput.trim() && !email) return
+    if (email) {
+      setEmailInput(email)
+    }
 
     setIsInviting(true)
     router.post(
-      route('projects.members.invite', { project: project.slug }),
-      { email: emailInput },
+      route('invitations.store'),
+      {
+        email: emailInput,
+        workspace_id: project.workspace_id,
+        project_id: project.id,
+      },
       {
         preserveScroll: true,
         onSuccess: () => {
@@ -62,86 +83,48 @@ export const InviteMembersModal = () => {
     )
   }
 
-  const handleRemoveMember = (userId: string) => {
-    if (confirm('Are you sure you want to remove this member from the project?')) {
-      router.delete(
-        route('projects.members.remove', { project: project.slug, user: userId }),
-        {
-          preserveScroll: true,
-          onSuccess: () => {
-            toast.success('Member removed successfully')
-          },
-        }
-      )
-    }
-  }
-
-  const handleInvitationResponse = (userId: string, action: 'accept' | 'reject') => {
-    // Show confirmation dialog for rejection
-    if (action === 'reject' && !confirm('Are you sure you want to reject this invitation?')) {
+  const handleCancelInvitation = (invitationId: string, email: string) => {
+    if (!confirm(`Are you sure you want to cancel the invitation sent to ${email}?`)) {
       return
     }
 
+    router.delete(route('invitations.destroy', invitationId), {
+      preserveScroll: true,
+      onSuccess: () => {
+        toast.success('Invitation cancelled successfully')
+      },
+      onError: () => {
+        toast.error('Failed to cancel invitation')
+      },
+    })
+  }
+
+  const handleResendInvitation = (invitation: Invitation) => {
     router.post(
-      route('projects.members.respond', { project: project.slug, action }),
-      { user_id: userId },
+      route('invitations.resend', invitation.id), {
+      invitation: invitation.id
+    },
       {
         preserveScroll: true,
+        onStart: () => {
+          setIsResending(true)
+        },
         onSuccess: () => {
-          toast.success(`Invitation ${action}ed`)
+          toast.success('Invitation email resend successfully')
+          router.reload({
+            only: ['invitations'],
+          })
+          setIsResending(false)
+        },
+        onError: (errors) => {
+          const message = errors?.message || 'Failed to resend invitation email'
+          toast.error(message)
+          setIsResending(false)
         },
       }
     )
   }
 
-
-  const getMemberStatus = (member: User) => {
-    return member?.pivot?.status || 'not_invited'
-  }
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'accepted':
-        return (
-          <Badge variant="default" className="text-xs bg-green-500">
-            <Check className="h-3 w-3 mr-1" />
-            Accepted
-          </Badge>
-        )
-      case 'pending':
-        return (
-          <Badge variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-700 dark:text-yellow-400">
-            <Clock className="h-3 w-3 mr-1" />
-            Pending
-          </Badge>
-        )
-      case 'rejected':
-        return (
-          <Badge variant="destructive" className="text-xs">
-            <X className="h-3 w-3 mr-1" />
-            Rejected
-          </Badge>
-        )
-      default:
-        return null
-    }
-  }
-
-  const getRoleBadge = (role: string) => {
-    if (!role) return null
-
-    const colorMap: Record<string, string> = {
-      admin: 'bg-purple-500/20 text-purple-700 dark:text-purple-400',
-      member: 'bg-blue-500/20 text-blue-700 dark:text-blue-400',
-      viewer: 'bg-gray-500/20 text-gray-700 dark:text-gray-400',
-    }
-
-    return (
-      <Badge variant="outline" className={`text-xs ${colorMap[role] || ''}`}>
-        {role.charAt(0).toUpperCase() + role.slice(1)}
-      </Badge>
-    )
-  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -151,19 +134,22 @@ export const InviteMembersModal = () => {
           Invite Members
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] bg-card">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[600px] bg-card max-h-[90vh] overflow-y-auto p-0">
+        <DialogHeader className="p-4">
           <DialogTitle>Invite Members to {project.name}</DialogTitle>
           <DialogDescription>
             Add team members to collaborate on this project
+            {errors?.message && <p className="text-red-500 text-sm bg-red-500/10 p-2 rounded-md mt-2">{errors.message}</p>}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <Separator />
+
+        <div className="space-y-4 py-4 -mt-6">
           {/* Invite by Email */}
-          <div className="space-y-2">
+          <div className="space-y-4 px-4">
             <Label htmlFor="email">Invite by Email</Label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mt-2">
               <div className="relative flex-1">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -180,11 +166,10 @@ export const InviteMembersModal = () => {
                   }}
                   className="pl-10"
                 />
-                {errors?.message && <p className="text-red-500 text-sm">{errors.message}</p>}
                 {errors?.email && <p className="text-red-500 text-sm">{errors.email}</p>}
               </div>
               <Button
-                onClick={handleInviteByEmail}
+                onClick={() => handleInviteByEmail()}
                 disabled={!emailInput.trim() || isInviting}
               >
                 {isInviting ? 'Inviting...' : 'Invite'}
@@ -194,8 +179,100 @@ export const InviteMembersModal = () => {
 
           <Separator />
 
+          {/* Pending Invitations */}
+          {pendingInvitations.length > 0 ? (
+            <>
+              <div className="space-y-2 px-4">
+                <Label className="flex items-center gap-2">
+                  <Mail className="h-5 w-5 text-primary" />
+                  Pending Invitations
+                </Label>
+                <div className="space-y-2 mt-2">
+                  {pendingInvitations.map((invitation: Invitation) => (
+                    <div
+                      key={invitation.id}
+                      className="flex items-center justify-between p-3 rounded-lg border bg-background"
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium">{invitation.email}</p>
+                            <Badge variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-700 dark:text-yellow-400">
+                              <Clock className="h-3 w-3 mr-1" />
+                              Pending
+                            </Badge>
+                          </div>
+                          <div className="flex flex-col gap-2 mt-1">
+                            <p className="text-xs text-muted-foreground">
+                              Invited on: {new Date(invitation.invited_at).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
+                            </p>
+                            {/* Last Sent At */}
+                            {invitation.last_sent_at && (
+                              <p className="text-xs text-muted-foreground">
+                                Last sent at: {new Date(invitation.last_sent_at).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <p className="w-fit text-xs text-muted-foreground flex items-center border border-border bg-primary/10 rounded-md px-2 py-1">
+                                Invited by:
+                                <span className="mr-1 ">
+                                  {invitation.invited_by?.name}
+                                </span>
+                                <AppAvatar src={invitation.invited_by?.avatar} name={invitation.invited_by?.name} size="xs" />
+                              </p>
+                              <AppTooltip
+                                content="Resend Invitation"
+                                side="top"
+                              >
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleResendInvitation(invitation)}
+                                  className="text-primary hover:text-primary"
+                                >
+                                  <RefreshCcwIcon className={cn("h-4 w-4", isResending && "animate-spin")} />
+                                </Button>
+                              </AppTooltip>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleCancelInvitation(invitation.id, invitation.email)}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <X className="h-4 w-4" />
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Separator />
+            </>
+          ) : (
+            <div className='px-4'>
+              <AppEmpty
+                title="No pending invitations"
+                description="There are no pending invitations for this project. When members join, they will appear here."
+                icon={<ClockIcon className='text-primary' />}
+              />
+            </div>
+          )}
+
           {/* Search Members */}
-          <div className="space-y-2">
+          <div className="space-y-2 px-4">
             <Label htmlFor="search">Project Members</Label>
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -210,86 +287,46 @@ export const InviteMembersModal = () => {
             </div>
           </div>
 
-          <ScrollArea className="h-[300px] rounded-md border">
-            <div className="p-4 space-y-2">
-              {filteredMembers.length > 0 ? (
-                filteredMembers.map((member) => {
-                  const status = getMemberStatus(member)
-                  const role = member?.pivot?.role || 'member'
-
-                  return (
-                    <div
-                      key={member.id}
-                      className={cn("flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors",
-                        role === 'owner' && 'bg-muted')}
-                    >
-                      <div className="flex items-center gap-3 flex-1">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={member.avatar} alt={member.name} />
-                          <AvatarFallback>
-                            {member.name?.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium">{member.name}</p>
-                            {getStatusBadge(status)}
-                            {status === 'accepted' && getRoleBadge(role)}
+          <div className="px-4">
+            <ScrollArea className="h-[300px] rounded-md border">
+              <div className="p-4 space-y-2 px-4">
+                {filteredMembers.length > 0 ? (
+                  filteredMembers.map((member) => {
+                    return (
+                      <div
+                        key={member.id}
+                        className={cn("border flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors")}>
+                        <div className="flex items-center gap-3 flex-1">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={member.avatar} alt={member.name} />
+                            <AvatarFallback>
+                              {member.name?.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-medium">{member.name}</p>
+                            </div>
+                            <p className="text-xs text-muted-foreground">{member.email}</p>
                           </div>
-                          <p className="text-xs text-muted-foreground">{member.email}</p>
                         </div>
                       </div>
+                    )
+                  })
 
-                      {/* Action buttons based on status */}
-                      <div className="flex items-center gap-2">
-                        {status === 'pending' && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleInvitationResponse(member.id, 'accept')}
-                              className="text-green-600 hover:text-green-700"
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleInvitationResponse(member.id, 'reject')}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                        {status === 'accepted' && member.id !== auth.user.id && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleRemoveMember(member.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-sm text-muted-foreground">
-                    {searchQuery
-                      ? 'No members found matching your search'
-                      : 'No members in this project'}
-                  </p>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
+                ) : (
+                  <AppEmpty
+                    title="No members found matching your search"
+                    description="No members in this project"
+                    icon={<UserIcon className='text-primary' />}
+                  />
+                )}
+              </div>
+            </ScrollArea>
+          </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="p-4 bg-muted">
           <Button variant="outline" onClick={() => setOpen(false)}>
             Close
           </Button>

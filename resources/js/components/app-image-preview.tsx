@@ -14,7 +14,6 @@ import {
   PlusIcon,
   MinusIcon,
   TrashIcon,
-  Trash2Icon,
   LoaderCircle
 } from "lucide-react";
 import { formatDueDate } from "@/utils/task";

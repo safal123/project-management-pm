@@ -13,7 +13,14 @@ const WorkspaceSelector = ({ workspaces }: WorkspaceSelectorProps) => {
   const { auth } = usePage<SharedData>().props;
   const { state } = useSidebar();
   const isMobile = useIsMobile();
-  const activeTeam = auth.user.current_workspace as Workspace;
+  const activeTeam = auth.user.current_workspace as Workspace | null;
+
+  // If no workspace is set, use the first available workspace
+  const currentWorkspace = activeTeam || workspaces[0];
+
+  if (!currentWorkspace) {
+    return null; // Or show a "Create Workspace" prompt
+  }
 
   return (
     <SidebarMenu>
@@ -25,11 +32,11 @@ const WorkspaceSelector = ({ workspaces }: WorkspaceSelectorProps) => {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <span className="text-xl font-semibold">{activeTeam.name.charAt(0)}</span>
+                <span className="text-xl font-semibold">{currentWorkspace.name.charAt(0)}</span>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {activeTeam.name}
+                  {currentWorkspace.name}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto" />

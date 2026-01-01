@@ -12,12 +12,16 @@ class Task extends Model
 
     // Status constants
     public const STATUS_TODO = 'todo';
+
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_DONE = 'done';
 
     // Priority constants
     public const PRIORITY_LOW = 'low';
+
     public const PRIORITY_MEDIUM = 'medium';
+
     public const PRIORITY_HIGH = 'high';
 
     public $fillable = [

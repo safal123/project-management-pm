@@ -1,12 +1,13 @@
 import AppLayout from '@/layouts/app-layout';
 import { Project, SharedData, Task, type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, User, FileText, LayoutDashboard, Kanban, ListTodo } from 'lucide-react';
 import { KanbanBoard } from '@/components/projects/kanban/kanban-board';
 import { InviteMembersModal } from '@/components/projects/invite-members-modal';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function ProjectShow() {
   const { project } = usePage<SharedData & { project: Project; tasks: Task[] }>().props;
@@ -22,6 +23,20 @@ export default function ProjectShow() {
     },
   ];
 
+  const handleDeleteProject = () => {
+    if (confirm('Are you sure you want to delete this project?')) {
+      router.delete(route('projects.destroy', { project: project.slug }), {
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success('Project deleted successfully')
+        },
+        onError: () => {
+          toast.error('Failed to delete project')
+        },
+      })
+    }
+  }
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={project.name} />
@@ -29,7 +44,7 @@ export default function ProjectShow() {
       <div className="h-full flex flex-col">
         {/* Tabs */}
         <Tabs defaultValue="board" className="flex-1 flex flex-col">
-          <div className="px-12 pt-8 pb-4 flex items-center justify-between">
+          <div className="p-6 flex items-center justify-between border-b dark:bg-primary/5">
             <TabsList>
               <TabsTrigger value="board" className="gap-2">
                 <Kanban className="h-4 w-4" />
@@ -52,7 +67,7 @@ export default function ProjectShow() {
           </TabsContent>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6 px-12">
+          <TabsContent value="overview" className="space-y-6 px-6">
             {/* Project Info Cards */}
             <div className="grid gap-6 md:grid-cols-3">
               <Card>
@@ -139,14 +154,14 @@ export default function ProjectShow() {
                   <CardDescription>Dangerous actions that can be taken in this project</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button variant="destructive">Delete Project</Button>
+                  <Button onClick={() => handleDeleteProject()} variant="destructive">Delete Project</Button>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
           {/* Dashboard Tab */}
-          <TabsContent value="dashboard" className="space-y-6 px-12">
+          <TabsContent value="dashboard" className="space-y-6 px-6">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

@@ -33,16 +33,18 @@ const MarkTaskAsComplete = ({ task, type = 'button' }: MarkTaskAsCompleteProps) 
       <AppTooltip
         content={task.status === "done" ? "Mark as incomplete" : "Mark as complete"}
       >
-        <Check
-          onClick={handleToggleComplete}
-          className={cn("h-6 w-6 bg-primary/10 rounded-full p-1 cursor-pointer",
-            task.status === "done" ?
-              "text-green-500 border border-green-500 bg-green-500/10" :
-              "text-gray-500 bg-gray-500/10",
-            // circular border isLoading
-            isLoading && "border-2 border-primary/50 animate-spin",
+        <div className="flex items-center justify-center">
+          {isLoading ? <LoaderCircle className="h-6 w-6 animate-spin border rounded-full border-primary w-fit" /> : (
+            <Check
+              onClick={handleToggleComplete}
+              className={cn("h-6 w-6 bg-primary/10 rounded-full p-1 cursor-pointer",
+                task.status === "done" ?
+                  "text-green-500 border border-green-500 bg-green-500/10" :
+                  "text-gray-500 bg-gray-500/10",
+              )}
+            />
           )}
-        />
+        </div>
       </AppTooltip>
     )
   }

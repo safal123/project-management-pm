@@ -6,13 +6,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ChevronDown, Search, UserCheck, X, Mail, Send } from 'lucide-react'
+import { ChevronDown, Search, UserCheck, X, Mail, Send, LoaderCircle } from 'lucide-react'
 import { SharedData, Task, User, Project } from '@/types'
 import { toast } from 'sonner'
+import AppAvatar from '@/components/app-avatar'
+import { InviteMembersModal } from '@/components/projects/invite-members-modal'
 
 interface Props {
   task: Task
@@ -27,6 +28,7 @@ export default function TaskAssignee({ task, className }: Props) {
   const [search, setSearch] = useState('')
   const [inviteOpen, setInviteOpen] = useState(false)
   const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const members = useMemo(() => project.users ?? [], [project.users])
 
@@ -45,11 +47,15 @@ export default function TaskAssignee({ task, className }: Props) {
       { assigned_to },
       {
         preserveScroll: true,
+        onStart: () => {
+          setLoading(true)
+        },
         onSuccess: () => {
           toast.success(
             `Assignee updated to ${assigned_to ? auth.user.name : 'none'
             }`
           )
+          setLoading(false)
         },
         onError: () => toast.error('Failed to update assignee'),
       }
@@ -59,16 +65,29 @@ export default function TaskAssignee({ task, className }: Props) {
   const inviteByEmail = () => {
     if (!email.trim()) return
     router.post(
-      `/projects/${project.slug}/members/invite`,
-      { email },
+      route('invitations.store'),
+      {
+        email,
+        workspace_id: project.workspace_id,
+        project_id: project.id,
+      },
       {
         preserveScroll: true,
-        onSuccess: () => {
-          toast.success(`Invitation sent to ${email}`)
-          setEmail('')
-          setInviteOpen(false)
+        onStart: () => {
+          setLoading(true)
         },
-        onError: () => toast.error('Failed to invite member'),
+        onSuccess: () => {
+          toast.success('Invitation sent successfully')
+          router.reload({
+            only: ['invitations'],
+          })
+          setLoading(false)
+        },
+        onError: (errors) => {
+          const message = errors?.message || 'Failed to invite member'
+          toast.error(message)
+          setLoading(false)
+        },
       }
     )
   }
@@ -76,23 +95,24 @@ export default function TaskAssignee({ task, className }: Props) {
   return (
     <div className={`flex items-center gap-3 ${className}`}>
       <Label className="w-24 text-sm">Assignee</Label>
+      {/* OVerlay Loader */}
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 justify-start -ml-1"
+            className="gap-2 justify-start -ml-1 py-5"
           >
+            {loading && <LoaderCircle className="h-4 w-4 animate-spin" />}
             {/* {task.assigned_to.profile_picture?.url} */}
             {task.assigned_to ? (
               <>
-                <Avatar className="h-6 w-6">
-                  <AvatarImage src={task.assigned_to.profile_picture?.url} />
-                  <AvatarFallback className="text-xs">
-                    {task.assigned_to.name.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+                <AppAvatar
+                  src={task.assigned_to.profile_picture?.url}
+                  name={task.assigned_to.name}
+                  size="sm"
+                />
                 <span className="text-sm font-medium">{task.assigned_to.name}</span>
               </>
             ) : (
@@ -145,12 +165,11 @@ export default function TaskAssignee({ task, className }: Props) {
                 }}
                 className="flex items-center gap-2"
               >
-                <Avatar className="h-6 w-6">
-                  <AvatarImage src={user.profile_picture?.url} />
-                  <AvatarFallback className="text-xs">
-                    {user.name.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+                <AppAvatar
+                  src={user.profile_picture?.url}
+                  name={user.name}
+                  size="sm"
+                />
                 <div className="text-sm leading-tight">
                   {user.name}
                   <div className="text-xs text-muted-foreground">{user.email}</div>
@@ -211,6 +230,9 @@ export default function TaskAssignee({ task, className }: Props) {
                 )}
               </div>
             )}
+          </div>
+          <div className="border-t p-1">
+            <InviteMembersModal />
           </div>
 
           {/* Unassign */}

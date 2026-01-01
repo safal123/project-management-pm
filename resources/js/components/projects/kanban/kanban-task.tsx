@@ -3,7 +3,6 @@ import { Task } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,
@@ -35,6 +34,7 @@ import { useKanbanTask } from '@/hooks/use-kanban'
 import { CircularProgressChip } from '@/components/projects/kanban/project-progress'
 import AppTooltip from '@/components/app-tooltip'
 import MarkTaskAsComplete from '@/components/tasks/mark-as-complete'
+import AppAvatar from '@/components/app-avatar'
 
 interface KanbanTaskProps {
   task: Task
@@ -127,15 +127,12 @@ export const KanbanTask = ({ task, columns }: KanbanTaskProps) => {
           </div>
           <div className="flex items-center justify-between px-4 mt-3">
             <div className="flex items-center gap-2">
-              <div className="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale">
-                <AppTooltip content={`Assigned to: ${task.assigned_to?.name || 'Not assigned'}`} side="top">
-                  <Avatar>
-                    <AvatarImage src={task.assigned_to?.profile_picture?.url} alt={task.assigned_to?.name} />
-                    <AvatarFallback className="text-xs">
-                      {task.assigned_to?.name?.slice(0, 2).toUpperCase() || 'NA'}
-                    </AvatarFallback>
-                  </Avatar>
-                </AppTooltip>
+              <div className="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2">
+                <AppAvatar
+                  src={task.assigned_to?.profile_picture?.url}
+                  name={task.assigned_to?.name}
+                  size="sm"
+                />
               </div>
             </div>
             <div className="flex items-center gap-2">

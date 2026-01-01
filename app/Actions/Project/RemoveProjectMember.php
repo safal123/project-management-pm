@@ -11,7 +11,7 @@ class RemoveProjectMember
     public function execute(Project $project, User $user): string
     {
         // Check if user is a member
-        if (!$project->users()->where('user_id', $user->id)->exists()) {
+        if (! $project->users()->where('user_id', $user->id)->exists()) {
             throw new CannotRemoveMemberException('User is not a member of this project.');
         }
 

@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
 use App\Models\Media;
-use App\Models\Task;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class MediaController extends Controller
 {
@@ -23,7 +22,7 @@ class MediaController extends Controller
             'mediable_type' => 'required|string',
         ]);
 
-        if (!Storage::disk('s3')->exists($request->path)) {
+        if (! Storage::disk('s3')->exists($request->path)) {
             return response()->json([
                 'message' => 'Path not found',
             ], 404);
@@ -39,7 +38,7 @@ class MediaController extends Controller
 
         $mediableClass = $mediableTypeMap[$request->mediable_type] ?? null;
 
-        if (!$mediableClass) {
+        if (! $mediableClass) {
             return response()->json([
                 'message' => 'Invalid mediable type',
             ], 400);
@@ -54,7 +53,7 @@ class MediaController extends Controller
                 try {
                     Storage::disk($old->disk ?? 's3')->delete($old->path);
                 } catch (\Exception $e) {
-                    Log::error('Failed to delete old media: ' . $e->getMessage());
+                    Log::error('Failed to delete old media: '.$e->getMessage());
                 }
                 $old->delete();
             }
@@ -80,7 +79,7 @@ class MediaController extends Controller
         $media->load('mediable');
 
         return response()->json([
-            'media' => $media
+            'media' => $media,
         ]);
     }
 
@@ -95,7 +94,7 @@ class MediaController extends Controller
             Storage::disk($disk)->delete($path);
         } catch (\Exception $e) {
             // Log the error but continue with database deletion
-            Log::error('Failed to delete media from storage: ' . $e->getMessage());
+            Log::error('Failed to delete media from storage: '.$e->getMessage());
         }
 
         // Delete from database

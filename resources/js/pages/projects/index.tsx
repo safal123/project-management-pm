@@ -1,12 +1,14 @@
-import { AddNewProject } from '@/components/modals/add-new-project';
+import { ProjectModal } from '@/components/modals/project-modal';
 import AppLayout from '@/layouts/app-layout'
 import { BreadcrumbItem, Project, SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FolderKanban, Calendar } from 'lucide-react';
+import { FolderKanban, Calendar, FolderCodeIcon } from 'lucide-react';
+import Can from '@/components/can';
+import AppEmpty from '@/components/app-empty';
 
 const Projects = () => {
-  const { projects } = usePage<SharedData>().props as { projects: Project[] };
+  const { projects } = usePage<SharedData & { projects: Project[] }>().props;
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: 'Projects',
@@ -19,14 +21,16 @@ const Projects = () => {
       <Head title="Projects" />
 
       <div className="px-12 py-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
             <p className="text-muted-foreground mt-2">
               Manage and organize your projects in one place
             </p>
           </div>
-          <AddNewProject />
+          <Can permission="project.create">
+            <ProjectModal triggerClassName="w-full md:w-fit" />
+          </Can>
         </div>
 
         {/* Projects Grid */}
@@ -42,6 +46,12 @@ const Projects = () => {
                           <FolderKanban className="h-5 w-5 text-primary" />
                         </div>
                       </div>
+                      {/* Edit Button */}
+                      <Can permission="project.update">
+                        <div onClick={(e) => e.preventDefault()}>
+                          <ProjectModal project={project} triggerVariant="ghost" />
+                        </div>
+                      </Can>
                     </div>
                     <CardTitle className="mt-4 line-clamp-1">{project.name}</CardTitle>
                     <CardDescription className="line-clamp-2 min-h-[2.5rem]">
@@ -59,23 +69,15 @@ const Projects = () => {
             ))}
           </div>
         ) : (
-          /* Empty State */
-          <Card className="border-dashed">
-            <CardContent className="flex flex-col items-center justify-center py-16">
-              <div className="p-4 bg-primary/10 rounded-full mb-4">
-                <FolderKanban className="h-12 w-12 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">No projects yet</h3>
-              <p className="text-muted-foreground text-center mb-6 max-w-md">
-                Get started by creating your first project to organize your work and collaborate with your team.
-              </p>
-              <AddNewProject />
-            </CardContent>
-          </Card>
+          <AppEmpty
+            title="No projects yet."
+            description="Get started by creating your first project to organize your work and collaborate with your team."
+            icon={<FolderCodeIcon className='text-primary' />}
+            action={<ProjectModal />}
+          />
         )}
       </div>
-
-    </AppLayout>
+    </AppLayout >
   )
 }
 

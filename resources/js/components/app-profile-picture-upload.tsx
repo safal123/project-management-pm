@@ -6,6 +6,7 @@ import { router } from '@inertiajs/react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Media } from '@/types';
+import AppAvatar from '@/components/app-avatar';
 
 interface AppProfilePictureUploadProps {
   workspaceId: string;
@@ -112,33 +113,15 @@ export default function AppProfilePictureUpload({
     }
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <div className={cn('flex flex-col sm:flex-row items-start sm:items-center gap-6', className)}>
       <div className="relative group flex-shrink-0">
-        <div className="relative h-24 w-24 rounded-full overflow-hidden ring-2 ring-border">
-          {currentPicture ? (
-            <img
-              src={currentPicture.url}
-              alt={userName}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="h-full w-full flex items-center justify-center bg-primary/10 text-primary">
-              <span className="text-2xl font-semibold">
-                {getInitials(userName)}
-              </span>
-            </div>
-          )}
-        </div>
+        <AppAvatar
+          src={currentPicture?.url}
+          name={userName}
+          size="2xl"
+          className="ring-2 ring-border"
+        />
 
         <button
           type="button"

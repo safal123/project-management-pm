@@ -6,6 +6,7 @@ use App\Exceptions\UserAlreadyInvitedException;
 use App\Models\Project;
 use App\Models\User;
 use App\Notifications\ProjectInvitationNotification;
+use Illuminate\Support\Str;
 
 class InviteProjectMember
 {
@@ -25,6 +26,8 @@ class InviteProjectMember
             'status' => $data['status'] ?? 'pending',
             'invited_by' => $invitedBy->id,
             'invited_at' => now(),
+            'token' => Str::random(32),
+            'token_expires_at' => now()->addHours(24),
         ]);
 
         $member->notify(new ProjectInvitationNotification($project, $invitedBy));

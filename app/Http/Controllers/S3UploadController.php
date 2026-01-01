@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class S3UploadController extends Controller
 {
@@ -21,8 +21,8 @@ class S3UploadController extends Controller
             'file_size' => 'required|integer|min:1|max:5242880', // 5MB max
         ]);
 
-        $filename = Str::random(40) . '_' . $request->filename;
-        $path = 'uploads/' . date('Y/m/d') . '/' . $filename;
+        $filename = Str::random(40).'_'.$request->filename;
+        $path = 'uploads/'.date('Y/m/d').'/'.$filename;
         $client = Storage::disk('s3')->getClient();
         $command = $client->getCommand('PutObject', [
             'Bucket' => config('filesystems.disks.s3.bucket'),
@@ -31,6 +31,7 @@ class S3UploadController extends Controller
             'ContentLength' => $request->file_size,
         ]);
         $presignedUrl = $client->createPresignedRequest($command, '+5 minutes')->getUri();
+
         return response()->json([
             'signed_url' => $presignedUrl,
             'filename' => $filename,

@@ -41,7 +41,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
       <Head title="Profile settings" />
 
       <SettingsLayout>
-        <div className="space-y-6">
+        <div className="space-y-6 bg-card p-4 rounded-lg border shadow-sm">
           <HeadingSmall title="Profile information" description="Update your name and email address" />
 
           <form onSubmit={submit} className="space-y-6">
@@ -76,14 +76,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
               />
 
               <InputError className="mt-2" message={errors.email} />
-            </div>
-            <div className="pt-4 border-t">
-              <AppProfilePictureUpload
-                workspaceId={auth.user.current_workspace_id as string}
-                userId={auth.user.id}
-                currentPicture={(auth.user.profile_picture ?? null) as Media | null}
-                userName={auth.user.name}
-              />
             </div>
 
             {mustVerifyEmail && auth.user.email_verified_at === null && (
@@ -122,6 +114,14 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
               </Transition>
             </div>
           </form>
+          <div className="pt-4 border-t">
+            <AppProfilePictureUpload
+              workspaceId={auth.user.current_workspace_id as string}
+              userId={auth.user.id}
+              currentPicture={(auth.user.profile_picture ?? null) as Media | null}
+              userName={auth.user.name}
+            />
+          </div>
         </div>
 
         <DeleteUser />

@@ -22,10 +22,6 @@ return new class extends Migration
             $table->foreignUlid('project_id')
                 ->constrained('projects')
                 ->cascadeOnDelete();
-            $table->foreignUlid('parent_task_id')
-                ->nullable()
-                ->constrained('tasks')
-                ->cascadeOnDelete();
             $table->foreignUlid('workspace_id')
                 ->constrained('workspaces')
                 ->cascadeOnDelete();
@@ -44,6 +40,15 @@ return new class extends Migration
             $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
             $table->dateTime('due_date')->nullable();
             $table->timestamps();
+        });
+
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->foreignUlid('parent_task_id')
+                ->nullable()
+                ->after('project_id')
+                ->constrained('tasks')
+                ->cascadeOnDelete();
+            $table->index('parent_task_id');
         });
     }
 

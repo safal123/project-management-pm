@@ -2,6 +2,7 @@
 
 namespace App\Actions\Project;
 
+use App\Exceptions\ProjectCreationException;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -27,9 +28,8 @@ class CreateProject
 
             $this->attachProjectMember->execute($project, $user, [
                 'role' => 'owner',
-                'status' => 'accepted',
-                'accepted_by' => $user->id,
-                'accepted_at' => now(),
+                'created_by' => $user->id,
+                'joined_at' => now(),
             ]);
 
             DB::commit();
@@ -37,7 +37,7 @@ class CreateProject
             return $project;
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new \Exception('Cannot create project');
+            throw new ProjectCreationException('Cannot create project: '.$e->getMessage());
         }
     }
 
@@ -46,9 +46,10 @@ class CreateProject
         $slug = Str::slug($name);
         $count = 1;
         while (Project::where('slug', $slug)->exists()) {
-            $slug = Str::slug($name) . '-' . $count;
+            $slug = Str::slug($name).'-'.$count;
             $count++;
         }
+
         return $slug;
     }
 }

@@ -12,7 +12,7 @@ class WorkspaceSwitcherController extends Controller
         $user = $request->user();
 
         $workspace = Workspace::where('id', $request->workspace)
-            ->whereHas('users', fn($q) => $q->where('user_id', $user->id))
+            ->whereHas('users', fn ($q) => $q->where('user_id', $user->id))
             ->first();
 
         if (! $workspace) {

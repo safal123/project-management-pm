@@ -7,7 +7,6 @@ use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class TaskController extends Controller
@@ -28,7 +27,7 @@ class TaskController extends Controller
         $data = [
             ...$validated,
             'created_by' => auth()->user()->id,
-            'slug' => Str::slug($validated['title']) . '-' . Str::random(6),
+            'slug' => Str::slug($validated['title']).'-'.Str::random(6),
             'assigned_by' => auth()->user()->id,
             'order' => ($maxOrder ?? 0) + 1,
             'workspace_id' => auth()->user()->currentWorkspace()->first()->id,
@@ -86,7 +85,7 @@ class TaskController extends Controller
 
             $taskIds = $validated['taskIds'];
 
-            if (!empty($taskIds)) {
+            if (! empty($taskIds)) {
                 $caseSql = '';
                 foreach ($taskIds as $index => $taskId) {
                     $order = $index + 1;
@@ -94,7 +93,7 @@ class TaskController extends Controller
                     $caseSql .= "WHEN id = '$safeId' THEN $order ";
                 }
 
-                $ids = implode(',', array_map(fn($id) => "'" . addslashes($id) . "'", $taskIds));
+                $ids = implode(',', array_map(fn ($id) => "'".addslashes($id)."'", $taskIds));
                 DB::update("UPDATE tasks SET `order` = CASE $caseSql END WHERE id IN ($ids)");
             }
         });
@@ -125,7 +124,7 @@ class TaskController extends Controller
                 ->orderBy('order')
                 ->get();
 
-            $currentIndex = $siblingTasks->search(fn($t) => $t->order > $task->order);
+            $currentIndex = $siblingTasks->search(fn ($t) => $t->order > $task->order);
 
             if ($currentIndex === false) {
                 $currentIndex = $siblingTasks->count();

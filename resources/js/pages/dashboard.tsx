@@ -4,6 +4,8 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FolderKanban, Briefcase, Calendar, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import AppEmpty from '@/components/app-empty';
+import { ProjectModal } from '@/components/modals/project-modal';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -120,15 +122,12 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8">
-                <div className="p-4 bg-primary/10 rounded-full w-fit mx-auto mb-4">
-                  <FolderKanban className="h-8 w-8 text-primary" />
-                </div>
-                <p className="text-muted-foreground mb-4">No projects yet</p>
-                <Button size="sm" asChild>
-                  <Link href="/projects">Create Your First Project</Link>
-                </Button>
-              </div>
+              <AppEmpty
+                title="No recent projects yet."
+                description="Get started by creating your first project to organize your work and collaborate with your team."
+                icon={<FolderKanban className='text-primary' />}
+                action={<ProjectModal />}
+              />
             )}
           </CardContent>
         </Card>

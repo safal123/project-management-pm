@@ -12,8 +12,8 @@ class RespondToInvitation
     {
         $member = $project->users()->where('user_id', $userId)->first();
 
-        if (!$member || $member->pivot->status !== 'pending') {
-            throw new InvalidInvitationException("Invalid invitation.");
+        if (! $member || $member->pivot->status !== 'pending') {
+            throw new InvalidInvitationException('Invalid invitation.');
         }
 
         return DB::transaction(function () use ($project, $userId, $action) {
@@ -24,11 +24,12 @@ class RespondToInvitation
                     'accepted_at' => now(),
                 ]);
 
-                return "Invitation accepted successfully.";
+                return 'Invitation accepted successfully.';
             }
 
             $project->users()->detach($userId);
-            return "Invitation rejected successfully.";
+
+            return 'Invitation rejected successfully.';
         });
     }
 }

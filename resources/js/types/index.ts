@@ -1,8 +1,10 @@
 import { LucideIcon } from 'lucide-react';
-import WorkspaceSelector from '../components/workspace-switcher';
 
 export interface Auth {
   user: User;
+  permissions: {
+    can: string[];
+  };
 }
 
 export interface BreadcrumbItem {
@@ -62,6 +64,22 @@ export interface Project {
   created_by: string;
   created_at: string;
   users: User[]
+}
+
+export interface Invitation {
+  id: string;
+  email: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  token: string;
+  expires_at: string;
+  invited_at: string;
+  accepted_at?: string | null;
+  rejected_at?: string | null;
+  invited_by?: User | null;
+  invited_to?: User | null;
+  project?: Project | null;
+  workspace?: Workspace | null;
+  last_sent_at?: string | null;
 }
 
 export interface Media {

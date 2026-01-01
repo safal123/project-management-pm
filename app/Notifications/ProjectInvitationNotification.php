@@ -2,12 +2,12 @@
 
 namespace App\Notifications;
 
+use App\Models\Project;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\Project;
-use App\Models\User;
 
 class ProjectInvitationNotification extends Notification implements ShouldQueue
 {
@@ -38,8 +38,8 @@ class ProjectInvitationNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('Project Invitation')
-            ->greeting('Hello, ' . $this->invitedBy->name)
-            ->line('You have been invited to join the project: ' . $this->project->name)
+            ->greeting('Hello, '.$this->invitedBy->name)
+            ->line('You have been invited to join the project: '.$this->project->name)
             ->action('View Project', route('projects.show', $this->project->id))
             ->line('If you believe this invitation was a mistake, you can ignore this message.');
     }

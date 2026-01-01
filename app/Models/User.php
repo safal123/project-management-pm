@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -35,9 +36,9 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    protected $appends = [
-        'profile_picture',
-    ];
+    // protected $appends = [
+    //     'profile_picture',
+    // ];
 
     /**
      * Get the attributes that should be cast.
@@ -64,11 +65,19 @@ class User extends Authenticatable
 
     public function media()
     {
-        return $this->morphMany(Media::class, 'mediable');
+        return $this->morphOne(Media::class, 'mediable')
+            ->latestOfMany();
     }
 
-    public function getProfilePictureAttribute()
+    public function profilePicture(): Attribute
     {
-        return $this->media()->latest()->first();
+        return Attribute::make(
+            get: fn () => $this->media
+        )->shouldCache();
+    }
+
+    public function currentWorkspaceId()
+    {
+        return $this->currentWorkspace?->id;
     }
 }
