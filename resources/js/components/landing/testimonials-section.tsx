@@ -34,13 +34,13 @@ export function TestimonialsSection() {
 
     return (
         <section id="testimonials" className="relative w-full py-12 md:py-24 lg:py-32">
-            <GradientBackground variant="purple" intensity="light" />
+            <GradientBackground variant="primary" intensity="light" />
 
             <div className="container relative z-10 mx-auto px-4 md:px-6">
                 <div className="flex flex-col items-center justify-center space-y-4 text-center">
                     <div className="space-y-2">
-                        <div className="inline-block rounded-lg bg-purple-500/10 px-3 py-1 text-sm dark:bg-purple-500/20">
-                            <span className="bg-gradient-to-r from-purple-500 to-purple-700 bg-clip-text font-semibold text-transparent">
+                        <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm border border-primary/20">
+                            <span className="font-semibold text-primary">
                                 Testimonials
                             </span>
                         </div>
@@ -57,7 +57,7 @@ export function TestimonialsSection() {
                     {testimonials.map((testimonial, index) => (
                         <div
                             key={index}
-                            className="flex flex-col justify-between space-y-4 rounded-lg border p-6 bg-background/80 backdrop-blur-sm"
+                            className="flex flex-col justify-between space-y-4 rounded-lg border p-6 bg-background/50 backdrop-blur-sm hover:border-primary/50 transition-colors"
                         >
                             <div className="space-y-2">
                                 <div className="flex space-x-0.5">
@@ -73,7 +73,7 @@ export function TestimonialsSection() {
                                             strokeWidth="2"
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
-                                            className={i < testimonial.rating ? "text-yellow-500" : "text-gray-300"}
+                                            className={i < 5 ? "text-primary" : "text-gray-300"}
                                         >
                                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                                         </svg>
@@ -82,7 +82,7 @@ export function TestimonialsSection() {
                                 <p className="text-muted-foreground">{testimonial.quote}</p>
                             </div>
                             <div className="flex items-center space-x-3">
-                                <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-700 font-bold">
+                                <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
                                     {testimonial.avatar}
                                 </div>
                                 <div>
@@ -97,7 +97,6 @@ export function TestimonialsSection() {
                 <div className="flex justify-center mt-8">
                     <Link href="/register">
                         <Button
-                            variant="gradient-sunset"
                             size="lg"
                             className="w-full sm:w-auto"
                         >

@@ -7,7 +7,7 @@ const gradientVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-gradient-to-br from-purple-500/10 via-background/5 to-indigo-500/10 dark:from-purple-600/20 dark:via-background/5 dark:to-indigo-700/20",
+        primary: "bg-gradient-to-br from-primary/10 via-background/5 to-primary/5 dark:from-primary/20 dark:via-background/5 dark:to-primary/10",
         purple: "bg-gradient-to-br from-purple-500/15 via-pink-500/5 to-fuchsia-500/10 dark:from-purple-600/20 dark:via-pink-600/10 dark:to-fuchsia-700/20",
         blue: "bg-gradient-to-br from-blue-500/15 via-cyan-500/5 to-sky-500/10 dark:from-blue-600/20 dark:via-cyan-600/10 dark:to-sky-700/20",
         green: "bg-gradient-to-br from-emerald-500/15 via-teal-500/5 to-green-500/10 dark:from-emerald-600/20 dark:via-teal-600/10 dark:to-green-700/20",
@@ -52,9 +52,9 @@ export function GradientBackground({
 
       {withOrbs && (
         <>
-          <div className="absolute -left-20 -top-20 h-[300px] w-[300px] rounded-full bg-purple-500/20 blur-[120px] dark:bg-purple-600/30" />
-          <div className="absolute -right-20 top-1/3 h-[250px] w-[250px] rounded-full bg-blue-500/20 blur-[120px] dark:bg-blue-600/30" />
-          <div className="absolute left-1/4 bottom-0 h-[200px] w-[200px] rounded-full bg-cyan-500/20 blur-[100px] dark:bg-cyan-600/30" />
+          <div className="absolute -left-20 -top-20 h-[300px] w-[300px] rounded-full bg-primary/20 blur-[120px] dark:bg-primary/30" />
+          <div className="absolute -right-20 top-1/3 h-[250px] w-[250px] rounded-full bg-primary/20 blur-[120px] dark:bg-primary/30" />
+          <div className="absolute left-1/4 bottom-0 h-[200px] w-[200px] rounded-full bg-primary/10 blur-[100px] dark:bg-primary/20" />
         </>
       )}
 

@@ -144,7 +144,7 @@ export const KanbanTask = ({ task, columns }: KanbanTaskProps) => {
               {task.due_date && formatDueDate(task.due_date)?.isOverdue && (
                 <Badge className="text-xs bg-destructive text-destructive-foreground">Overdue</Badge>
               )}
-              <CircularProgressChip percent={25} />
+              <CircularProgressChip percent={task.progress || 0} />
             </div>
           </div>
           <Separator />

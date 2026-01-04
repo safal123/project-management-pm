@@ -40,7 +40,7 @@ export function PricingSection() {
       ],
       popular: true,
       buttonText: "Start Free Trial",
-      buttonVariant: "gradient-green" as const,
+      buttonVariant: "default" as const,
     },
     {
       name: "Enterprise",
@@ -59,19 +59,19 @@ export function PricingSection() {
       ],
       popular: false,
       buttonText: "Contact Sales",
-      buttonVariant: "gradient-ocean" as const,
+      buttonVariant: "outline" as const,
     },
   ];
 
   return (
     <section id="pricing" className="relative w-full py-12 md:py-24 lg:py-32">
-      <GradientBackground variant="green" intensity="light" />
+      <GradientBackground variant="primary" intensity="light" />
 
       <div className="container relative z-10 mx-auto px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
-            <div className="inline-block rounded-lg bg-green-500/10 px-3 py-1 text-sm dark:bg-green-500/20">
-              <span className="bg-gradient-to-r from-green-500 to-green-700 bg-clip-text font-semibold text-transparent">
+            <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm border border-primary/20">
+              <span className="font-semibold text-primary">
                 Pricing
               </span>
             </div>
@@ -89,20 +89,20 @@ export function PricingSection() {
             <Card
               key={index}
               className={cn(
-                "flex flex-col backdrop-blur-sm bg-background/80",
-                plan.popular ? "border-primary shadow-md" : "border-border"
+                "flex flex-col backdrop-blur-sm bg-background/50 transition-all hover:shadow-xl",
+                plan.popular ? "border-primary shadow-lg scale-105 z-10" : "border-border hover:border-primary/50"
               )}
             >
               {plan.popular && (
-                <div className="absolute right-0 top-0 rounded-bl-lg rounded-tr-lg bg-green-600 px-3 py-1 text-xs font-medium text-white">
+                <div className="absolute right-0 top-0 rounded-bl-lg rounded-tr-lg bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
                   Most Popular
                 </div>
               )}
               <CardHeader>
-                <CardTitle>{plan.name}</CardTitle>
+                <CardTitle className="text-2xl">{plan.name}</CardTitle>
                 <CardDescription>{plan.description}</CardDescription>
-                <div className="mt-4 flex items-baseline text-gray-900 dark:text-gray-50">
-                  <span className="text-3xl font-bold tracking-tight">{plan.price}</span>
+                <div className="mt-4 flex items-baseline text-foreground">
+                  <span className="text-4xl font-bold tracking-tight">{plan.price}</span>
                   {plan.period && (
                     <span className="ml-1 text-sm text-muted-foreground">/{plan.period}</span>
                   )}
@@ -112,15 +112,15 @@ export function PricingSection() {
                 <ul className="space-y-3">
                   {plan.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-start">
-                      <Check className="mr-2 h-5 w-5 shrink-0 text-green-500" />
-                      <span>{feature}</span>
+                      <Check className="mr-2 h-5 w-5 shrink-0 text-primary" />
+                      <span className="text-sm">{feature}</span>
                     </li>
                   ))}
                 </ul>
               </CardContent>
               <CardFooter>
                 <Link href={plan.name === "Enterprise" ? "/contact" : "/register"} className="w-full">
-                  <Button variant={plan.buttonVariant} className="w-full">
+                  <Button variant={plan.popular ? "default" : "outline"} className="w-full">
                     {plan.buttonText}
                   </Button>
                 </Link>

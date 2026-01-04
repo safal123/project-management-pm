@@ -115,6 +115,7 @@ export interface Task {
   order: number | null;
   project: Project | null;
   media?: Media[];
+  progress?: number | null;
 }
 
 // Kanban Board Types

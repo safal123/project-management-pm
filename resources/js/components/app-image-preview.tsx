@@ -14,7 +14,8 @@ import {
   PlusIcon,
   MinusIcon,
   TrashIcon,
-  LoaderCircle
+  LoaderCircle,
+  RefreshCcwIcon
 } from "lucide-react";
 import { formatDueDate } from "@/utils/task";
 import axios from "axios";
@@ -127,7 +128,7 @@ const AppImagePreview = ({
 
       <DialogTitle className="sr-only">{alt}</DialogTitle>
 
-      <DialogContent className="p-0 min-w-screen h-full bg-background [&>button]:hidden z-[9999]">
+      <DialogContent className="p-0 gap-0 min-w-screen h-[100vh] bg-background [&>button]:hidden z-[9999]">
         <div className="border-b bg-background min-h-[50px] max-h-fit py-2">
           <div className="grid grid-cols-2 md:grid-cols-3 items-center h-14 px-4">
             <div className="hidden w-[400px] text-sm text-muted-foreground break-all leading-tight md:flex flex-col gap-1">
@@ -183,6 +184,14 @@ const AppImagePreview = ({
                     <LoaderCircle className="h-4 w-4 animate-spin" /> :
                     <TrashIcon className="h-4 w-4" />
                 }
+              </Button>
+              {/* Refresh */}
+              <Button
+                variant="ghost"
+                onClick={refreshImageUrl}
+                className="rounded-none cursor-pointer"
+              >
+                <RefreshCcwIcon className="h-4 w-4" />
               </Button>
             </div>
 

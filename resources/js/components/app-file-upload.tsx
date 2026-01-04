@@ -1,4 +1,7 @@
 import React, { useRef, useState } from 'react';
+import axios from 'axios';
+import { router } from '@inertiajs/react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,15 +15,11 @@ import {
   Upload,
   LoaderCircle,
 } from 'lucide-react';
-import axios from 'axios';
-import { router } from '@inertiajs/react';
-import { toast } from 'sonner';
 
 interface AppFileUploadProps {
   workspaceId: string;
   mediableId: string;
   mediableType?: string;
-  className?: string;
   showPlaceholder?: boolean;
   accept?: string;
 }
@@ -30,80 +29,121 @@ export default function AppFileUpload({
   mediableId,
   mediableType = 'task',
   showPlaceholder = false,
-  accept = "image/*"
+  accept = 'image/*',
 }: AppFileUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const openFilePicker = () => {
-    fileInputRef.current?.click();
+    if (!isUploading) {
+      fileInputRef.current?.click();
+    }
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    toast.loading('Uploading file...');
-    const files = e.target.files;
-    if (files?.length) {
-      try {
-        setIsUploading(true);
-        const response = await axios.post(route('s3.upload'), {
-          filename: files[0].name,
-          file_type: files[0].type,
-          file_size: files[0].size,
-        })
-        const signedUrl = response.data.signed_url;
-        await axios.put(signedUrl, files[0]);
-        router.post(route('media.upload'), {
-          path: response.data.path,
-          filename: response.data.filename,
-          original_filename: response.data.original_filename,
-          filetype: files[0].type,
-          filesize: files[0].size,
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file || isUploading) return;
+
+    const toastId = toast.loading(`Uploading file... ${progress}%`);
+    setIsUploading(true);
+    setProgress(0);
+
+    try {
+      const { data } = await axios.post(route('s3.upload'), {
+        filename: file.name,
+        file_type: file.type,
+        file_size: file.size,
+      });
+
+      await axios.put(data.signed_url, file, {
+        headers: {
+          'Content-Type': file.type,
+        },
+        onUploadProgress: (event) => {
+          if (event.total) {
+            const percent = Math.round(
+              (event.loaded * 100) / event.total
+            );
+            setProgress(percent);
+            toast.loading(`Uploading file... ${percent}%`, {
+              id: toastId,
+            });
+          }
+        },
+      });
+
+      router.post(
+        route('media.upload'),
+        {
+          path: data.path,
+          filename: data.filename,
+          original_filename: data.original_filename,
+          filetype: file.type,
+          filesize: file.size,
           workspace_id: workspaceId,
           mediable_id: mediableId,
           mediable_type: mediableType,
-        }, {
+        },
+        {
+          preserveScroll: true,
+          onSuccess: () => {
+            toast.success('File uploaded successfully', {
+              id: toastId,
+            });
+          },
+          onError: () => {
+            toast.error('Failed to save file metadata', {
+              id: toastId,
+            });
+          },
           onFinish: () => {
             setIsUploading(false);
-            toast.success('File uploaded successfully');
+            setProgress(0);
           },
-        })
-      } catch (error) {
-        console.error('Upload failed:', error);
-        setIsUploading(false);
-        toast.error('Upload failed');
-      } finally {
-        toast.dismiss();
-      }
+        }
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error('Upload failed', { id: toastId });
+      setIsUploading(false);
+      setProgress(0);
+    } finally {
+      e.target.value = '';
     }
-    e.target.value = '';
   };
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-9 w-fit" disabled={isUploading}>
-            {isUploading && showPlaceholder ? (
-              <Button className="flex items-center gap-2 border rounded-md px-12">
-                <LoaderCircle className="h-4 w-4 animate-spin" />
-              </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={isUploading}
+            className="h-9 w-9"
+          >
+            {isUploading ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
             ) : showPlaceholder ? (
-              <div
-                role="button"
-                className="h-12 w-12 flex items-center justify-center gap-2 rounded-md border border-dashed border-muted-foreground hover:bg-muted cursor-pointer"
-              >
-                <PlusIcon className="h-4 w-4" />
-              </div>
+              <PlusIcon className="h-4 w-4" />
             ) : (
               <Paperclip className="h-4 w-4" />
             )}
-            <span className="sr-only">Attach file or link</span>
           </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-64">
-          {/* Upload from computer */}
-          <DropdownMenuItem onSelect={openFilePicker} className="gap-3 py-3" disabled={isUploading}>
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              openFilePicker();
+            }}
+            disabled={isUploading}
+            className="gap-3 py-3"
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
               {isUploading ? (
                 <LoaderCircle className="h-5 w-5 animate-spin" />
@@ -111,23 +151,27 @@ export default function AppFileUpload({
                 <Upload className="h-5 w-5" />
               )}
             </div>
-            <div>
-              <p className="font-medium">{isUploading ? 'Uploading...' : 'Computer'}</p>
+            <div className="flex-1">
+              <p className="font-medium">
+                {isUploading ? 'Uploading...' : 'Computer'}
+              </p>
               <p className="text-xs text-muted-foreground">
-                {isUploading ? 'Please wait' : 'Upload from your device'}
+                {isUploading
+                  ? `Uploading ${progress}%`
+                  : 'Upload from your device'}
               </p>
             </div>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
       <input
         ref={fileInputRef}
         type="file"
-        onChange={handleFileChange}
         className="hidden"
         accept={accept}
+        onChange={handleFileChange}
       />
     </>
   );
 }
-

@@ -49,7 +49,11 @@ const TaskActions = ({
         </Button>
       </AppTooltip>
 
-      <AppFileUpload workspaceId={task.workspace_id} mediableId={task.id} mediableType="task" />
+      <AppFileUpload
+        workspaceId={task.workspace_id}
+        mediableId={task.id}
+        mediableType="task"
+      />
 
       <AppTooltip content="Copy task link">
         <Button variant="ghost" size="icon" className="h-8 w-8">

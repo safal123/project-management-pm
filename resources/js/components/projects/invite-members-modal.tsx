@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils'
 import AppAvatar from '../app-avatar'
 import AppEmpty from '../app-empty'
 import AppTooltip from '../app-tooltip'
+import { formatDateTime, hoursUntil } from '@/utils/date'
 
 interface InviteMembersModalProps {
   errors?: {
@@ -204,20 +205,18 @@ export const InviteMembersModal = () => {
                           </div>
                           <div className="flex flex-col gap-2 mt-1">
                             <p className="text-xs text-muted-foreground">
-                              Invited on: {new Date(invitation.invited_at).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })}
+                              Invited on: {formatDateTime(invitation.invited_at)}
                             </p>
                             {/* Last Sent At */}
                             {invitation.last_sent_at && (
                               <p className="text-xs text-muted-foreground">
-                                Last sent at: {new Date(invitation.last_sent_at).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                })}
+                                Last email sent at: {formatDateTime(invitation.last_sent_at)}
+                              </p>
+                            )}
+                            {invitation.last_sent_at && (
+                              <p className="text-xs text-muted-foreground flex items-center">
+                                <ClockIcon className="h-3 w-3 mr-1" />
+                                Can send email after {hoursUntil(invitation.last_sent_at)} hours
                               </p>
                             )}
                             <div className="flex items-center gap-2">
@@ -228,19 +227,23 @@ export const InviteMembersModal = () => {
                                 </span>
                                 <AppAvatar src={invitation.invited_by?.avatar} name={invitation.invited_by?.name} size="xs" />
                               </p>
-                              <AppTooltip
-                                content="Resend Invitation"
-                                side="top"
-                              >
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleResendInvitation(invitation)}
-                                  className="text-primary hover:text-primary"
+                              {/* Can send email after time in hours */}
+
+                              {(!invitation.last_sent_at || hoursUntil(invitation.last_sent_at) === 0) && (
+                                <AppTooltip
+                                  content="Resend Invitation"
+                                  side="top"
                                 >
-                                  <RefreshCcwIcon className={cn("h-4 w-4", isResending && "animate-spin")} />
-                                </Button>
-                              </AppTooltip>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleResendInvitation(invitation)}
+                                    className="text-primary hover:text-primary"
+                                  >
+                                    <RefreshCcwIcon className={cn("h-4 w-4", isResending && "animate-spin")} />
+                                  </Button>
+                                </AppTooltip>
+                              )}
                               <Button
                                 size="sm"
                                 variant="outline"
