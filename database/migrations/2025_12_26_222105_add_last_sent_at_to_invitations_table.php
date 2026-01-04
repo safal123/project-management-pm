@@ -12,7 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invitations', function (Blueprint $table) {
-            $table->timestamp('last_sent_at')->after('invited_at')->nullable();
+            $table->timestamp('last_sent_at')
+                ->after('invited_at')
+                ->nullable();
+            $table->timestamp('deleted_at')
+                ->nullable();
         });
     }
 
@@ -23,6 +27,7 @@ return new class extends Migration
     {
         Schema::table('invitations', function (Blueprint $table) {
             $table->dropColumn('last_sent_at');
+            $table->dropColumn('deleted_at');
         });
     }
 };

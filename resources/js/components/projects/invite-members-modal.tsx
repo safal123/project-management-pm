@@ -17,7 +17,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { UserPlus, Search, Mail, X, Clock, UserIcon, ClockIcon, RefreshCcwIcon } from 'lucide-react'
+import {
+  UserPlus,
+  Search,
+  Mail,
+  X,
+  Clock,
+  UserIcon,
+  ClockIcon,
+  RefreshCcwIcon,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import AppAvatar from '../app-avatar'
@@ -27,44 +36,49 @@ import { formatDateTime, hoursUntil } from '@/utils/date'
 
 interface InviteMembersModalProps {
   errors?: {
-    message?: string;
-    email?: string;
-  };
+    message?: string
+    email?: string
+  }
 }
 
 export const InviteMembersModal = () => {
   const { project, errors, invitations } = usePage<
-    SharedData & { project: Project; errors?: InviteMembersModalProps['errors']; invitations?: Invitation[] }
+    SharedData & {
+      project: Project
+      errors?: InviteMembersModalProps['errors']
+      invitations?: Invitation[]
+    }
   >().props
 
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [emailInput, setEmailInput] = useState('')
   const [isInviting, setIsInviting] = useState(false)
-  const [isResending, setIsResending] = useState(false)
+  const [resendingInvitationId, setResendingInvitationId] = useState<string | null>(null)
 
   const projectMembers = project.users || []
   const pendingInvitations = (invitations || []).filter(
     (invitation) => invitation.status === 'pending'
   )
 
-  const filteredMembers = projectMembers.filter(
-    (member) =>
-      member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.email.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredMembers = projectMembers.filter((member) =>
+    [member.name, member.email]
+      .filter(Boolean)
+      .some((value) =>
+        value!.toLowerCase().includes(searchQuery.toLowerCase())
+      )
   )
 
-  const handleInviteByEmail = (email?: string) => {
-    if (!emailInput.trim() && !email) return
-    if (email) {
-      setEmailInput(email)
-    }
+  const handleInviteByEmail = () => {
+    const email = emailInput.trim()
+    if (!email || isInviting) return
 
     setIsInviting(true)
+
     router.post(
       route('invitations.store'),
       {
-        email: emailInput,
+        email,
         workspace_id: project.workspace_id,
         project_id: project.id,
       },
@@ -72,12 +86,12 @@ export const InviteMembersModal = () => {
         preserveScroll: true,
         onSuccess: () => {
           setEmailInput('')
-          setIsInviting(false)
           toast.success('Invitation sent successfully')
         },
         onError: (errors) => {
-          const message = errors?.message || 'Failed to invite member'
-          toast.error(message)
+          toast.error(errors?.message || 'Failed to invite member')
+        },
+        onFinish: () => {
           setIsInviting(false)
         },
       }
@@ -101,31 +115,27 @@ export const InviteMembersModal = () => {
   }
 
   const handleResendInvitation = (invitation: Invitation) => {
+    if (resendingInvitationId) return
+
+    setResendingInvitationId(invitation.id)
+
     router.post(
-      route('invitations.resend', invitation.id), {
-      invitation: invitation.id
-    },
+      route('invitations.resend', invitation.id),
+      {},
       {
         preserveScroll: true,
-        onStart: () => {
-          setIsResending(true)
-        },
         onSuccess: () => {
           toast.success('Invitation email resend successfully')
-          router.reload({
-            only: ['invitations'],
-          })
-          setIsResending(false)
         },
         onError: (errors) => {
-          const message = errors?.message || 'Failed to resend invitation email'
-          toast.error(message)
-          setIsResending(false)
+          toast.error(errors?.message || 'Failed to resend invitation email')
+        },
+        onFinish: () => {
+          setResendingInvitationId(null)
         },
       }
     )
   }
-
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -135,19 +145,23 @@ export const InviteMembersModal = () => {
           Invite Members
         </Button>
       </DialogTrigger>
+
       <DialogContent className="sm:max-w-[600px] bg-card max-h-[90vh] overflow-y-auto p-0">
         <DialogHeader className="p-4">
           <DialogTitle>Invite Members to {project.name}</DialogTitle>
           <DialogDescription>
             Add team members to collaborate on this project
-            {errors?.message && <p className="text-red-500 text-sm bg-red-500/10 p-2 rounded-md mt-2">{errors.message}</p>}
+            {errors?.message && (
+              <p className="text-red-500 text-sm bg-red-500/10 p-2 rounded-md mt-2">
+                {errors.message}
+              </p>
+            )}
           </DialogDescription>
         </DialogHeader>
 
         <Separator />
 
         <div className="space-y-4 py-4 -mt-6">
-          {/* Invite by Email */}
           <div className="space-y-4 px-4">
             <Label htmlFor="email">Invite by Email</Label>
             <div className="flex gap-2 mt-2">
@@ -167,12 +181,11 @@ export const InviteMembersModal = () => {
                   }}
                   className="pl-10"
                 />
-                {errors?.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                {errors?.email && (
+                  <p className="text-red-500 text-sm">{errors.email}</p>
+                )}
               </div>
-              <Button
-                onClick={() => handleInviteByEmail()}
-                disabled={!emailInput.trim() || isInviting}
-              >
+              <Button onClick={handleInviteByEmail} disabled={!emailInput.trim() || isInviting}>
                 {isInviting ? 'Inviting...' : 'Invite'}
               </Button>
             </div>
@@ -180,7 +193,6 @@ export const InviteMembersModal = () => {
 
           <Separator />
 
-          {/* Pending Invitations */}
           {pendingInvitations.length > 0 ? (
             <>
               <div className="space-y-2 px-4">
@@ -188,8 +200,9 @@ export const InviteMembersModal = () => {
                   <Mail className="h-5 w-5 text-primary" />
                   Pending Invitations
                 </Label>
+
                 <div className="space-y-2 mt-2">
-                  {pendingInvitations.map((invitation: Invitation) => (
+                  {pendingInvitations.map((invitation) => (
                     <div
                       key={invitation.id}
                       className="flex items-center justify-between p-3 rounded-lg border bg-background"
@@ -198,56 +211,70 @@ export const InviteMembersModal = () => {
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-medium">{invitation.email}</p>
-                            <Badge variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-700 dark:text-yellow-400">
+                            <Badge className="text-xs bg-yellow-500/20 text-yellow-700 dark:text-yellow-400">
                               <Clock className="h-3 w-3 mr-1" />
                               Pending
                             </Badge>
                           </div>
+
                           <div className="flex flex-col gap-2 mt-1">
                             <p className="text-xs text-muted-foreground">
                               Invited on: {formatDateTime(invitation.invited_at)}
                             </p>
-                            {/* Last Sent At */}
+
                             {invitation.last_sent_at && (
-                              <p className="text-xs text-muted-foreground">
-                                Last email sent at: {formatDateTime(invitation.last_sent_at)}
-                              </p>
+                              <>
+                                <p className="text-xs text-muted-foreground">
+                                  Last email sent at:{' '}
+                                  {formatDateTime(invitation.last_sent_at)}
+                                </p>
+                                <p className="text-xs text-muted-foreground flex items-center">
+                                  <ClockIcon className="h-3 w-3 mr-1" />
+                                  Can send email after{' '}
+                                  {hoursUntil(invitation.last_sent_at)} hours
+                                </p>
+                              </>
                             )}
-                            {invitation.last_sent_at && (
-                              <p className="text-xs text-muted-foreground flex items-center">
-                                <ClockIcon className="h-3 w-3 mr-1" />
-                                Can send email after {hoursUntil(invitation.last_sent_at)} hours
-                              </p>
-                            )}
+
                             <div className="flex items-center gap-2">
                               <p className="w-fit text-xs text-muted-foreground flex items-center border border-border bg-primary/10 rounded-md px-2 py-1">
                                 Invited by:
-                                <span className="mr-1 ">
+                                <span className="mx-1">
                                   {invitation.invited_by?.name}
                                 </span>
-                                <AppAvatar src={invitation.invited_by?.avatar} name={invitation.invited_by?.name} size="xs" />
+                                <AppAvatar
+                                  src={invitation.invited_by?.avatar}
+                                  name={invitation.invited_by?.name}
+                                  size="xs"
+                                />
                               </p>
-                              {/* Can send email after time in hours */}
 
-                              {(!invitation.last_sent_at || hoursUntil(invitation.last_sent_at) === 0) && (
-                                <AppTooltip
-                                  content="Resend Invitation"
-                                  side="top"
-                                >
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleResendInvitation(invitation)}
-                                    className="text-primary hover:text-primary"
-                                  >
-                                    <RefreshCcwIcon className={cn("h-4 w-4", isResending && "animate-spin")} />
-                                  </Button>
-                                </AppTooltip>
-                              )}
+                              {(!invitation.last_sent_at ||
+                                hoursUntil(invitation.last_sent_at) === 0) && (
+                                  <AppTooltip content="Resend Invitation" side="top">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleResendInvitation(invitation)}
+                                      disabled={resendingInvitationId === invitation.id}
+                                    >
+                                      <RefreshCcwIcon
+                                        className={cn(
+                                          'h-4 w-4',
+                                          resendingInvitationId === invitation.id &&
+                                          'animate-spin'
+                                        )}
+                                      />
+                                    </Button>
+                                  </AppTooltip>
+                                )}
+
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleCancelInvitation(invitation.id, invitation.email)}
+                                onClick={() =>
+                                  handleCancelInvitation(invitation.id, invitation.email)
+                                }
                                 className="text-destructive hover:text-destructive"
                               >
                                 <X className="h-4 w-4" />
@@ -257,7 +284,6 @@ export const InviteMembersModal = () => {
                           </div>
                         </div>
                       </div>
-
                     </div>
                   ))}
                 </div>
@@ -265,16 +291,15 @@ export const InviteMembersModal = () => {
               <Separator />
             </>
           ) : (
-            <div className='px-4'>
+            <div className="px-4">
               <AppEmpty
                 title="No pending invitations"
                 description="There are no pending invitations for this project. When members join, they will appear here."
-                icon={<ClockIcon className='text-primary' />}
+                icon={<ClockIcon className="text-primary" />}
               />
             </div>
           )}
 
-          {/* Search Members */}
           <div className="space-y-2 px-4">
             <Label htmlFor="search">Project Members</Label>
             <div className="relative">
@@ -294,34 +319,30 @@ export const InviteMembersModal = () => {
             <ScrollArea className="h-[300px] rounded-md border">
               <div className="p-4 space-y-2 px-4">
                 {filteredMembers.length > 0 ? (
-                  filteredMembers.map((member) => {
-                    return (
-                      <div
-                        key={member.id}
-                        className={cn("border flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors")}>
-                        <div className="flex items-center gap-3 flex-1">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={member.avatar} alt={member.name} />
-                            <AvatarFallback>
-                              {member.name?.slice(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <p className="text-sm font-medium">{member.name}</p>
-                            </div>
-                            <p className="text-xs text-muted-foreground">{member.email}</p>
-                          </div>
+                  filteredMembers.map((member) => (
+                    <div
+                      key={member.id}
+                      className="border flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={member.avatar} alt={member.name} />
+                          <AvatarFallback>
+                            {member.name?.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{member.name}</p>
+                          <p className="text-xs text-muted-foreground">{member.email}</p>
                         </div>
                       </div>
-                    )
-                  })
-
+                    </div>
+                  ))
                 ) : (
                   <AppEmpty
                     title="No members found matching your search"
                     description="No members in this project"
-                    icon={<UserIcon className='text-primary' />}
+                    icon={<UserIcon className="text-primary" />}
                   />
                 )}
               </div>
