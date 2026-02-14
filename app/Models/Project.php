@@ -63,4 +63,14 @@ class Project extends Model
                 $query->where('user_id', $user->id);
             });
     }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function invitations()
+    {
+        return $this->hasMany(Invitation::class);
+    }
 }

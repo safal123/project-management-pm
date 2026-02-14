@@ -63,7 +63,6 @@ export const KanbanTask = ({ task, columns }: KanbanTaskProps) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 -ml-2">
                 <MarkTaskAsComplete task={task} type="icon" />
-
                 <h1
                   className="font-medium cursor-pointer hover:text-primary transition-colors"
                   onClick={openTaskDetailSheet}
@@ -121,8 +120,10 @@ export const KanbanTask = ({ task, columns }: KanbanTaskProps) => {
         )}>
           <Separator />
           <div className="px-4 flex items-center justify-between mt-3">
-            <TaskDueDate task={task} />
-            <TaskStatus task={task} />
+            <div className="flex items-center gap-2">
+              <TaskDueDate task={task} />
+              <TaskStatus task={task} />
+            </div>
             <TaskPriority task={task} />
           </div>
           <div className="flex items-center justify-between px-4 mt-3">

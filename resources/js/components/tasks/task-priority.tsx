@@ -1,14 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Loader2 } from 'lucide-react';
 import { TASK_PRIORITY, type TaskPriority } from '@/constants/task';
 import { router } from '@inertiajs/react';
 import { Task } from '@/types';
 
 interface TaskPriorityProps {
   task: Task;
-  className?: string;
 }
 
 export function getPriorityColor(priority: string | null | undefined) {
@@ -24,9 +23,21 @@ export function getPriorityColor(priority: string | null | undefined) {
   }
 }
 
-export default function TaskPriority({ task, className = '' }: TaskPriorityProps) {
+export default function TaskPriority({ task }: TaskPriorityProps) {
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const handlePriorityChange = (priority: TaskPriority) => {
-    router.patch(`/tasks/${task.id}`, { priority }, { preserveScroll: true });
+    setIsUpdating(true);
+    router.patch(
+      `/tasks/${task.id}`,
+      { priority },
+      {
+        preserveScroll: true,
+        onFinish: () => {
+          setIsUpdating(false);
+        },
+      }
+    );
   };
 
   return (
@@ -35,10 +46,15 @@ export default function TaskPriority({ task, className = '' }: TaskPriorityProps
         <Button
           variant="ghost"
           size="sm"
+          disabled={isUpdating}
           className={`w-fit p-0 px-3 py-1 rounded-md text-xs font-medium hover:opacity-80 ${getPriorityColor(task.priority)}`}
         >
           {task.priority || 'Medium'}
-          <ChevronDown className="h-3 w-3 ml-1" />
+          {isUpdating ? (
+            <Loader2 className="h-3 w-3 ml-1 animate-spin" />
+          ) : (
+            <ChevronDown className="h-3 w-3 ml-1" />
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">

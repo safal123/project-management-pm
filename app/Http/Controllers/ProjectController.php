@@ -14,105 +14,100 @@ use App\Models\Task;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Http\Resources\ProjectResource;
+use App\Http\Resources\TaskResource;
+use App\Http\Resources\InvitationResource;
 
 class ProjectController extends Controller
 {
-  public function index()
-  {
-    /** @var \App\Models\User $user */
-    $user = Auth::user();
-    abort_if(! $user->current_workspace_id, 403, 'Please create a workspace first.');
-    $projects = Project::query()
-      ->forUserAndWorkspace($user, $user->currentWorkspace)
-      ->get();
+    public function index()
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        abort_if(! $user->current_workspace_id, 403, 'Please create a workspace first.');
+        $projects = Project::query()
+            ->forUserAndWorkspace($user, $user->currentWorkspace)
+            ->get();
 
-    return Inertia::render('projects/index', [
-      'projects' => $projects,
-    ]);
-  }
-
-  public function store(ProjectCreateRequest $request, CreateProject $createProject)
-  {
-    try {
-      $validated = $request->validated();
-      $project = $createProject->execute(auth()->user(), $validated);
-
-      return redirect()
-        ->route('projects.show', $project->slug)
-        ->withSuccess('Project created successfully');
-    } catch (ProjectCreationException $e) {
-      return redirect()
-        ->back()
-        ->withErrors(['message' => 'Cannot create project']);
+        return Inertia::render('projects/index', [
+            'projects' => $projects,
+        ]);
     }
-  }
 
-  public function show(Project $project)
-  {
-    $tasks = Task::where('project_id', $project->id)
-      ->with(
-        'parentTask',
-        'assignedBy',
-        'assignedTo',
-        'createdBy',
-        'project',
-        'workspace',
-        'media'
-      )
-      ->orderBy('order')
-      ->get();
-    // TODO: get tasks for the project
-    // $workspace = $project->workspace;
-    $members = $project->users;
-    $invitations = Invitation::query()
-      ->forProject($project)
-      ->with(['invitedBy', 'invitedTo'])
-      ->get();
+    public function store(ProjectCreateRequest $request, CreateProject $createProject)
+    {
+        try {
+            $validated = $request->validated();
+            $project = $createProject->execute(auth()->user(), $validated);
 
-    return Inertia::render('projects/project/index', [
-      'project' => $project->load('users'),
-      'tasks' => $tasks,
-      'members' => $members,
-      'invitations' => $invitations,
-    ]);
-  }
-
-  public function update(ProjectUpdateRequest $request, Project $project)
-  {
-    $validated = $request->validated();
-
-    $project->update([
-      'name' => $validated['name'],
-      'description' => $validated['description'] ?? null,
-    ]);
-
-    return redirect()
-      ->back()
-      ->with('success', 'Project updated successfully');
-  }
-
-  public function removeMember(
-    Project $project,
-    User $user,
-    RemoveProjectMember $removeProjectMember
-  ) {
-    try {
-      $message = $removeProjectMember->execute($project, $user);
-
-      return redirect()->back()->with('success', $message);
-    } catch (CannotRemoveMemberException $e) {
-      return redirect()->back()->withErrors(['user' => $e->getMessage()]);
+            return redirect()
+                ->route('projects.show', $project->slug)
+                ->withSuccess('Project created successfully');
+        } catch (ProjectCreationException $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['message' => 'Cannot create project']);
+        }
     }
-  }
 
-  public function destroy(Project $project)
-  {
-    /** @var \App\Models\User $user */
-    $user = Auth::user();
-    abort_if($project->created_by !== $user->id, 403, 'You are not authorized to delete this project.');
+    public function show(Project $project)
+    {
+        $project->load([
+            'tasks.parentTask',
+            'tasks.assignedBy',
+            'tasks.assignedTo',
+            'tasks.createdBy',
+            'tasks.project',
+            'tasks.workspace',
+            'tasks.media',
+            'invitations',
+            'invitations.invitedBy',
+            'invitations.invitedTo',
+        ]);
 
-    $project->delete();
+        return Inertia::render('projects/project/index', [
+            'project' => ProjectResource::make($project),
+            'tasks' => $project->tasks->sortBy('order')->values(),
+            'invitations' => $project->invitations,
+        ]);
+    }
 
-    return redirect()->route('projects.index')->with('success', 'Project deleted successfully');
-  }
+    public function update(ProjectUpdateRequest $request, Project $project)
+    {
+        $validated = $request->validated();
+
+        $project->update([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Project updated successfully');
+    }
+
+    public function removeMember(
+        Project $project,
+        User $user,
+        RemoveProjectMember $removeProjectMember
+    ) {
+        try {
+            $message = $removeProjectMember->execute($project, $user);
+
+            return redirect()->back()->with('success', $message);
+        } catch (CannotRemoveMemberException $e) {
+            return redirect()->back()->withErrors(['user' => $e->getMessage()]);
+        }
+    }
+
+    public function destroy(Project $project)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        abort_if($project->created_by !== $user->id, 403, 'You are not authorized to delete this project.');
+
+        $project->delete();
+
+        return redirect()->route('projects.index')->with('success', 'Project deleted successfully');
+    }
 }

@@ -14,7 +14,7 @@ export const getStatusColors = (status: string | null | undefined) => {
 export const getPriorityColors = (priority: string | null | undefined) => {
   switch (priority) {
     case 'high':
-      return 'border-red-200 dark:border-red-300 bg-red-50/10 dark:bg-red-950/10';
+      return 'border-destructive/10 dark:border-destructive/10 bg-destructive/5 dark:bg-destructive/10';
     // case 'medium':
     //   return 'border-amber-200 dark:border-amber-300';
     // case 'low':

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar } from 'lucide-react';
+import { Calendar, Loader2 } from 'lucide-react';
 import { Task } from '@/types';
 import { router } from '@inertiajs/react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -13,6 +13,7 @@ interface TaskDueDateProps {
 }
 
 export default function TaskDueDate({ task }: TaskDueDateProps) {
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleDateSelect = (date: Date | undefined) => {
     const formatDate = (d: Date) => {
@@ -22,12 +23,16 @@ export default function TaskDueDate({ task }: TaskDueDateProps) {
       return `${year}-${month}-${day}`;
     };
 
+    setIsUpdating(true);
     router.patch(
       route('tasks.update', { task: task.id }),
       { due_date: date ? formatDate(date) : null },
       {
         preserveScroll: true,
         only: ['tasks'],
+        onFinish: () => {
+          setIsUpdating(false);
+        },
       }
     );
   };
@@ -38,9 +43,14 @@ export default function TaskDueDate({ task }: TaskDueDateProps) {
         <Button
           size="sm"
           variant="ghost"
+          disabled={isUpdating}
           className="border border-border rounded-md flex items-center gap-2 h-fit p-1.75 w-fit justify-start hover:bg-accent"
         >
-          <Calendar className="h-3 w-3 text-muted-foreground" />
+          {isUpdating ? (
+            <Loader2 className="h-3 w-3 text-muted-foreground animate-spin" />
+          ) : (
+            <Calendar className="h-3 w-3 text-muted-foreground" />
+          )}
           <span className="text-xs text-muted-foreground">
             {task.due_date ? (
               <p>

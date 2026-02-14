@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class CreateProject
 {
@@ -36,8 +37,9 @@ class CreateProject
 
             return $project;
         } catch (\Exception $e) {
+            Log::error('Cannot create project: ' . $e->getMessage());
             DB::rollBack();
-            throw new ProjectCreationException('Cannot create project: '.$e->getMessage());
+            throw new ProjectCreationException('Cannot create project: ' . $e->getMessage());
         }
     }
 
@@ -46,7 +48,7 @@ class CreateProject
         $slug = Str::slug($name);
         $count = 1;
         while (Project::where('slug', $slug)->exists()) {
-            $slug = Str::slug($name).'-'.$count;
+            $slug = Str::slug($name) . '-' . $count;
             $count++;
         }
 

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Task } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -6,7 +6,7 @@ import EditableTaskTitle from '@/components/tasks/editable-task-title'
 import ColumnDropdown from './column-dropdown'
 import { KanbanTask } from './kanban-task'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Loader2, Plus } from 'lucide-react'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
 
@@ -17,6 +17,7 @@ interface KanbanColumnProps {
 }
 
 export const KanbanColumn = ({ column, columns, tasks }: KanbanColumnProps) => {
+  const [isAddingNewTask, setIsAddingNewTask] = useState(false);
   const childTasks = useMemo(() => {
     return tasks
       .filter((task) => task.parent_task_id === column.id)
@@ -24,6 +25,7 @@ export const KanbanColumn = ({ column, columns, tasks }: KanbanColumnProps) => {
   }, [tasks, column.id])
 
   const handleAddNewTask = (columnId: string) => {
+    setIsAddingNewTask(true);
     router.post(route('tasks.store'), {
       title: 'New Task',
       description: 'New Task Description',
@@ -38,6 +40,9 @@ export const KanbanColumn = ({ column, columns, tasks }: KanbanColumnProps) => {
       },
       onError: () => {
         toast.error('Failed to add new task');
+      },
+      onFinish: () => {
+        setIsAddingNewTask(false);
       },
     })
   }
@@ -63,6 +68,7 @@ export const KanbanColumn = ({ column, columns, tasks }: KanbanColumnProps) => {
                 onClick={() => handleAddNewTask(column.id)}
                 variant="outline" size="sm" className="w-full text-primary">
                 <Plus className="h-4 w-4" />
+                {isAddingNewTask && <Loader2 className="h-4 w-4 animate-spin" />}
                 Add New Task
               </Button>
             </div>
