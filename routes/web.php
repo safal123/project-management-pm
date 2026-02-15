@@ -71,6 +71,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('invitations/{invitation}/resend', [InvitationController::class, 'resend'])
         ->name('invitations.resend');
+
+    Route::post('invitations/{invitation}/approve', [InvitationController::class, 'approve'])
+        ->name('invitations.approve');
 });
 
 Route::middleware(['signed'])->group(function () {

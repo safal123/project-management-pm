@@ -102,6 +102,58 @@ class InvitationController extends Controller
             ->withSuccess('Invitation email resent successfully.');
     }
 
+    // approve invitation (admin only)
+    public function approve(Invitation $invitation)
+    {
+        // Authorization check
+        if ($invitation->project->created_by !== auth()->id()) {
+            return redirect()
+                ->back()
+                ->withErrors(['message' => 'Only the project owner can approve invitations.']);
+        }
+
+        // Validate invitation
+        if ($invitation->isExpired()) {
+            return redirect()->back()->withErrors(['message' => 'Invitation expired.']);
+        }
+
+        if ($invitation->status !== 'pending') {
+            return redirect()->back()->withErrors(['message' => 'Invitation already processed.']);
+        }
+
+        DB::transaction(function () use ($invitation) {
+            // Get or create user
+            $user = User::firstOrCreate(
+                ['email' => $invitation->email],
+                [
+                    'password' => Hash::make(Str::random(32)),
+                    'name' => $invitation->email,
+                ]
+            );
+
+            // Attach to workspace if not already attached
+            if (! $user->workspaces()->where('workspace_id', $invitation->workspace_id)->exists()) {
+                $invitation->workspace->users()->attach($user->id);
+            }
+
+            // Attach to project
+            $invitation->project->users()->syncWithoutDetaching([
+                $user->id => ['joined_at' => now()],
+            ]);
+
+            // Mark invitation as accepted
+            $invitation->update([
+                'status' => 'accepted',
+                'accepted_at' => now(),
+                'invited_to' => $user->id,
+            ]);
+        });
+
+        return redirect()
+            ->back()
+            ->withSuccess('Member approved and added to the project successfully.');
+    }
+
     public function update(Request $request, string $token)
     {
         $request->validate([

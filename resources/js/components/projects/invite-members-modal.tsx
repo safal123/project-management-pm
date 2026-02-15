@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { router, usePage } from '@inertiajs/react'
-import { SharedData, Project, Invitation } from '@/types'
+import { SharedData, Project, Invitation, Auth } from '@/types'
 import {
   Dialog,
   DialogContent,
@@ -26,6 +26,8 @@ import {
   UserIcon,
   ClockIcon,
   RefreshCcwIcon,
+  Check,
+  Loader2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -42,11 +44,12 @@ interface InviteMembersModalProps {
 }
 
 export const InviteMembersModal = () => {
-  const { project, errors, invitations } = usePage<
+  const { project, errors, invitations, auth } = usePage<
     SharedData & {
       project: Project
       errors?: InviteMembersModalProps['errors']
       invitations?: Invitation[]
+      auth: Auth
     }
   >().props
 
@@ -55,6 +58,7 @@ export const InviteMembersModal = () => {
   const [emailInput, setEmailInput] = useState('')
   const [isInviting, setIsInviting] = useState(false)
   const [resendingInvitationId, setResendingInvitationId] = useState<string | null>(null)
+  const [approvingInvitationId, setApprovingInvitationId] = useState<string | null>(null)
 
   const projectMembers = project.users || []
   const pendingInvitations = (invitations || []).filter(
@@ -93,6 +97,30 @@ export const InviteMembersModal = () => {
         },
         onFinish: () => {
           setIsInviting(false)
+        },
+      }
+    )
+  }
+
+  const handleApproveMember = (invitationId: string) => {
+    if (approvingInvitationId) return
+
+    setApprovingInvitationId(invitationId)
+
+    router.post(
+      route('invitations.approve', invitationId),
+      {},
+      {
+        preserveScroll: true,
+        only: ['project', 'invitations'],
+        onSuccess: () => {
+          toast.success('Member approved successfully')
+        },
+        onError: (errors) => {
+          toast.error(errors?.message || 'Failed to approve member')
+        },
+        onFinish: () => {
+          setApprovingInvitationId(null)
         },
       }
     )
@@ -280,6 +308,24 @@ export const InviteMembersModal = () => {
                                 <X className="h-4 w-4" />
                                 Cancel
                               </Button>
+                              {/* As an admin you can approve member */}
+                              {auth.user.id === project.created_by && (
+                                <AppTooltip content="Approve Member" side="top">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleApproveMember(invitation.id)}
+                                    disabled={approvingInvitationId === invitation.id}
+                                    className="text-emerald-600 hover:text-emerald-700 border-emerald-200 hover:border-emerald-300"
+                                  >
+                                    {approvingInvitationId === invitation.id ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <Check className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </AppTooltip>
+                              )}
                             </div>
                           </div>
                         </div>
