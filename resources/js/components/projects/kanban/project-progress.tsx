@@ -34,6 +34,8 @@ export function CircularProgressChip({
       return { start: "#818cf8", end: "#2563eb" }; // medium
     if (progress >= 25)
       return { start: "#facc15", end: "#f97316" }; // low
+    if (progress > 0)
+      return { start: "#fb923c", end: "#ea580c" }; // started (more visible)
     return { start: "#d1d5db", end: "#9ca3af" }; // idle
   }, [progress]);
 
@@ -75,7 +77,7 @@ export function CircularProgressChip({
             fill="none"
             stroke="currentColor"
             strokeWidth={strokeWidth}
-            className="text-muted/30"
+            className="text-muted-foreground/40"
           />
 
           {/* Progress indicator */}

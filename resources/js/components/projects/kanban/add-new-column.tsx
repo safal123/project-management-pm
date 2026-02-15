@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 import { router } from '@inertiajs/react'
 import { usePage } from '@inertiajs/react'
 import { Project, SharedData } from '@/types'
+import { toast } from 'sonner'
 
 const AddNewColumn = () => {
   const { project } = usePage<SharedData & { project: Project }>().props
@@ -16,11 +17,17 @@ const AddNewColumn = () => {
       workspace_id: project.workspace_id,
     }, {
       preserveScroll: true,
+      onSuccess: () => {
+        toast.success('New column created');
+      },
+      onError: () => {
+        toast.error('Failed to create new column');
+      },
     })
   }
 
   return (
-    <div className="w-[350px] flex-shrink-0">
+    <div className="w-[350px] flex-shrink-0 pr-12">
       <Button
         onClick={createNewColumn}
         variant="outline"

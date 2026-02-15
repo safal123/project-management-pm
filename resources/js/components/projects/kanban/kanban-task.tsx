@@ -15,7 +15,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
-  PaperclipIcon,
   Trash2,
   ArrowRightIcon,
   MoreVerticalIcon,
@@ -35,6 +34,7 @@ import { CircularProgressChip } from '@/components/projects/kanban/project-progr
 import AppTooltip from '@/components/app-tooltip'
 import MarkTaskAsComplete from '@/components/tasks/mark-as-complete'
 import AppAvatar from '@/components/app-avatar'
+import AppFileUpload from '@/components/app-file-upload'
 
 interface KanbanTaskProps {
   task: Task
@@ -126,17 +126,39 @@ export const KanbanTask = ({ task, columns }: KanbanTaskProps) => {
             </div>
             <TaskPriority task={task} />
           </div>
-          <div className="flex items-center justify-between px-4 mt-3">
-            <div className="flex items-center gap-2">
-              <div className="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2">
-                <AppAvatar
-                  src={task.assigned_to?.profile_picture?.url}
-                  name={task.assigned_to?.name}
-                  size="sm"
+          {task.media && task.media.length > 0 && (
+            <div className="px-4 mt-3">
+              <div className="relative w-full h-48 rounded-lg overflow-hidden bg-muted group">
+                <img
+                  onClick={() => openTaskDetailSheet()}
+                  src={task.media[0].url}
+                  alt={task.media[0].original_filename}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
                 />
+                {task.media.length > 1 && (
+                  <div className="absolute bottom-2 right-2 bg-background/90 backdrop-blur-sm text-xs font-medium px-2 py-1 rounded-md">
+                    +{task.media.length - 1} more
+                  </div>
+                )}
               </div>
             </div>
-            <div className="flex items-center gap-2">
+          )}
+          <Separator />
+          <div className="flex items-center gap-2 px-4">
+            <div className="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2">
+              <AppAvatar
+                src={task.assigned_to?.profile_picture?.url}
+                name={task.assigned_to?.name}
+                size="sm"
+              />
+            </div>
+            <AppFileUpload
+              workspaceId={task.workspace_id}
+              mediableId={task.id}
+              mediableType="task"
+            />
+            <MessageSquare className="h-4 w-4 text-muted-foreground hover:fill-primary" />
+            <div className="flex items-center gap-2 ml-auto">
               <AppTooltip content="The task is due today" side="top">
                 {task.due_date && formatDueDate(task.due_date)?.isToday && (
                   <Badge className="text-xs">Due today</Badge>
@@ -146,18 +168,8 @@ export const KanbanTask = ({ task, columns }: KanbanTaskProps) => {
                 <Badge className="text-xs bg-destructive text-destructive-foreground">Overdue</Badge>
               )}
               <CircularProgressChip percent={task.progress || 0} />
+              <ThumbsUp className="h-4 w-4 text-muted-foreground hover:text-primary cursor-pointer" />
             </div>
-          </div>
-          <Separator />
-          <div className="flex items-center gap-2 px-4">
-            <AppTooltip content={`${task.media && task.media.length > 0 ? task.media.length : 0} attachments`} side="top">
-              <PaperclipIcon
-                className={cn("h-4 w-4 text-muted-foreground hover:text-primary cursor-pointer",
-                  task.media && task.media.length > 0 && "text-primary")}
-              />
-            </AppTooltip>
-            <MessageSquare className="h-4 w-4 text-muted-foreground hover:fill-primary" />
-            <ThumbsUp className="h-4 ml-auto w-4 text-muted-foreground hover:text-primary cursor-pointer" />
           </div>
         </CardContent>
       </Card>

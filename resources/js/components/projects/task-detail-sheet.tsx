@@ -91,7 +91,7 @@ export function TaskDetailSheet({ task, open, onOpenChange }: TaskDetailSheetPro
             <Label className="w-24 text-sm">
               <p>Attachements {task.media && task.media.length > 0 && `(${task.media.length})`}</p>
             </Label>
-            <div className="flex items-center gap-2 flex-wrap mt-2">
+            <div className="flex items-center gap-2 flex-wrap mt-2 border-t border-border pt-4">
               {task.media && task.media.length > 0 &&
                 task.media.map((media) => (
                   <AppImagePreview

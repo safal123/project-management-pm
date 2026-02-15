@@ -83,7 +83,7 @@ export default function EditableTaskTitle({
           tabIndex={0}
           className={cn(
             baseTextClass,
-            'cursor-pointer px-3 py-3 -mx-3 hover:bg-muted/50'
+            'cursor-pointer px-3 py-3 -ml-3 hover:bg-muted/50'
           )}
           onClick={() => setIsEditing(true)}
         >
