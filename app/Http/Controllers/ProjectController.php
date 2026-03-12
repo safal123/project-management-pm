@@ -53,22 +53,18 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         $project->load([
-            'tasks.parentTask',
-            'tasks.assignedBy',
-            'tasks.assignedTo',
-            'tasks.createdBy',
-            'tasks.project',
-            'tasks.workspace',
-            'tasks.media',
+            'users',
+            'createdBy',
             'invitations',
             'invitations.invitedBy',
             'invitations.invitedTo',
+            'tasks.media',
+            'tasks'
         ]);
 
         return Inertia::render('projects/project/index', [
             'project' => ProjectResource::make($project),
             'tasks' => $project->tasks->sortBy('order')->values(),
-            'invitations' => $project->invitations,
         ]);
     }
 

@@ -50,7 +50,7 @@ export const KanbanColumn = ({ column, columns, tasks }: KanbanColumnProps) => {
 
   return (
     <div className="w-[350px] h-full shrink-0">
-      <Card className="h-[700px] flex flex-col bg-card">
+      <Card className="h-[700px] flex flex-col bg-background dark:bg-card">
         <CardHeader className="flex-shrink-0 -my-6 pt-2 border-b">
           <CardTitle className="flex items-center justify-between mb-2">
             <EditableTaskTitle task={column} variant="small" className="flex-1" childTasksCount={childTasks.length} />
@@ -63,13 +63,14 @@ export const KanbanColumn = ({ column, columns, tasks }: KanbanColumnProps) => {
             {childTasks.map((task) => (
               <KanbanTask key={task.id} task={task} columns={columns} />
             ))}
-            <div className="text-center text-sm text-muted-foreground">
+            <div className="text-center text-sm">
               <Button
                 onClick={() => handleAddNewTask(column.id)}
-                variant="outline" size="sm" className="w-full text-primary">
+                size="sm"
+                className="w-full">
                 <Plus className="h-4 w-4" />
                 {isAddingNewTask && <Loader2 className="h-4 w-4 animate-spin" />}
-                Add New Task
+                Add New Task sdfdsf
               </Button>
             </div>
           </div>

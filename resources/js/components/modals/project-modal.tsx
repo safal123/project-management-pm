@@ -30,7 +30,7 @@ export function ProjectModal({
   triggerClassName,
   triggerVariant = "default"
 }: ProjectModalProps) {
-  const { auth, permissions } = usePage<SharedData>().props
+  const { auth } = usePage<SharedData>().props
   const [open, setOpen] = useState(false)
   const isEditMode = !!project
 

@@ -54,7 +54,7 @@ export const KanbanTask = ({ task, columns }: KanbanTaskProps) => {
   return (
     <>
       <Card className={cn(
-        'bg-background py-2 gap-2',
+        'bg-card py-2 gap-2',
         getPriorityColors(task.priority),
         isTaskDetailOpen && "bg-primary/10 rounded-md",
       )}>
@@ -133,7 +133,7 @@ export const KanbanTask = ({ task, columns }: KanbanTaskProps) => {
                   onClick={() => openTaskDetailSheet()}
                   src={task.media[0].url}
                   alt={task.media[0].original_filename}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105 border border-border rounded-lg"
                 />
                 {task.media.length > 1 && (
                   <div className="absolute bottom-2 right-2 bg-background/90 backdrop-blur-sm text-xs font-medium px-2 py-1 rounded-md">

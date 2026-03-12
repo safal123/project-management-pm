@@ -64,6 +64,7 @@ export interface Project {
   created_by: string;
   created_at: string;
   users: User[]
+  invitations: Invitation[]
 }
 
 export interface Invitation {
@@ -117,6 +118,22 @@ export interface Task {
   media?: Media[];
   progress?: number | null;
   color?: string | null;
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  start_time: string;
+  end_time: string;
+  location: string;
+  type: 'meeting' | 'deadline' | 'reminder' | 'call';
+  attendees: User[];
+  created_by: User;
+  created_at: string;
+  updated_at: string;
 }
 
 // Kanban Board Types

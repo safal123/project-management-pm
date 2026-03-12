@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProjectController;
@@ -50,6 +51,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('tasks/move', [TaskController::class, 'move'])
         ->name('tasks.move');
+
+    Route::resource('events', EventController::class)
+        ->only(['store'])
+        ->names('events');
 
     // S3 Upload
     Route::post('s3/upload', [S3UploadController::class, 'generateSignedUrl'])

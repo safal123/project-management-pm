@@ -17,7 +17,9 @@ class ProjectFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $name = $this->faker->sentence(3),
+            'slug' => \Illuminate\Support\Str::slug($name),
+            'description' => $this->faker->sentence,
         ];
     }
 }
