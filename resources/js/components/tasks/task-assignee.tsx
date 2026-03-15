@@ -13,7 +13,7 @@ import { ChevronDown, Search, UserCheck, X, Mail, Send, LoaderCircle } from 'luc
 import { SharedData, Task, User, Project } from '@/types'
 import { toast } from 'sonner'
 import AppAvatar from '@/components/app-avatar'
-import { InviteMembersModal } from '@/components/projects/invite-members-modal'
+import { InviteMembersModal } from '@/components/modals/invite-members-modal'
 
 interface Props {
   task: Task

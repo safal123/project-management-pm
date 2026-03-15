@@ -206,9 +206,13 @@ export const TaskCard = memo(({
               </div>
             </div>
           )}
+          <pre>
+            {JSON.stringify(task.assigned_to, null, 2)}
+          </pre>
           <Separator />
           <div className="flex items-center gap-2 px-4">
             <div className="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2">
+
               <AppAvatar
                 src={task.assigned_to?.profile_picture?.url}
                 name={task.assigned_to?.name}
