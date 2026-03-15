@@ -42,7 +42,7 @@ export default function EditableTaskTitle({
       {
         preserveScroll: true,
         preserveState: true,
-        only: ['tasks'],
+        only: ['tasks', 'paginatedTasks'],
         onFinish: () => {
           setIsSubmitting(false);
           setIsEditing(false);

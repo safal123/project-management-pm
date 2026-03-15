@@ -29,7 +29,7 @@ export default function TaskDueDate({ task }: TaskDueDateProps) {
       { due_date: date ? formatDate(date) : null },
       {
         preserveScroll: true,
-        only: ['tasks'],
+        only: ['tasks', 'paginatedTasks'],
         onFinish: () => {
           setIsUpdating(false);
         },

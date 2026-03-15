@@ -12,6 +12,7 @@ use App\Models\Invitation;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Http\Resources\ProjectResource;
@@ -65,6 +66,22 @@ class ProjectController extends Controller
         return Inertia::render('projects/project/index', [
             'project' => ProjectResource::make($project),
             'tasks' => $project->tasks->sortBy('order')->values(),
+        ]);
+    }
+
+    public function tasks(Project $project, Request $request)
+    {
+        $tasks = Task::where('project_id', $project->id)
+            ->whereNotNull('parent_task_id')
+            ->with(['assignedTo', 'parentTask:id,title', 'media'])
+            ->orderBy('order')
+            ->paginate(15)
+            ->withQueryString();
+
+        return Inertia::render('projects/project/index', [
+            'project' => ProjectResource::make($project->load(['users', 'createdBy', 'invitations', 'invitations.invitedBy', 'invitations.invitedTo'])),
+            'tasks' => $project->tasks->sortBy('order')->values(),
+            'paginatedTasks' => $tasks,
         ]);
     }
 

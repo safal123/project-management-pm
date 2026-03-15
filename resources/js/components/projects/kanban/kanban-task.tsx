@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo, useState } from 'react'
 import { Task } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -35,13 +35,25 @@ import AppTooltip from '@/components/app-tooltip'
 import MarkTaskAsComplete from '@/components/tasks/mark-as-complete'
 import AppAvatar from '@/components/app-avatar'
 import AppFileUpload from '@/components/app-file-upload'
+import { useSortable } from '@dnd-kit/react/sortable'
 
 interface KanbanTaskProps {
   task: Task
   columns: Task[]
+  index: number
+  columnId: string
 }
 
-export const KanbanTask = ({ task, columns }: KanbanTaskProps) => {
+const KanbanTask = memo(({ task, columns, index, columnId }: KanbanTaskProps) => {
+  const [element, setElement] = useState<Element | null>(null)
+  const { isDragging } = useSortable({
+    id: task.id,
+    index,
+    group: columnId,
+    type: 'task',
+    element,
+    data: task,
+  })
   const {
     isTaskDetailOpen,
     setIsTaskDetailOpen,
@@ -51,12 +63,60 @@ export const KanbanTask = ({ task, columns }: KanbanTaskProps) => {
     availableColumns,
   } = useKanbanTask(task, columns)
 
+  if (isDragging) {
+    return (
+      <div ref={setElement}>
+        <Card className="border-2 border-dashed border-primary/30 bg-primary/5 py-2 gap-2 opacity-50">
+          <CardHeader className="px-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {task.title.length > 30 ? task.title.slice(0, 30).concat('...') : task.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 px-4 space-y-2 pb-3">
+            <div className="h-3 w-2/3 rounded bg-muted animate-pulse" />
+            <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div ref={setElement}>
+      <TaskCard
+        task={task}
+        isDragging={isDragging}
+        isTaskDetailOpen={isTaskDetailOpen}
+        setIsTaskDetailOpen={setIsTaskDetailOpen}
+        openTaskDetailSheet={openTaskDetailSheet}
+        availableColumns={availableColumns}
+        moveTaskToColumn={moveTaskToColumn}
+        deleteTask={deleteTask}
+      />
+    </div>
+  )
+})
+
+export { KanbanTask }
+
+export const TaskCard = memo(({
+  task,
+  isDragging,
+  isTaskDetailOpen,
+  openTaskDetailSheet,
+  availableColumns,
+  moveTaskToColumn,
+  deleteTask,
+  setIsTaskDetailOpen
+}: { task: Task, isDragging: boolean, isTaskDetailOpen: boolean, openTaskDetailSheet: () => void, availableColumns: Task[], moveTaskToColumn: (columnId: string) => void, deleteTask: () => void, setIsTaskDetailOpen: (isOpen: boolean) => void }) => {
   return (
     <>
       <Card className={cn(
         'bg-card py-2 gap-2',
         getPriorityColors(task.priority),
         isTaskDetailOpen && "bg-primary/10 rounded-md",
+        isDragging && "opacity-50",
+
       )}>
         <CardHeader className="px-4 -pt-12">
           <CardTitle>
@@ -68,6 +128,9 @@ export const KanbanTask = ({ task, columns }: KanbanTaskProps) => {
                   onClick={openTaskDetailSheet}
                 >
                   {task.title.length > 30 ? task.title.slice(0, 30).concat('...') : task.title}
+                  <span className="text-xs text-muted-foreground ml-4">
+                    #{task.order}
+                  </span>
                 </h1>
               </div>
               <DropdownMenu>
@@ -180,5 +243,4 @@ export const KanbanTask = ({ task, columns }: KanbanTaskProps) => {
       />
     </>
   )
-}
-
+})

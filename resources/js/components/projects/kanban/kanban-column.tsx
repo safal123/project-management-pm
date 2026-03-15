@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import { memo, useState } from 'react'
 import { Task } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Loader2, Plus } from 'lucide-react'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
+import { useDroppable } from '@dnd-kit/react'
+import { cn } from '@/lib/utils'
 
 interface KanbanColumnProps {
   column: Task
@@ -16,16 +18,16 @@ interface KanbanColumnProps {
   tasks: Task[]
 }
 
-export const KanbanColumn = ({ column, columns, tasks }: KanbanColumnProps) => {
-  const [isAddingNewTask, setIsAddingNewTask] = useState(false);
-  const childTasks = useMemo(() => {
-    return tasks
-      .filter((task) => task.parent_task_id === column.id)
-      .sort((a, b) => (b?.order || 0) - (a?.order || 0))
-  }, [tasks, column.id])
+export const KanbanColumn = memo(({ column, columns, tasks }: KanbanColumnProps) => {
+  const { ref, isDropTarget } = useDroppable({
+    id: column.id,
+    type: 'column',
+    accept: 'task',
+  })
+  const [isAddingNewTask, setIsAddingNewTask] = useState(false)
 
   const handleAddNewTask = (columnId: string) => {
-    setIsAddingNewTask(true);
+    setIsAddingNewTask(true)
     router.post(route('tasks.store'), {
       title: 'New Task',
       description: 'New Task Description',
@@ -36,41 +38,47 @@ export const KanbanColumn = ({ column, columns, tasks }: KanbanColumnProps) => {
       preserveScroll: true,
       only: ['tasks'],
       onSuccess: () => {
-        toast.success('New task added');
+        toast.success('New task added')
       },
       onError: () => {
-        toast.error('Failed to add new task');
+        toast.error('Failed to add new task')
       },
       onFinish: () => {
-        setIsAddingNewTask(false);
+        setIsAddingNewTask(false)
       },
     })
   }
 
-
   return (
-    <div className="w-[350px] h-full shrink-0">
-      <Card className="h-[700px] flex flex-col bg-background dark:bg-card">
+    <div
+      ref={ref}
+      className={cn(
+        'w-[350px] h-full shrink-0 rounded-lg transition-colors',
+        isDropTarget && 'bg-primary/10'
+      )}
+    >
+      <Card className="h-[800px] flex flex-col bg-background dark:transparent">
         <CardHeader className="flex-shrink-0 -my-6 pt-2 border-b">
           <CardTitle className="flex items-center justify-between mb-2">
-            <EditableTaskTitle task={column} variant="small" className="flex-1" childTasksCount={childTasks.length} />
+            <EditableTaskTitle task={column} variant="small" className="flex-1" childTasksCount={tasks.length} />
             <ColumnDropdown column={column} columns={columns} />
           </CardTitle>
         </CardHeader>
         <Separator className="bg-border flex-shrink-0" />
         <CardContent className="p-0 flex-1 overflow-y-auto -mt-6">
           <div className="space-y-2 p-2">
-            {childTasks.map((task) => (
-              <KanbanTask key={task.id} task={task} columns={columns} />
+            {tasks.map((task, index) => (
+              <KanbanTask key={task.id} task={task} columns={columns} index={index} columnId={column.id} />
             ))}
             <div className="text-center text-sm">
               <Button
                 onClick={() => handleAddNewTask(column.id)}
                 size="sm"
-                className="w-full">
+                className="w-full"
+              >
                 <Plus className="h-4 w-4" />
                 {isAddingNewTask && <Loader2 className="h-4 w-4 animate-spin" />}
-                Add New Task sdfdsf
+                Add New Task
               </Button>
             </div>
           </div>
@@ -78,5 +86,4 @@ export const KanbanColumn = ({ column, columns, tasks }: KanbanColumnProps) => {
       </Card>
     </div>
   )
-}
-
+})
