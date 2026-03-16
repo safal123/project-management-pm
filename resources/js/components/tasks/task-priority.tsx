@@ -5,22 +5,10 @@ import { ChevronDown, Loader2 } from 'lucide-react';
 import { TASK_PRIORITY, type TaskPriority } from '@/constants/task';
 import { router } from '@inertiajs/react';
 import { Task } from '@/types';
+import { PRIORITY_BADGE_COLORS } from '@/utils/task-colors';
 
 interface TaskPriorityProps {
   task: Task;
-}
-
-export function getPriorityColor(priority: string | null | undefined) {
-  switch (priority?.toLowerCase()) {
-    case 'low':
-      return 'bg-green-500/10 text-green-700 dark:text-green-400';
-    case 'medium':
-      return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400';
-    case 'high':
-      return 'bg-red-500/10 text-red-700 dark:text-red-400';
-    default:
-      return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400';
-  }
 }
 
 export default function TaskPriority({ task }: TaskPriorityProps) {
@@ -47,7 +35,7 @@ export default function TaskPriority({ task }: TaskPriorityProps) {
           variant="ghost"
           size="sm"
           disabled={isUpdating}
-          className={`w-fit p-0 px-3 py-1 rounded-md text-xs font-medium hover:opacity-80 ${getPriorityColor(task.priority)}`}
+          className={`w-fit p-0 px-3 py-1 rounded-md text-xs font-medium hover:opacity-80 ${PRIORITY_BADGE_COLORS[task.priority?.toLowerCase() ?? 'medium'] ?? PRIORITY_BADGE_COLORS.medium}`}
         >
           {task.priority || 'Medium'}
           {isUpdating ? (

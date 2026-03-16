@@ -1,3 +1,5 @@
+// --- Card-level styles (borders/backgrounds for kanban cards, status selectors) ---
+
 export const getStatusColors = (status: string | null | undefined) => {
   switch (status) {
     case 'done':
@@ -15,12 +17,35 @@ export const getPriorityColors = (priority: string | null | undefined) => {
   switch (priority) {
     case 'high':
       return 'border-destructive/10 dark:border-destructive/10 bg-destructive/5 dark:bg-destructive/10';
-    // case 'medium':
-    //   return 'border-amber-200 dark:border-amber-300';
-    // case 'low':
-    //   return 'border-blue-200 dark:border-blue-300';
     default:
       return 'border-gray-200 dark:border-gray-700';
   }
 };
 
+// --- Badge styles (compact colored badges for tables, dropdowns) ---
+
+export const STATUS_BADGE_COLORS: Record<string, string> = {
+  todo: 'bg-slate-500/20 text-slate-700 dark:text-slate-300',
+  in_progress: 'bg-blue-500/20 text-blue-700 dark:text-blue-300',
+  done: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300',
+};
+
+export const PRIORITY_BADGE_COLORS: Record<string, string> = {
+  low: 'bg-green-500/10 text-green-700 dark:text-green-400',
+  medium: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400',
+  high: 'bg-red-500/10 text-red-700 dark:text-red-400',
+};
+
+// --- Display labels ---
+
+export const STATUS_LABELS: Record<string, string> = {
+  todo: 'To Do',
+  in_progress: 'In Progress',
+  done: 'Done',
+};
+
+export const PRIORITY_LABELS: Record<string, string> = {
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+};

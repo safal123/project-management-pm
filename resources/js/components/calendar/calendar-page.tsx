@@ -1,51 +1,39 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useState, useMemo } from 'react'
+import { router, usePage } from '@inertiajs/react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 import {
   ChevronLeft,
   ChevronRight,
-  MapPin,
   Users,
   X,
   Clock,
   Plus,
+  Pencil,
+  Trash2,
+  CalendarDays,
+  Video,
+  Building2,
+  Globe,
 } from 'lucide-react'
 import AddNewEvent from '@/components/modals/add-new-event'
-import { usePage } from '@inertiajs/react'
-import { Event, SharedData } from '@/types'
+import AppAvatar from '@/components/app-avatar'
+import { Event, SharedData, User } from '@/types'
+import {
+  EVENT_TYPE_STYLES,
+  EVENT_DOT_STYLES,
+  EVENT_CARD_ACCENT,
+  EVENT_TYPE_BADGE,
+  EVENT_TYPE_ICON_COLOR,
+  EVENT_TYPE_LABELS,
+  EVENT_LOCATION_LABELS,
+  type EventType,
+} from '@/utils/event-colors'
+import { toast } from 'sonner'
 
-interface CalendarEvent {
-  id: string
-  title: string
-  time: string
-  duration: string
-  type: 'meeting' | 'deadline' | 'reminder' | 'call'
-  location?: string
-  attendees?: string[]
-  description?: string
-}
-
-interface DayEvents {
-  [key: string]: CalendarEvent[]
-}
-
-const EVENT_TYPE_STYLES: Record<CalendarEvent['type'], string> = {
-  meeting: 'bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-100 border-blue-300 dark:border-blue-800',
-  deadline: 'bg-red-100 dark:bg-red-950 text-red-900 dark:text-red-100 border-red-300 dark:border-red-800',
-  reminder: 'bg-yellow-100 dark:bg-yellow-950 text-yellow-900 dark:text-yellow-100 border-yellow-300 dark:border-yellow-800',
-  call: 'bg-green-100 dark:bg-green-950 text-green-900 dark:text-green-100 border-green-300 dark:border-green-800',
-}
-
-const EVENT_DOT_STYLES: Record<CalendarEvent['type'], string> = {
-  meeting: 'bg-blue-500 dark:bg-blue-400',
-  deadline: 'bg-red-500 dark:bg-red-400',
-  reminder: 'bg-yellow-500 dark:bg-yellow-400',
-  call: 'bg-green-500 dark:bg-green-400',
-}
-
-// Helper function to calculate duration between two dates
 const calculateDuration = (start: string, end: string): string => {
   const startDate = new Date(start)
   const endDate = new Date(end)
@@ -53,50 +41,52 @@ const calculateDuration = (start: string, end: string): string => {
   const diffMins = Math.round(diffMs / 60000)
 
   if (diffMins < 60) {
-    return `${diffMins} min`
+    return `${diffMins}m`
   }
   const hours = Math.floor(diffMins / 60)
   const mins = diffMins % 60
-  return mins > 0 ? `${hours} hr ${mins} min` : `${hours} hr`
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+}
+
+const formatEventTime = (dateStr: string): string => {
+  return new Date(dateStr).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+}
+
+const LocationIcon = ({ location }: { location: string }) => {
+  switch (location) {
+    case 'online':
+      return <Video className="w-3.5 h-3.5 shrink-0" />
+    case 'office':
+      return <Building2 className="w-3.5 h-3.5 shrink-0" />
+    default:
+      return <Globe className="w-3.5 h-3.5 shrink-0" />
+  }
 }
 
 export function CalendarPage() {
   const { events } = usePage<SharedData & { events: Event[] }>().props
 
-  const today = new Date();
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+  const today = new Date()
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth())
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
   const [eventDialogOpen, setEventDialogOpen] = useState(false)
   const [eventDialogDate, setEventDialogDate] = useState<Date | undefined>(undefined)
+  const [editingEvent, setEditingEvent] = useState<Event | undefined>(undefined)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
 
-  // Transform events into the calendar format
-  const eventsMap = useMemo(() => {
-    const map: DayEvents = {}
-
+  const eventsLookup = useMemo(() => {
+    const map: Record<string, Event[]> = {}
     events?.forEach((event) => {
-      const startDate = new Date(event.start_date)
-      const key = `${startDate.getFullYear()}-${startDate.getMonth() + 1}-${startDate.getDate()}`
-
-      const calendarEvent: CalendarEvent = {
-        id: event.id,
-        title: event.title,
-        time: startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-        duration: event.end_date ? calculateDuration(event.start_date, event.end_date) : '',
-        type: event.type,
-        location: event.location || undefined,
-        attendees: event.attendees && Array.isArray(event.attendees) && event.attendees.length > 0
-          ? event.attendees.map(a => a.name)
-          : undefined,
-        description: event.description || undefined,
-      }
-
-      if (!map[key]) {
-        map[key] = []
-      }
-      map[key].push(calendarEvent)
+      const d = new Date(event.start_date)
+      const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
+      if (!map[key]) map[key] = []
+      map[key].push(event)
     })
-
     return map
   }, [events])
 
@@ -133,15 +123,29 @@ export function CalendarPage() {
     setSelectedDay(today.getDate())
   }
 
-  const getEventsForDay = (day: number): CalendarEvent[] => {
+  const getEventsForDay = (day: number): Event[] => {
     const key = `${currentYear}-${currentMonth + 1}-${day}`
-    return eventsMap[key] ?? []
+    return eventsLookup[key] ?? []
   }
 
-  const openEventDialog = (day: number) => {
+  const openCreateDialog = (day: number) => {
     const date = new Date(currentYear, currentMonth, day)
     setEventDialogDate(date)
     setEventDialogOpen(true)
+  }
+
+  const openEditDialog = (event: Event) => {
+    setEditingEvent(event)
+    setEditDialogOpen(true)
+  }
+
+  const handleDeleteEvent = (event: Event) => {
+    if (!confirm(`Delete "${event.title}"? This action cannot be undone.`)) return
+    router.delete(route('events.destroy', event.id), {
+      preserveScroll: true,
+      onSuccess: () => toast.success('Event deleted'),
+      onError: () => toast.error('Failed to delete event'),
+    })
   }
 
   const selectedEvents = selectedDay ? getEventsForDay(selectedDay) : []
@@ -169,9 +173,8 @@ export function CalendarPage() {
           selectedDate={eventDialogDate}
         />
       </div>
-
       <div className="space-y-6">
-        {/* Calendar */}
+        {/* Calendar Grid */}
         <div className="overflow-x-auto">
           <div className="min-w-[600px]">
             <Card>
@@ -216,34 +219,34 @@ export function CalendarPage() {
                       currentYear === today.getFullYear()
 
                     const isSelected = day === selectedDay
-                    const events = getEventsForDay(day)
+                    const dayEvents = getEventsForDay(day)
 
                     return (
                       <div
                         key={day}
                         onClick={() => setSelectedDay(day === selectedDay ? null : day)}
                         className={`p-2 h-24 border rounded-lg cursor-pointer transition-colors flex flex-col gap-1
-                ${isSelected ? "border-primary bg-primary/10 ring-1 ring-primary" : "border-border hover:bg-accent"}
-                ${isToday && !isSelected ? "bg-primary/5 border-primary/40" : ""}`}
+                          ${isSelected ? 'border-primary bg-primary/10 ring-1 ring-primary' : 'border-border hover:bg-accent'}
+                          ${isToday && !isSelected ? 'bg-primary/5 border-primary/40' : ''}`}
                       >
-                        <div className={`text-sm font-medium ${isToday ? "text-primary" : "text-foreground"}`}>
+                        <div className={`text-sm font-medium ${isToday ? 'text-primary' : 'text-foreground'}`}>
                           {day}
                         </div>
 
                         <div className="flex flex-col gap-0.5 overflow-hidden flex-1">
-                          {events.length === 0 ? (
+                          {dayEvents.length === 0 ? (
                             <div
                               className="flex-1 flex items-center justify-center group"
                               onClick={(e) => {
                                 e.stopPropagation()
-                                openEventDialog(day)
+                                openCreateDialog(day)
                               }}
                             >
                               <Plus className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary group-hover:scale-110 transition-all" />
                             </div>
                           ) : (
                             <>
-                              {events.slice(0, 2).map(event => (
+                              {dayEvents.slice(0, 2).map(event => (
                                 <div
                                   key={event.id}
                                   className={`text-[10px] leading-tight px-1 py-0.5 rounded truncate border ${EVENT_TYPE_STYLES[event.type]}`}
@@ -252,9 +255,9 @@ export function CalendarPage() {
                                 </div>
                               ))}
 
-                              {events.length > 2 && (
+                              {dayEvents.length > 2 && (
                                 <div className="text-[10px] text-muted-foreground pl-1">
-                                  +{events.length - 2} more
+                                  +{dayEvents.length - 2} more
                                 </div>
                               )}
                             </>
@@ -269,107 +272,72 @@ export function CalendarPage() {
           </div>
         </div>
 
-        {/* Events Section - Now at Bottom */}
+        {/* Event Details Section */}
         {selectedDay !== null ? (
-          <Card className="border-primary/40">
+          <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-base">{selectedDateLabel}</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {selectedEvents.length === 0
-                      ? 'No events'
-                      : `${selectedEvents.length} event${selectedEvents.length > 1 ? 's' : ''}`}
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                    <CalendarDays className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">{selectedDateLabel}</CardTitle>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {selectedEvents.length === 0
+                        ? 'No events scheduled'
+                        : `${selectedEvents.length} event${selectedEvents.length > 1 ? 's' : ''}`}
+                    </p>
+                  </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0"
-                  onClick={() => setSelectedDay(null)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => openCreateDialog(selectedDay)}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Add Event
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => setSelectedDay(null)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
-            <CardContent>
+
+            <Separator />
+
+            <CardContent className="pt-4">
               {selectedEvents.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 space-y-4">
                   <div className="rounded-full bg-muted p-4">
-                    <Plus className="w-8 h-8 text-muted-foreground" />
+                    <CalendarDays className="w-8 h-8 text-muted-foreground" />
                   </div>
-                  <div className="text-center space-y-2">
+                  <div className="text-center space-y-1">
                     <p className="text-sm font-medium text-foreground">
-                      No events scheduled
+                      Nothing on the agenda
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Create a new event for this day
+                      Click "Add Event" to schedule something for this day.
                     </p>
                   </div>
-                  <AddNewEvent
-                    selectedDate={selectedDay ? new Date(currentYear, currentMonth, selectedDay) : undefined}
-                  />
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {selectedEvents.map(event => (
-                    <div
+                    <EventCard
                       key={event.id}
-                      className={`rounded-lg border p-3 space-y-2 ${EVENT_TYPE_STYLES[event.type]}`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="font-medium text-sm leading-tight">{event.title}</p>
-                        <Badge
-                          variant="outline"
-                          className={`capitalize text-[10px] shrink-0 ${EVENT_TYPE_STYLES[event.type]}`}
-                        >
-                          {event.type}
-                        </Badge>
-                      </div>
-
-                      <div className="space-y-1">
-                        {(event.time || event.duration) && (
-                          <div className="flex items-center gap-1.5 text-xs">
-                            <Clock className="w-3 h-3 shrink-0" />
-                            <span>
-                              {event.time}
-                              {event.duration && ` · ${event.duration}`}
-                            </span>
-                          </div>
-                        )}
-                        {event.location && (
-                          <div className="flex items-center gap-1.5 text-xs">
-                            <MapPin className="w-3 h-3 shrink-0" />
-                            <span>{event.location}</span>
-                          </div>
-                        )}
-                        {event.attendees && event.attendees.length > 0 && (
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 text-xs">
-                              <Users className="w-3 h-3 shrink-0" />
-                              <span className="font-medium">Attendees:</span>
-                            </div>
-                            <div className="flex flex-wrap gap-1 pl-5">
-                              {event.attendees.map((attendee, idx) => (
-                                <Badge
-                                  key={idx}
-                                  variant="secondary"
-                                  className="text-[10px] px-1.5 py-0.5"
-                                >
-                                  {attendee}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {event.description && (
-                        <p className="text-xs opacity-80 leading-relaxed border-t border-current/10 pt-2">
-                          {event.description}
-                        </p>
-                      )}
-                    </div>
+                      event={event}
+                      onEdit={() => openEditDialog(event)}
+                      onDelete={() => handleDeleteEvent(event)}
+                    />
                   ))}
                 </div>
               )}
@@ -378,15 +346,23 @@ export function CalendarPage() {
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Events</CardTitle>
-              <p className="text-xs text-muted-foreground">Click a day to see its events</p>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                  <CalendarDays className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-base">Events</CardTitle>
+                  <p className="text-xs text-muted-foreground">Select a day to view and manage events</p>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
+            <Separator />
+            <CardContent className="pt-4">
               <div className="flex flex-wrap gap-4">
-                {(['meeting', 'deadline', 'reminder', 'call'] as CalendarEvent['type'][]).map(type => (
+                {(['meeting', 'deadline', 'reminder', 'call'] as EventType[]).map(type => (
                   <div key={type} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${EVENT_DOT_STYLES[type]}`} />
-                    <span className="capitalize">{type}</span>
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${EVENT_DOT_STYLES[type]}`} />
+                    <span>{EVENT_TYPE_LABELS[type]}</span>
                   </div>
                 ))}
               </div>
@@ -394,6 +370,113 @@ export function CalendarPage() {
           </Card>
         )}
       </div>
+    </div>
+  )
+}
+
+function EventCard({
+  event,
+  onEdit,
+  onDelete,
+}: {
+  event: Event
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  const time = formatEventTime(event.start_date)
+  const duration = event.end_date ? calculateDuration(event.start_date, event.end_date) : null
+  const type = event.type as EventType
+  const attendees = event.attendees && Array.isArray(event.attendees) ? event.attendees : []
+
+  return (
+    <div
+      className={`group relative rounded-lg border border-l-4 bg-card hover:shadow-md transition-shadow ${EVENT_CARD_ACCENT[type]}`}
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
+        <div className="flex-1 min-w-0">
+          <h4 className="text-sm font-semibold text-foreground truncate">{event.title}</h4>
+          <Badge
+            variant="secondary"
+            className={`mt-1 text-[10px] font-medium px-1.5 py-0 border-0 ${EVENT_TYPE_BADGE[type]}`}
+          >
+            {EVENT_TYPE_LABELS[type]}
+          </Badge>
+        </div>
+
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0"
+            onClick={onEdit}
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+            onClick={onDelete}
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Meta */}
+      <div className="px-4 pb-3 space-y-1.5">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Clock className={`w-3.5 h-3.5 shrink-0 ${EVENT_TYPE_ICON_COLOR[type]}`} />
+          <span>
+            {time}
+            {duration && (
+              <span className="ml-1 text-muted-foreground/70">({duration})</span>
+            )}
+          </span>
+        </div>
+
+        {event.location && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <LocationIcon location={event.location} />
+            <span>{EVENT_LOCATION_LABELS[event.location] ?? event.location}</span>
+          </div>
+        )}
+
+        {attendees.length > 0 && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Users className={`w-3.5 h-3.5 shrink-0 ${EVENT_TYPE_ICON_COLOR[type]}`} />
+            <div className="flex items-center gap-1">
+              <div className="flex -space-x-1.5">
+                {attendees.slice(0, 4).map((attendee: User) => (
+                  <AppAvatar
+                    key={attendee.id}
+                    src={attendee.avatar}
+                    name={attendee.name}
+                    size="xs"
+                    className="ring-2 ring-card"
+                  />
+                ))}
+              </div>
+              {attendees.length > 4 && (
+                <span className="text-[10px] text-muted-foreground">
+                  +{attendees.length - 4}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Description */}
+      {event.description && (
+        <>
+          <Separator />
+          <p className="px-4 py-2.5 text-xs text-muted-foreground leading-relaxed line-clamp-2">
+            {event.description}
+          </p>
+        </>
+      )}
     </div>
   )
 }

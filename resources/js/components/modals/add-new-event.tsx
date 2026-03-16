@@ -12,7 +12,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { Checkbox } from '@/components/ui/checkbox'
 import InputError from '@/components/input-error'
 import AppAvatar from '@/components/app-avatar'
-import { Plus, CalendarPlus, ChevronDownIcon, Loader2, AlertCircle } from 'lucide-react'
+import { Plus, CalendarPlus, Pencil, ChevronDownIcon, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
@@ -20,24 +20,30 @@ import { FormEventHandler } from 'react'
 
 interface AddNewEventProps {
   event?: Event
-  isEditMode?: boolean
   selectedDate?: Date
   open?: boolean
   onOpenChange?: (open: boolean) => void
 }
 
-const AddNewEvent = ({ event, isEditMode = false, selectedDate, open: controlledOpen, onOpenChange }: AddNewEventProps) => {
+const AddNewEvent = ({ event, selectedDate, open: controlledOpen, onOpenChange }: AddNewEventProps) => {
   const { members } = usePage<SharedData & { members: User[] }>().props
   const [internalOpen, setInternalOpen] = useState(false)
-  const [hasEndDate, setHasEndDate] = useState(!!event?.end_date)
-  const [hasAttendees, setHasAttendees] = useState(!!(event?.attendees && event.attendees.length > 0))
+  const [hasEndDate, setHasEndDate] = useState(false)
+  const [hasAttendees, setHasAttendees] = useState(false)
 
+  const isEditMode = !!event
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
   const setOpen = onOpenChange !== undefined ? onOpenChange : setInternalOpen
 
+  const extractTime = (dateStr: string | Date | undefined): string => {
+    if (!dateStr) return '09:00'
+    const d = new Date(dateStr)
+    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+  }
+
   const generateTimeOptions = () => {
     const times: string[] = []
-    for (let hour = 9; hour <= 17; hour++) {
+    for (let hour = 0; hour <= 23; hour++) {
       for (let minute = 0; minute < 60; minute += 15) {
         const h = hour.toString().padStart(2, '0')
         const m = minute.toString().padStart(2, '0')
@@ -49,27 +55,47 @@ const AddNewEvent = ({ event, isEditMode = false, selectedDate, open: controlled
 
   const timeOptions = generateTimeOptions()
 
-  const { data, setData, processing, errors, reset, post, transform } = useForm({
-    title: event?.title || 'New Event',
-    description: event?.description || 'This is a new event',
+  const getInitialValues = () => ({
+    title: event?.title || '',
+    description: event?.description || '',
     type: event?.type || 'meeting',
     location: event?.location || 'office',
-    start_date: event?.start_date || new Date(),
-    start_time: event?.start_time || '09:00',
-    end_date: event?.end_date || new Date(),
-    end_time: event?.end_time || '10:00',
-    attendees: event?.attendees?.map((attendee) => attendee.id) || [],
+    start_date: event?.start_date ? new Date(event.start_date) : (selectedDate || new Date()),
+    start_time: event?.start_date ? extractTime(event.start_date) : '09:00',
+    end_date: event?.end_date ? new Date(event.end_date) : new Date(),
+    end_time: event?.end_date ? extractTime(event.end_date) : '10:00',
+    attendees: event?.attendees?.map((a) => a.id) || [],
   })
+
+  const { data, setData, processing, errors, reset, post, put, transform } = useForm(getInitialValues())
+
+  useEffect(() => {
+    if (open && event) {
+      setHasEndDate(!!event.end_date)
+      setHasAttendees(!!(event.attendees && event.attendees.length > 0))
+
+      const vals = getInitialValues()
+      Object.entries(vals).forEach(([key, val]) => {
+        setData(key as keyof typeof vals, val as never)
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, event?.id])
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen)
-    if (isOpen && selectedDate) {
+    if (isOpen && selectedDate && !isEditMode) {
       setData('start_date', selectedDate)
+    }
+    if (!isOpen && !isEditMode) {
+      reset()
+      setHasEndDate(false)
+      setHasAttendees(false)
     }
   }
 
   useEffect(() => {
-    if (open && selectedDate) {
+    if (open && selectedDate && !isEditMode) {
       setData('start_date', selectedDate)
       if (hasEndDate) {
         setData('end_date', selectedDate)
@@ -97,16 +123,28 @@ const AddNewEvent = ({ event, isEditMode = false, selectedDate, open: controlled
       }),
     }))
 
-    post(route('events.store'), {
-      onSuccess: () => {
-        toast.success('Event created successfully')
-        reset()
-        setOpen(false)
-      },
-      onError: () => {
-        toast.error('Failed to create event')
-      },
-    })
+    if (isEditMode) {
+      put(route('events.update', event.id), {
+        onSuccess: () => {
+          toast.success('Event updated successfully')
+          setOpen(false)
+        },
+        onError: () => {
+          toast.error('Failed to update event')
+        },
+      })
+    } else {
+      post(route('events.store'), {
+        onSuccess: () => {
+          toast.success('Event created successfully')
+          reset()
+          setOpen(false)
+        },
+        onError: () => {
+          toast.error('Failed to create event')
+        },
+      })
+    }
   }
 
   return (
@@ -114,12 +152,18 @@ const AddNewEvent = ({ event, isEditMode = false, selectedDate, open: controlled
       open={open}
       onOpenChange={handleOpenChange}
       trigger={
-        <Button size="sm">
-          <Plus className="h-4 w-4" />
-          New Event
-        </Button>
+        !isEditMode ? (
+          <Button size="sm">
+            <Plus className="h-4 w-4" />
+            New Event
+          </Button>
+        ) : undefined
       }
-      icon={<CalendarPlus className="h-5 w-5 text-primary" />}
+      icon={
+        isEditMode
+          ? <Pencil className="h-5 w-5 text-primary" />
+          : <CalendarPlus className="h-5 w-5 text-primary" />
+      }
       title={isEditMode ? 'Edit Event' : 'Create New Event'}
       description={
         isEditMode
@@ -141,7 +185,7 @@ const AddNewEvent = ({ event, isEditMode = false, selectedDate, open: controlled
               </>
             ) : (
               <>
-                <Plus className="h-4 w-4" />
+                {isEditMode ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                 {isEditMode ? 'Update Event' : 'Create Event'}
               </>
             )}
@@ -157,7 +201,6 @@ const AddNewEvent = ({ event, isEditMode = false, selectedDate, open: controlled
           </div>
         )}
 
-        {/* Event Title */}
         <div className="grid gap-2">
           <Label htmlFor="title" className="text-sm font-medium">
             Event Title <span className="text-destructive">*</span>
@@ -172,7 +215,6 @@ const AddNewEvent = ({ event, isEditMode = false, selectedDate, open: controlled
           <InputError message={errors.title} />
         </div>
 
-        {/* Event Description */}
         <div className="grid gap-2">
           <Label htmlFor="description" className="text-sm font-medium">
             Description
@@ -188,7 +230,6 @@ const AddNewEvent = ({ event, isEditMode = false, selectedDate, open: controlled
           <InputError message={errors.description} />
         </div>
 
-        {/* Event Type and Location */}
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
             <Label htmlFor="type" className="text-sm font-medium">
@@ -232,7 +273,6 @@ const AddNewEvent = ({ event, isEditMode = false, selectedDate, open: controlled
           </div>
         </div>
 
-        {/* Start Date & Time */}
         <div className="grid gap-2">
           <Label className="text-sm font-medium">Start Date & Time</Label>
           <div className="flex gap-2">
@@ -285,7 +325,6 @@ const AddNewEvent = ({ event, isEditMode = false, selectedDate, open: controlled
           <InputError message={errors.start_date} />
         </div>
 
-        {/* End Date & Time */}
         <div className="grid gap-2">
           <div className="flex items-center gap-2">
             <Checkbox
@@ -353,7 +392,6 @@ const AddNewEvent = ({ event, isEditMode = false, selectedDate, open: controlled
           <InputError message={errors.end_date} />
         </div>
 
-        {/* Attendees */}
         {members && members.length > 0 && (
           <div className="grid gap-2">
             <div className="flex items-center gap-2">

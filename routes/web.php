@@ -56,7 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('tasks.move');
 
     Route::resource('events', EventController::class)
-        ->only(['store'])
+        ->only(['store', 'update', 'destroy'])
         ->names('events');
 
     // S3 Upload

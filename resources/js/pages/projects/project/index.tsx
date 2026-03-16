@@ -60,6 +60,10 @@ export default function ProjectShow() {
                 <Kanban className="h-4 w-4" />
                 Board
               </TabsTrigger>
+              <TabsTrigger value="table" className="gap-2 data-[state=active]:bg-background">
+                <TableIcon className="h-4 w-4" />
+                Table
+              </TabsTrigger>
               <TabsTrigger value="overview" className="gap-2 data-[state=active]:bg-background">
                 <ListTodo className="h-4 w-4" />
                 Overview
@@ -67,10 +71,6 @@ export default function ProjectShow() {
               <TabsTrigger value="dashboard" className="gap-2 data-[state=active]:bg-background">
                 <LayoutDashboard className="h-4 w-4" />
                 Dashboard
-              </TabsTrigger>
-              <TabsTrigger value="table" className="gap-2 data-[state=active]:bg-background">
-                <TableIcon className="h-4 w-4" />
-                Table
               </TabsTrigger>
             </TabsList>
             <div className="flex items-center gap-2">

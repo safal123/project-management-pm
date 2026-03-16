@@ -23,30 +23,7 @@ import AppAvatar from '@/components/app-avatar'
 import AppEmpty from '@/components/app-empty'
 import { TaskDetailSheet } from '@/components/projects/task-detail-sheet'
 import { ListTodo } from 'lucide-react'
-
-const statusLabels: Record<string, string> = {
-  todo: 'To Do',
-  in_progress: 'In Progress',
-  done: 'Done',
-}
-
-const statusColors: Record<string, string> = {
-  todo: 'bg-slate-500/20 text-slate-700 dark:text-slate-300',
-  in_progress: 'bg-blue-500/20 text-blue-700 dark:text-blue-300',
-  done: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300',
-}
-
-const priorityLabels: Record<string, string> = {
-  low: 'Low',
-  medium: 'Medium',
-  high: 'High',
-}
-
-const priorityColors: Record<string, string> = {
-  low: 'bg-slate-500/20 text-slate-700 dark:text-slate-300',
-  medium: 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-300',
-  high: 'bg-red-500/20 text-red-700 dark:text-red-300',
-}
+import { STATUS_LABELS, STATUS_BADGE_COLORS, PRIORITY_LABELS, PRIORITY_BADGE_COLORS } from '@/utils/task-colors'
 
 interface TasksTableProps {
   paginatedTasks: PaginatedData<Task> | null
@@ -126,8 +103,8 @@ export default function TasksTable({ paginatedTasks }: TasksTableProps) {
                 </TableCell>
                 <TableCell>
                   {task.status ? (
-                    <Badge className={statusColors[task.status] ?? ''}>
-                      {statusLabels[task.status] ?? task.status}
+                    <Badge className={STATUS_BADGE_COLORS[task.status] ?? ''}>
+                      {STATUS_LABELS[task.status] ?? task.status}
                     </Badge>
                   ) : (
                     <span className="text-muted-foreground">—</span>
@@ -135,8 +112,8 @@ export default function TasksTable({ paginatedTasks }: TasksTableProps) {
                 </TableCell>
                 <TableCell>
                   {task.priority ? (
-                    <Badge className={priorityColors[task.priority] ?? ''}>
-                      {priorityLabels[task.priority] ?? task.priority}
+                    <Badge className={PRIORITY_BADGE_COLORS[task.priority] ?? ''}>
+                      {PRIORITY_LABELS[task.priority] ?? task.priority}
                     </Badge>
                   ) : (
                     <span className="text-muted-foreground">—</span>
