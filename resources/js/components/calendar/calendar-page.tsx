@@ -31,7 +31,7 @@ import {
   EVENT_TYPE_LABELS,
   EVENT_LOCATION_LABELS,
   type EventType,
-} from '@/utils/event-colors'
+} from '@/utils/app-utils'
 import { toast } from 'sonner'
 
 const calculateDuration = (start: string, end: string): string => {
@@ -159,7 +159,7 @@ export function CalendarPage() {
     : null
 
   return (
-    <div className="p-6 bg-white dark:bg-background min-h-screen">
+    <div className="p-6 min-h-screen">
       <div className="flex flex-col lg:flex-row md:justify-between mb-2">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold text-foreground mb-0 md:mb-2">Calendar</h1>
@@ -177,7 +177,7 @@ export function CalendarPage() {
         {/* Calendar Grid */}
         <div className="overflow-x-auto">
           <div className="min-w-[600px]">
-            <Card>
+            <Card className="dark:bg-primary/5 dark:border-primary/20">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">
@@ -274,7 +274,7 @@ export function CalendarPage() {
 
         {/* Event Details Section */}
         {selectedDay !== null ? (
-          <Card>
+          <Card className="dark:bg-primary/5 dark:border-primary/20">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -292,7 +292,6 @@ export function CalendarPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
-                    variant="outline"
                     size="sm"
                     className="gap-1.5"
                     onClick={() => openCreateDialog(selectedDay)}
@@ -301,7 +300,6 @@ export function CalendarPage() {
                     Add Event
                   </Button>
                   <Button
-                    variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0"
                     onClick={() => setSelectedDay(null)}
@@ -390,7 +388,7 @@ function EventCard({
 
   return (
     <div
-      className={`group relative rounded-lg border border-l-4 bg-card hover:shadow-md transition-shadow ${EVENT_CARD_ACCENT[type]}`}
+      className={`dark:bg-primary/5 dark:border-primary/20 group relative rounded-lg border border-l-4 bg-card hover:shadow-md transition-shadow ${EVENT_CARD_ACCENT[type]}`}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">

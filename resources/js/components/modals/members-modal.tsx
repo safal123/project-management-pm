@@ -26,7 +26,7 @@ import { cn } from '@/lib/utils'
 import AppAvatar from '@/components/app-avatar'
 import AppEmpty from '@/components/app-empty'
 import AppTooltip from '@/components/app-tooltip'
-import { formatDateTime, hoursUntil } from '@/utils/date'
+import { formatDateTime, hoursUntil } from '@/utils/app-utils'
 
 export const MembersModal = () => {
   const { project, auth } = usePage<
@@ -170,7 +170,7 @@ export const MembersModal = () => {
                     <div
                       key={invitation.id}
                       className={cn(
-                        'flex items-center justify-between p-3 rounded-lg border bg-background',
+                        'flex items-center justify-between p-3 rounded-lg border bg-white dark:bg-background',
                         isExpired && 'opacity-60 border-destructive/30'
                       )}
                     >
@@ -179,8 +179,8 @@ export const MembersModal = () => {
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-medium">{invitation.email}</p>
                             {isExpired ? (
-                              <Badge className="text-xs bg-destructive/20 text-destructive">
-                                <X className="h-3 w-3 mr-1" />
+                              <Badge className="text-xs bg-red-500 text-red-900">
+                                <X className="h-3 w-3" />
                                 Expired
                               </Badge>
                             ) : (

@@ -5,7 +5,7 @@ import { ChevronDown, Loader2 } from 'lucide-react';
 import { TASK_STATUS, type TaskStatus } from '@/constants/task';
 import { router } from '@inertiajs/react';
 import { Task } from '@/types';
-import { getStatusColors } from '@/utils/task-colors';
+import { taskStatusSurfaceClasses, formatHumanLabel } from '@/utils/app-utils';
 
 interface TaskStatusProps {
   task: Task;
@@ -35,9 +35,9 @@ export default function TaskStatus({ task }: TaskStatusProps) {
           variant="outline"
           size="sm"
           disabled={isUpdating}
-          className={`w-fit p-0 px-3 py-1 rounded-md text-xs font-medium hover:opacity-80 ${getStatusColors(task.status)}`}
+          className={`w-fit p-0 px-3 py-1 rounded-md text-xs font-medium hover:opacity-80 ${taskStatusSurfaceClasses(task.status)}`}
         >
-          {task.status || 'To do'}
+          {formatHumanLabel(task.status, 'todo')}
           {isUpdating ? (
             <Loader2 className="h-3 w-3 ml-1 animate-spin" />
           ) : (

@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { SharedData, Task } from '@/types'
 import { router, usePage } from '@inertiajs/react'
-import AddNewColumn from './add-new-column'
+import { AddKanbanItem } from './add-kanban-item'
 import { KanbanColumn } from './kanban-column'
 import { useKanban } from '@/hooks/use-kanban'
 import { DragDropProvider, DragOverlay } from '@dnd-kit/react'
 import { move } from '@dnd-kit/helpers'
 import { toast } from 'sonner'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { TaskCardDragPreview } from './task-card-drag-preview'
 
 type GroupedTasks = Record<string, Task[]>
 
@@ -101,25 +101,11 @@ export const KanbanBoard = () => {
               tasks={columns[column.id] || []}
             />
           ))}
-          <AddNewColumn />
+          <AddKanbanItem type="column" />
         </div>
       </div>
       <DragOverlay>
-        {activeTask && (
-          <div className="w-[320px] rotate-2">
-            <Card className="border-2 border-dashed border-primary/30 bg-primary/5 py-2 gap-2 opacity-50 shadow-lg">
-              <CardHeader className="px-4">
-                <CardTitle className="text-sm font-medium text-muted-foreground truncate">
-                  {activeTask.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0 px-4 space-y-2 pb-3">
-                <div className="h-3 w-2/3 rounded bg-muted animate-pulse" />
-                <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {activeTask && <TaskCardDragPreview task={activeTask} floating />}
       </DragOverlay>
     </DragDropProvider>
   )

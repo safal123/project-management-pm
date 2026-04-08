@@ -40,8 +40,8 @@ export function TaskDetailSheet({ task, open, onOpenChange }: TaskDetailSheetPro
     <Sheet open={open} onOpenChange={onOpenChange} modal={true}>
       <SheetContent
         className={cn(
-          "[&>button]:hidden p-0 flex flex-col overflow-hidden space-y-0 w-full sm:max-w-4xl",
-          fullScreen && "rounded-none border-none bg-background !p-0",
+          "[&>button]:hidden p-0 flex flex-col overflow-hidden space-y-0 w-full sm:max-w-4xl bg-white dark:bg-background rounded-lg",
+          fullScreen && "rounded-none border border-border",
         )}
         style={fullScreen ? {
           position: 'fixed',
@@ -59,7 +59,7 @@ export function TaskDetailSheet({ task, open, onOpenChange }: TaskDetailSheetPro
         <SheetDescription className="sr-only">
           Task details and information for {task.title}
         </SheetDescription>
-        <div className="flex-shrink-0 bg-background border-b px-4 pt-6 pr-8 py-4 flex items-center justify-between">
+        <div className="flex-shrink-0 bg-white dark:bg-background border-b px-4 pt-6 pr-8 py-4 flex items-center justify-between dark:bg-primary/5 dark:border-primary/20">
           <MarkTaskAsComplete task={task} />
           <TaskActions
             task={task}

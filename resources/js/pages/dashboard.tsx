@@ -1,11 +1,19 @@
 import AppLayout from '@/layouts/app-layout';
-import { Project, SharedData, Workspace, type BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FolderKanban, Briefcase, Calendar, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import AppEmpty from '@/components/app-empty';
-import { ProjectModal } from '@/components/modals/project-modal';
+import {
+  Project,
+  SharedData,
+  Workspace,
+  type BreadcrumbItem,
+} from '@/types';
+import { Head, usePage } from '@inertiajs/react';
+import {
+  DashboardStats,
+  TaskStatusChart,
+  TasksByProjectChart,
+  RecentActivityTable,
+  RecentProjects,
+  OverallProgress,
+} from '@/components/dashboard';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -14,123 +22,102 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
+interface DashboardStatsData {
+  total_projects: number;
+  total_tasks: number;
+  tasks_todo: number;
+  tasks_in_progress: number;
+  tasks_done: number;
+  overdue_tasks: number;
+  total_workspaces: number;
+}
+
+interface RecentTask {
+  id: string;
+  title: string;
+  status: string | null;
+  priority: string | null;
+  due_date: string | null;
+  project: { id: string; name: string; slug: string } | null;
+  assigned_to: { id: string; name: string; avatar?: string } | null;
+  updated_at: string;
+}
+
+interface TasksByProject {
+  name: string;
+  total: number;
+  slug: string;
+}
+
 export default function Dashboard() {
-  const { projects, workspaces, auth } = usePage<SharedData>().props as { projects: Project[], workspaces: Workspace[] };
-  const recentProjects = projects?.slice(0, 3) || [];
+  const {
+    projects,
+    workspaces,
+    auth,
+    stats,
+    tasksByStatus,
+    tasksByProject,
+    recentTasks,
+  } = usePage<SharedData>().props as {
+    projects: Project[];
+    workspaces: Workspace[];
+    stats: DashboardStatsData;
+    tasksByStatus: { todo: number; in_progress: number; done: number };
+    tasksByProject: TasksByProject[];
+    recentTasks: RecentTask[];
+  };
+
+  const completionRate =
+    stats?.total_tasks > 0
+      ? Math.round((stats.tasks_done / stats.total_tasks) * 100)
+      : 0;
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Dashboard" />
 
-      <div className="px-12 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">
+      <div className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">
             Welcome back, {auth.user.name}!
           </h1>
-          <p className="text-muted-foreground mt-2">
-            Here's what's happening with your projects today
+          <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+            Here's an overview of your workspace and projects
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
-              <FolderKanban className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{projects?.length || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Active in workspace
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Workspaces</CardTitle>
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{workspaces?.length || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Available workspaces
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Current Workspace</CardTitle>
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold line-clamp-1">
-                {auth.user.current_workspace?.name || 'None'}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Active workspace
-              </p>
-            </CardContent>
-          </Card>
+        {/* Stats Grid */}
+        <div className="mb-8">
+          <DashboardStats
+            stats={stats ?? {}}
+            completionRate={completionRate}
+            activeWorkspaceName={auth.user.current_workspace?.name}
+            projectsCount={projects?.length}
+          // workspacesCount={workspaces?.length}
+          />
         </div>
 
-        {/* Recent Projects */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Recent Projects</CardTitle>
-                <CardDescription>Your latest projects at a glance</CardDescription>
-              </div>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/projects">
-                  View All
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {recentProjects.length > 0 ? (
-              <div className="flex flex-col gap-4">
-                {recentProjects?.map((project) => (
-                  <Link
-                    key={project.id}
-                    href={`/projects/${project.slug}`}
-                  >
-                    <div className="flex items-center gap-4 p-4 rounded-lg border hover:border-primary/50 transition-colors cursor-pointer">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <FolderKanban className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium line-clamp-1">{project.name}</h4>
-                        <p className="text-sm text-muted-foreground line-clamp-1">
-                          {project.description || 'No description'}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        <span className="whitespace-nowrap">
-                          {new Date(project.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <AppEmpty
-                title="No recent projects yet."
-                description="Get started by creating your first project to organize your work and collaborate with your team."
-                icon={<FolderKanban className='text-primary' />}
-                action={<ProjectModal />}
-              />
-            )}
-          </CardContent>
-        </Card>
+        {/* Charts Row */}
+        <div className="mb-6 grid gap-4 sm:mb-8 sm:gap-6 lg:grid-cols-2">
+          <TaskStatusChart tasksByStatus={tasksByStatus ?? { todo: 0, in_progress: 0, done: 0 }} />
+          <TasksByProjectChart data={tasksByProject ?? []} />
+        </div>
+
+        {/* Table + Projects Row */}
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
+          <RecentActivityTable tasks={recentTasks ?? []} />
+          <RecentProjects projects={projects ?? []} />
+        </div>
+
+        {/* Completion Progress */}
+        <div className="mt-8">
+          <OverallProgress
+            tasksDone={stats?.tasks_done ?? 0}
+            totalTasks={stats?.total_tasks ?? 0}
+            completionRate={completionRate}
+          />
+        </div>
       </div>
     </AppLayout>
   );

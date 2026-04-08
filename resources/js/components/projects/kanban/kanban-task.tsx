@@ -20,22 +20,22 @@ import {
   MoreVerticalIcon,
   Edit2Icon,
   MessageSquare,
-  ThumbsUp,
 } from 'lucide-react'
 import { TaskDetailSheet } from '../task-detail-sheet'
 import TaskDueDate from '@/components/tasks/task-due-date'
 import TaskStatus from '@/components/tasks/task-status'
 import TaskPriority from '@/components/tasks/task-priority'
-import { getPriorityColors } from '@/utils/task-colors'
-import { formatDueDate } from '@/utils/task'
+import { taskPrioritySurfaceClasses, getDueDateDisplay } from '@/utils/app-utils'
 import { cn } from '@/lib/utils'
 import { useKanbanTask } from '@/hooks/use-kanban'
 import { CircularProgressChip } from '@/components/projects/kanban/project-progress'
 import AppTooltip from '@/components/app-tooltip'
+import { LikeButton } from '@/components/like-button'
 import MarkTaskAsComplete from '@/components/tasks/mark-as-complete'
 import AppAvatar from '@/components/app-avatar'
 import AppFileUpload from '@/components/app-file-upload'
 import { useSortable } from '@dnd-kit/react/sortable'
+import { TaskCardDragPreview } from './task-card-drag-preview'
 
 interface KanbanTaskProps {
   task: Task
@@ -66,17 +66,7 @@ const KanbanTask = memo(({ task, columns, index, columnId }: KanbanTaskProps) =>
   if (isDragging) {
     return (
       <div ref={setElement}>
-        <Card className="border-2 border-dashed border-primary/30 bg-primary/5 py-2 gap-2 opacity-50">
-          <CardHeader className="px-4">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {task.title.length > 30 ? task.title.slice(0, 30).concat('...') : task.title}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0 px-4 space-y-2 pb-3">
-            <div className="h-3 w-2/3 rounded bg-muted animate-pulse" />
-            <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
-          </CardContent>
-        </Card>
+        <TaskCardDragPreview task={task} className="opacity-60" />
       </div>
     )
   }
@@ -112,8 +102,8 @@ export const TaskCard = memo(({
   return (
     <>
       <Card className={cn(
-        'bg-card py-2 gap-2',
-        getPriorityColors(task.priority),
+        'bg-card py-2 gap-2 dark:bg-primary/5 dark:border-primary/20',
+        taskPrioritySurfaceClasses(task.priority),
         isTaskDetailOpen && "bg-primary/10 rounded-md",
         isDragging && "opacity-50",
 
@@ -183,12 +173,13 @@ export const TaskCard = memo(({
         )}>
           <Separator />
           <div className="px-4 flex items-center justify-between mt-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mr-2">
               <TaskDueDate task={task} />
               <TaskStatus task={task} />
             </div>
             <TaskPriority task={task} />
           </div>
+
           {task.media && task.media.length > 0 && (
             <div className="px-4 mt-3">
               <div className="relative w-full h-48 rounded-lg overflow-hidden bg-muted group">
@@ -206,9 +197,7 @@ export const TaskCard = memo(({
               </div>
             </div>
           )}
-          <pre>
-            {JSON.stringify(task.assigned_to, null, 2)}
-          </pre>
+
           <Separator />
           <div className="flex items-center gap-2 px-4">
             <div className="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2">
@@ -227,15 +216,21 @@ export const TaskCard = memo(({
             <MessageSquare className="h-4 w-4 text-muted-foreground hover:fill-primary" />
             <div className="flex items-center gap-2 ml-auto">
               <AppTooltip content="The task is due today" side="top">
-                {task.due_date && formatDueDate(task.due_date)?.isToday && (
+                {task.due_date && getDueDateDisplay(task.due_date)?.isToday && (
                   <Badge className="text-xs">Due today</Badge>
                 )}
               </AppTooltip>
-              {task.due_date && formatDueDate(task.due_date)?.isOverdue && (
+              {task.due_date && getDueDateDisplay(task.due_date)?.isOverdue && (
                 <Badge className="text-xs bg-destructive text-destructive-foreground">Overdue</Badge>
               )}
               <CircularProgressChip percent={task.progress || 0} />
-              <ThumbsUp className="h-4 w-4 text-muted-foreground hover:text-primary cursor-pointer" />
+              <LikeButton
+                likeableType="task"
+                likeableId={task.id}
+                isLiked={!!task.is_liked_by_user}
+                likesCount={task.likes_count ?? 0}
+                size="md"
+              />
             </div>
           </div>
         </CardContent>

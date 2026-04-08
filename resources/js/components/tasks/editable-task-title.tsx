@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { router } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
 import { Task } from '@/types';
+import { toast } from 'sonner';
 
 interface EditableTaskTitleProps {
   task: Task;
@@ -46,6 +47,7 @@ export default function EditableTaskTitle({
         onFinish: () => {
           setIsSubmitting(false);
           setIsEditing(false);
+          toast.success('Task title updated');
         },
       }
     );
@@ -74,7 +76,7 @@ export default function EditableTaskTitle({
           onKeyDown={handleKeyDown}
           className={cn(
             baseTextClass,
-            'w-full px-3 py-3 -mx-3 focus:outline-none'
+            'w-full px-3 py-3 -mx-3 focus:outline-none hover:border'
           )}
         />
       ) : (
@@ -83,7 +85,7 @@ export default function EditableTaskTitle({
           tabIndex={0}
           className={cn(
             baseTextClass,
-            'cursor-pointer px-3 py-3 -ml-3 hover:bg-muted/50'
+            'cursor-pointer px-3 py-3 -ml-3 hover:bg-muted/50 hover:border'
           )}
           onClick={() => setIsEditing(true)}
         >

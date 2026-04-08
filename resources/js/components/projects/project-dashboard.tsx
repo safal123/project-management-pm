@@ -17,6 +17,8 @@ import {
 import AppAvatar from '@/components/app-avatar';
 import { Link } from '@inertiajs/react';
 import { useMemo } from 'react';
+import AppEmpty from '@/components/app-empty';
+import { AppStatCard } from '@/components/app-stat-card';
 
 interface ProjectDashboardProps {
   project: Project;
@@ -66,73 +68,42 @@ export default function ProjectDashboard({ project, tasks }: ProjectDashboardPro
     <div className="space-y-6">
       {/* Summary Stats */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="relative overflow-hidden group">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Total Tasks
-            </CardTitle>
-            <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-              <ListTodo className="h-4 w-4 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.totalTasks}</div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-              <TrendingUp className="h-3 w-3 text-emerald-500" />
-              <span>Active workspace</span>
-            </div>
-          </CardContent>
-        </Card>
+        <AppStatCard
+          title="In Progress"
+          value={stats.inProgressTasks}
+          description="Pending review"
+          icon={Kanban}
+          iconClassName="bg-blue-500/10 text-blue-600 dark:text-blue-400"
+        />
 
-        <Card className="relative overflow-hidden group">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              In Progress
-            </CardTitle>
-            <div className="p-2 bg-blue-500/10 rounded-lg group-hover:bg-blue-500/20 transition-colors">
-              <Kanban className="h-4 w-4 text-blue-500" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.inProgressTasks}</div>
-            <p className="text-xs text-muted-foreground mt-1">Pending review</p>
-          </CardContent>
-        </Card>
+        <AppStatCard
+          title="Completed"
+          value={stats.completedTasks}
+          description="Completed tasks"
+          icon={CheckCircle2}
+          iconClassName="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+        />
 
-        <Card className="relative overflow-hidden group">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Completed
-            </CardTitle>
-            <div className="p-2 bg-emerald-500/10 rounded-lg group-hover:bg-emerald-500/20 transition-colors">
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-emerald-600">{stats.completedTasks}</div>
-            <p className="text-xs text-muted-foreground mt-1">{stats.progressPercentage}% completion rate</p>
-          </CardContent>
-        </Card>
+        <AppStatCard
+          title="Team Size"
+          value={stats.teamCount}
+          description="Active contributors"
+          icon={UsersIcon}
+          iconClassName="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+        />
 
-        <Card className="relative overflow-hidden group">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Team Size
-            </CardTitle>
-            <div className="p-2 bg-amber-500/10 rounded-lg group-hover:bg-amber-500/20 transition-colors">
-              <UsersIcon className="h-4 w-4 text-amber-500" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.teamCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">Active contributors</p>
-          </CardContent>
-        </Card>
+        <AppStatCard
+          title="Total Tasks"
+          value={stats.totalTasks}
+          description="Total tasks"
+          icon={ListTodo}
+          iconClassName="bg-muted text-muted-foreground"
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-7">
         {/* Overall Progress */}
-        <Card className="lg:col-span-4">
+        <Card className="lg:col-span-4 dark:bg-primary/5 dark:border-primary/20">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -176,7 +147,7 @@ export default function ProjectDashboard({ project, tasks }: ProjectDashboardPro
 
         {/* Priority & Team */}
         <div className="lg:col-span-3 space-y-6">
-          <Card>
+          <Card className="dark:bg-primary/5 dark:border-primary/20">
             <CardHeader>
               <CardTitle>Priority Overview</CardTitle>
               <CardDescription>Urgency levels of current tasks</CardDescription>
@@ -206,7 +177,7 @@ export default function ProjectDashboard({ project, tasks }: ProjectDashboardPro
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dark:bg-primary/5 dark:border-primary/20">
             <CardHeader className="pb-3">
               <CardTitle>Team Members</CardTitle>
               <CardDescription>{project.users?.length || 1} people working on this</CardDescription>
@@ -255,7 +226,7 @@ export default function ProjectDashboard({ project, tasks }: ProjectDashboardPro
       </div>
 
       {/* Upcoming Deadlines */}
-      <Card>
+      <Card className="dark:bg-primary/5 dark:border-primary/20">
         <CardHeader>
           <CardTitle>Upcoming Deadlines</CardTitle>
           <CardDescription>Tasks that need immediate attention</CardDescription>
@@ -287,8 +258,7 @@ export default function ProjectDashboard({ project, tasks }: ProjectDashboardPro
             </div>
           ) : (
             <div className="text-center py-10">
-              <Calendar className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">No upcoming deadlines found</p>
+              <AppEmpty title="No upcoming deadlines found" description="No upcoming deadlines found" icon={<Calendar />} />
             </div>
           )}
         </CardContent>

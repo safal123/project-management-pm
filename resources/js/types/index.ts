@@ -118,6 +118,8 @@ export interface Task {
   media?: Media[];
   progress?: number | null;
   color?: string | null;
+  likes_count?: number;
+  is_liked_by_user?: boolean;
 }
 
 export interface Event {

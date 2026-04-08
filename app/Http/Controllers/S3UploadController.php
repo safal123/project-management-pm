@@ -17,12 +17,12 @@ class S3UploadController extends Controller
     {
         $request->validate([
             'filename' => 'required|string|max:255',
-            'file_type' => 'required|string|in:image,image/jpeg,image/png,image/gif,video,audio,document',
+            'file_type' => 'required|string|in:image,image/jpeg,image/png,image/gif,image/heic,video,audio,document',
             'file_size' => 'required|integer|min:1|max:5242880', // 5MB max
         ]);
 
-        $filename = Str::random(40).'_'.$request->filename;
-        $path = 'uploads/'.date('Y/m/d').'/'.$filename;
+        $filename = Str::random(40) . '_' . $request->filename;
+        $path = 'uploads/' . date('Y/m/d') . '/' . $filename;
         $client = Storage::disk('s3')->getClient();
         $command = $client->getCommand('PutObject', [
             'Bucket' => config('filesystems.disks.s3.bucket'),

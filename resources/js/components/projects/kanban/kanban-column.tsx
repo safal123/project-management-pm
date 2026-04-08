@@ -1,14 +1,11 @@
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import { Task } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import EditableTaskTitle from '@/components/tasks/editable-task-title'
 import ColumnDropdown from './column-dropdown'
 import { KanbanTask } from './kanban-task'
-import { Button } from '@/components/ui/button'
-import { Loader2, Plus } from 'lucide-react'
-import { router } from '@inertiajs/react'
-import { toast } from 'sonner'
+import { AddKanbanItem } from './add-kanban-item'
 import { useDroppable } from '@dnd-kit/react'
 import { cn } from '@/lib/utils'
 
@@ -24,30 +21,6 @@ export const KanbanColumn = memo(({ column, columns, tasks }: KanbanColumnProps)
     type: 'column',
     accept: 'task',
   })
-  const [isAddingNewTask, setIsAddingNewTask] = useState(false)
-
-  const handleAddNewTask = (columnId: string) => {
-    setIsAddingNewTask(true)
-    router.post(route('tasks.store'), {
-      title: 'New Task',
-      description: 'New Task Description',
-      project_id: column.project_id,
-      parent_task_id: columnId,
-      workspace_id: column.workspace_id,
-    }, {
-      preserveScroll: true,
-      only: ['tasks'],
-      onSuccess: () => {
-        toast.success('New task added')
-      },
-      onError: () => {
-        toast.error('Failed to add new task')
-      },
-      onFinish: () => {
-        setIsAddingNewTask(false)
-      },
-    })
-  }
 
   return (
     <div
@@ -57,7 +30,7 @@ export const KanbanColumn = memo(({ column, columns, tasks }: KanbanColumnProps)
         isDropTarget && 'bg-primary/10'
       )}
     >
-      <Card className="h-[800px] flex flex-col bg-background dark:transparent">
+      <Card className="h-[800px] flex flex-col bg-card">
         <CardHeader className="flex-shrink-0 -my-6 pt-2 border-b">
           <CardTitle className="flex items-center justify-between mb-2">
             <EditableTaskTitle task={column} variant="small" className="flex-1" childTasksCount={tasks.length} />
@@ -68,19 +41,15 @@ export const KanbanColumn = memo(({ column, columns, tasks }: KanbanColumnProps)
         <CardContent className="p-0 flex-1 overflow-y-auto -mt-6">
           <div className="space-y-2 p-2">
             {tasks.map((task, index) => (
-              <KanbanTask key={task.id} task={task} columns={columns} index={index} columnId={column.id} />
+              <KanbanTask
+                key={task.id}
+                task={task}
+                columns={columns}
+                index={index}
+                columnId={column.id}
+              />
             ))}
-            <div className="text-center text-sm">
-              <Button
-                onClick={() => handleAddNewTask(column.id)}
-                size="sm"
-                className="w-full"
-              >
-                <Plus className="h-4 w-4" />
-                {isAddingNewTask && <Loader2 className="h-4 w-4 animate-spin" />}
-                Add New Task
-              </Button>
-            </div>
+            <AddKanbanItem type="task" column={column} />
           </div>
         </CardContent>
       </Card>

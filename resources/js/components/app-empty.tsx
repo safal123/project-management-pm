@@ -17,9 +17,9 @@ interface AppEmptyProps {
 
 const AppEmpty = ({ title, description, icon, action }: AppEmptyProps) => {
   return (
-    <Empty className='bg-card border border-dashed border-primary/50'>
+    <Empty className='dark:bg-primary/5 dark:border-primary/20 border border-dashed border-primary/50'>
       <EmptyHeader>
-        <EmptyMedia variant="icon">
+        <EmptyMedia variant="icon" className='dark:text-muted-foreground'>
           {icon}
         </EmptyMedia>
         <EmptyTitle>{title}</EmptyTitle>

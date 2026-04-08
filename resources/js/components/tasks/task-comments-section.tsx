@@ -26,7 +26,7 @@ export default function TaskCommentsSection({ task, className = '' }: TaskCommen
   };
 
   return (
-    <div className={`flex-shrink-0 border-t bg-background ${className}`}>
+    <div className={`flex-shrink-0 border-t bg-white dark:bg-background ${className}`}>
       <Tabs defaultValue="comments" className="w-full">
         <div className="flex items-center justify-between px-6 py-3 border-b">
           <TabsList>
@@ -52,7 +52,7 @@ export default function TaskCommentsSection({ task, className = '' }: TaskCommen
           </DropdownMenu>
         </div>
 
-        <TabsContent value="comments" className="space-y-4 m-0 px-6 py-4">
+        <TabsContent value="comments" className="space-y-4 m-0 px-6 py-4 dark:bg-primary/5">
           <TaskComments task={task} />
           <TaskCollaborators task={task} />
         </TabsContent>

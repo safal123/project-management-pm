@@ -10,6 +10,7 @@ import { useState } from 'react';
 import ProjectOverview from '@/components/projects/project-overview';
 import ProjectDashboard from '@/components/projects/project-dashboard';
 import TasksTable from '@/components/projects/tasks-table';
+import Can from '@/components/can';
 
 export default function ProjectShow() {
   const { project, tasks, paginatedTasks } = usePage<SharedData & { project: Project; tasks: Task[]; paginatedTasks?: PaginatedData<Task> }>().props;
@@ -54,28 +55,32 @@ export default function ProjectShow() {
             }
           }}
           className="flex-1 flex flex-col">
-          <div className="p-6 flex items-center justify-between border-b bg-background/50 backdrop-blur-md sticky top-0 z-20">
-            <TabsList className="bg-muted/50">
-              <TabsTrigger value="board" className="gap-2 data-[state=active]:bg-background">
+          <div className="p-6 flex items-center justify-between border-b sticky top-0 z-20">
+            <TabsList className="border bg-white dark:bg-primary/10 dark:border-primary/20">
+              <TabsTrigger value="board" className="gap-2 data-[state=active]:bg-primary/20">
                 <Kanban className="h-4 w-4" />
                 Board
               </TabsTrigger>
-              <TabsTrigger value="table" className="gap-2 data-[state=active]:bg-background">
+              <TabsTrigger value="table" className="gap-2 data-[state=active]:bg-primary/20">
                 <TableIcon className="h-4 w-4" />
                 Table
               </TabsTrigger>
-              <TabsTrigger value="overview" className="gap-2 data-[state=active]:bg-background">
+              <TabsTrigger value="overview" className="gap-2 data-[state=active]:bg-primary/20">
                 <ListTodo className="h-4 w-4" />
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="dashboard" className="gap-2 data-[state=active]:bg-background">
+              <TabsTrigger value="dashboard" className="gap-2 data-[state=active]:bg-primary/20">
                 <LayoutDashboard className="h-4 w-4" />
                 Dashboard
               </TabsTrigger>
             </TabsList>
             <div className="flex items-center gap-2">
-              <MembersModal />
-              <InviteMembersModal />
+              <Can permission="project.view_members">
+                <MembersModal />
+              </Can>
+              <Can permission="project.invite_members">
+                <InviteMembersModal />
+              </Can>
             </div>
           </div>
 

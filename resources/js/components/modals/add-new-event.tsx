@@ -43,8 +43,8 @@ const AddNewEvent = ({ event, selectedDate, open: controlledOpen, onOpenChange }
 
   const generateTimeOptions = () => {
     const times: string[] = []
-    for (let hour = 0; hour <= 23; hour++) {
-      for (let minute = 0; minute < 60; minute += 15) {
+    for (let hour = 0;hour <= 23;hour++) {
+      for (let minute = 0;minute < 60;minute += 15) {
         const h = hour.toString().padStart(2, '0')
         const m = minute.toString().padStart(2, '0')
         times.push(`${h}:${m}`)
@@ -174,7 +174,12 @@ const AddNewEvent = ({ event, selectedDate, open: controlledOpen, onOpenChange }
       formProps={{ onSubmit: submit }}
       footer={
         <>
-          <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={() =>
+              setOpen(false)}
+          >
             Cancel
           </Button>
           <Button type="submit" disabled={processing} className="gap-2">

@@ -5,7 +5,7 @@ import { ChevronDown, Loader2 } from 'lucide-react';
 import { TASK_PRIORITY, type TaskPriority } from '@/constants/task';
 import { router } from '@inertiajs/react';
 import { Task } from '@/types';
-import { PRIORITY_BADGE_COLORS } from '@/utils/task-colors';
+import { PRIORITY_BADGE_COLORS, formatHumanLabel } from '@/utils/app-utils';
 
 interface TaskPriorityProps {
   task: Task;
@@ -15,6 +15,7 @@ export default function TaskPriority({ task }: TaskPriorityProps) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handlePriorityChange = (priority: TaskPriority) => {
+    if (task.priority === priority) return;
     setIsUpdating(true);
     router.patch(
       `/tasks/${task.id}`,
@@ -37,7 +38,7 @@ export default function TaskPriority({ task }: TaskPriorityProps) {
           disabled={isUpdating}
           className={`w-fit p-0 px-3 py-1 rounded-md text-xs font-medium hover:opacity-80 ${PRIORITY_BADGE_COLORS[task.priority?.toLowerCase() ?? 'medium'] ?? PRIORITY_BADGE_COLORS.medium}`}
         >
-          {task.priority || 'Medium'}
+          {formatHumanLabel(task.priority, 'medium')}
           {isUpdating ? (
             <Loader2 className="h-3 w-3 ml-1 animate-spin" />
           ) : (

@@ -8,7 +8,6 @@ use App\Exceptions\CannotRemoveMemberException;
 use App\Exceptions\ProjectCreationException;
 use App\Http\Requests\ProjectCreateRequest;
 use App\Http\Requests\ProjectUpdateRequest;
-use App\Models\Invitation;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -16,8 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Http\Resources\ProjectResource;
-use App\Http\Resources\TaskResource;
-use App\Http\Resources\InvitationResource;
+use Illuminate\Support\Facades\DB;
 
 class ProjectController extends Controller
 {
@@ -53,14 +51,23 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
+        $userId = Auth::id();
+
         $project->load([
             'users',
             'createdBy',
-            'invitations',
-            'invitations.invitedBy',
-            'invitations.invitedTo',
-            'tasks.media',
-            'tasks'
+            'invitations' => fn($q) => $q
+                ->where('expires_at', '>', now())
+                ->with([
+                    'invitedBy',
+                    'invitedTo',
+                ]),
+            'tasks' => fn($q) => $q
+                ->with(['media', 'assignedTo'])
+                ->withCount([
+                    'likes',
+                    'likes as is_liked_by_user' => fn($q) => $q->where('user_id', $userId),
+                ]),
         ]);
 
         return Inertia::render('projects/project/index', [
@@ -71,15 +78,37 @@ class ProjectController extends Controller
 
     public function tasks(Project $project, Request $request)
     {
+        $userId = Auth::id();
+        DB::enableQueryLog();
         $tasks = Task::where('project_id', $project->id)
             ->whereNotNull('parent_task_id')
             ->with(['assignedTo', 'parentTask:id,title', 'media'])
+            ->withCount([
+                'likes',
+                'likes as is_liked_by_user' => fn($q) => $q->where('user_id', $userId),
+            ])
             ->orderBy('order')
             ->paginate(15)
             ->withQueryString();
 
+        $project->load([
+            'users',
+            'createdBy',
+            'invitations',
+            'invitations.invitedBy',
+            'invitations.invitedTo',
+            'tasks' => fn($q) => $q
+                ->with(['media', 'assignedTo'])
+                ->withCount([
+                    'likes',
+                    'likes as is_liked_by_user' => fn($q) => $q->where('user_id', $userId),
+                ]),
+        ]);
+
+        dd(DB::getQueryLog());
+
         return Inertia::render('projects/project/index', [
-            'project' => ProjectResource::make($project->load(['users', 'createdBy', 'invitations', 'invitations.invitedBy', 'invitations.invitedTo'])),
+            'project' => ProjectResource::make($project),
             'tasks' => $project->tasks->sortBy('order')->values(),
             'paginatedTasks' => $tasks,
         ]);

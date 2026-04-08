@@ -6,7 +6,7 @@ import { router } from '@inertiajs/react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar as DatePicker } from '@/components/ui/calendar'
 import { Badge } from '@/components/ui/badge'
-import { formatDueDate } from '@/utils/task'
+import { getDueDateDisplay } from '@/utils/app-utils'
 
 interface TaskDueDateProps {
   task: Task;
@@ -54,7 +54,7 @@ export default function TaskDueDate({ task }: TaskDueDateProps) {
           <span className="text-xs text-muted-foreground">
             {task.due_date ? (
               <p>
-                {formatDueDate(task.due_date)?.text}
+                {getDueDateDisplay(task.due_date)?.text}
               </p>
             ) : (
               <Badge variant="outline" className="text-xs">NA</Badge>

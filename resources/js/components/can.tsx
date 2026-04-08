@@ -12,5 +12,7 @@ export default function Can({ permission, children }: Props) {
 
   if (!auth?.permissions?.can.includes(permission)) return null
 
-  return <>{children}</>
+  return <>
+    {children}
+  </>
 }

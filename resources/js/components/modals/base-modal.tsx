@@ -41,14 +41,14 @@ export function BaseModal({
     <DialogHeader className="px-6 pt-6 pb-4">
       <div className="flex items-center gap-3">
         {icon && (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/20">
             {icon}
           </div>
         )}
         <div>
           <DialogTitle className="text-lg">{title}</DialogTitle>
           {description && (
-            <DialogDescription className="text-sm">
+            <DialogDescription className="text-sm text-muted-foreground">
               {description}
             </DialogDescription>
           )}
@@ -61,7 +61,7 @@ export function BaseModal({
 
   const footerSection = footer && (
     <>
-      <Separator />
+      <Separator className="bg-primary" />
       <DialogFooter className="px-6 py-4">{footer}</DialogFooter>
     </>
   )
@@ -69,14 +69,14 @@ export function BaseModal({
   const content = formProps ? (
     <form {...formProps}>
       {header}
-      <Separator />
+      <Separator className="bg-primary" />
       {body}
       {footerSection}
     </form>
   ) : (
     <>
       {header}
-      <Separator />
+      <Separator className="bg-primary" />
       {body}
       {footerSection}
     </>
@@ -86,7 +86,7 @@ export function BaseModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
-        className={cn('bg-card p-0 gap-0', className)}
+        className={cn('bg-white dark:bg-background p-0 gap-0', className)}
       >
         {content}
       </DialogContent>

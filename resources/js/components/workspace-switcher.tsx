@@ -43,7 +43,7 @@ const WorkspaceSelector = ({ workspaces }: WorkspaceSelectorProps) => {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="border w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg bg-background z-10 mt-1 p-1"
+            className="border w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg bg-white dark:bg-background z-10 mt-1 p-1"
             align="end"
             side={isMobile ? 'bottom' : state === 'collapsed' ? 'left' : 'bottom'}
           >

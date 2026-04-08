@@ -1,10 +1,11 @@
 import React from 'react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Trash2, Plus } from 'lucide-react'
+import { MoreHorizontal, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Trash2 } from 'lucide-react'
 import { router } from '@inertiajs/react'
 import { Task } from '@/types'
 import { Separator } from '@/components/ui/separator'
+import { AddKanbanItem } from './add-kanban-item'
 
 interface ColumnDropdownProps {
   column: Task
@@ -33,19 +34,6 @@ const ColumnDropwn = ({ column, columns }: ColumnDropdownProps) => {
     });
   };
 
-  const handleAddNewTask = (columnId: string) => {
-    router.post(route('tasks.store'), {
-      title: 'New Task',
-      description: 'New Task Description',
-      project_id: column.project_id,
-      parent_task_id: columnId,
-      workspace_id: column.workspace_id,
-    }, {
-      preserveScroll: true,
-      only: ['tasks'],
-    })
-  }
-
   const isFirstColumn = (columnId: string) => {
     return columns.findIndex((c) => c.id === columnId) === 0;
   };
@@ -68,14 +56,7 @@ const ColumnDropwn = ({ column, columns }: ColumnDropdownProps) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          {/* Add new task */}
-          <DropdownMenuItem
-            onClick={() => handleAddNewTask(column.id)}
-            className="font-medium cursor-pointer bg-primary/10 mb-1 hover:bg-primary/20 dark:hover:bg-primary/20"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add New Task
-          </DropdownMenuItem>
+          <AddKanbanItem type="task" column={column} variant="dropdown" />
           <Separator />
           <DropdownMenuItem
             onClick={() => handleMoveColumn(column.id, 'left')}

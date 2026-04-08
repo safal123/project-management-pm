@@ -4,6 +4,7 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\LikeController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\S3UploadController;
@@ -71,6 +72,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Delete media
     Route::delete('media/{media}', [MediaController::class, 'deleteMedia'])
         ->name('media.delete');
+
+    Route::post('likes/toggle', [LikeController::class, 'toggle'])
+        ->name('likes.toggle');
 
     Route::post('invitations', [InvitationController::class, 'store'])
         ->name('invitations.store');

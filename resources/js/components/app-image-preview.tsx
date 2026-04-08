@@ -17,7 +17,7 @@ import {
   LoaderCircle,
   RefreshCcwIcon
 } from "lucide-react";
-import { formatDueDate } from "@/utils/task";
+import { getDueDateDisplay } from "@/utils/app-utils";
 import axios from "axios";
 import { Badge } from "./ui/badge";
 import { router } from "@inertiajs/react";
@@ -134,7 +134,7 @@ const AppImagePreview = ({
             <div className="hidden w-[400px] text-sm text-muted-foreground break-all leading-tight md:flex flex-col gap-1">
               {filename}
               <Badge variant="default" className="text-xs">
-                Uploaded at: {formatDueDate(createdAt)?.text}
+                Uploaded at: {getDueDateDisplay(createdAt)?.text}
               </Badge>
             </div>
 

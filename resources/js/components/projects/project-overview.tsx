@@ -29,7 +29,7 @@ export default function ProjectOverview({ project }: ProjectOverviewProps) {
     <div className="space-y-6">
       {/* Project Info Cards */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="overflow-hidden border-primary/10 bg-gradient-to-br from-background to-primary/5">
+        <Card className="overflow-hidden border-primary/10 dark:bg-primary/5 dark:border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Project ID</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -40,7 +40,7 @@ export default function ProjectOverview({ project }: ProjectOverviewProps) {
           </CardContent>
         </Card>
 
-        <Card className="overflow-hidden border-primary/10">
+        <Card className="overflow-hidden border-primary/10 dark:bg-primary/5 dark:border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Created</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -62,7 +62,7 @@ export default function ProjectOverview({ project }: ProjectOverviewProps) {
           </CardContent>
         </Card>
 
-        <Card className="overflow-hidden border-primary/10">
+        <Card className="overflow-hidden border-primary/10 dark:bg-primary/5 dark:border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Created By</CardTitle>
             <User className="h-4 w-4 text-muted-foreground" />
@@ -76,7 +76,7 @@ export default function ProjectOverview({ project }: ProjectOverviewProps) {
 
       {/* Project Details */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
+        <Card className="dark:bg-primary/5 dark:border-primary/20">
           <CardHeader>
             <CardTitle>Project Details</CardTitle>
             <CardDescription>Basic information about this project</CardDescription>
@@ -101,7 +101,7 @@ export default function ProjectOverview({ project }: ProjectOverviewProps) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dark:bg-primary/5 dark:border-primary/20">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
             <CardDescription>Latest changes in the project</CardDescription>

@@ -1,83 +1,124 @@
-import { ProjectModal } from '@/components/modals/project-modal';
+import { useEffect, useMemo, useState } from 'react'
+import { ProjectModal } from '@/components/modals/project-modal'
 import AppLayout from '@/layouts/app-layout'
-import { BreadcrumbItem, Project, SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FolderKanban, Calendar, FolderCodeIcon } from 'lucide-react';
-import Can from '@/components/can';
-import AppEmpty from '@/components/app-empty';
+import { BreadcrumbItem, Project, SharedData } from '@/types'
+import { Head, Link, usePage } from '@inertiajs/react'
+import { AppTable, type AppTableColumn } from '@/components/app-table'
+import { FolderKanban, Calendar, FolderCodeIcon } from 'lucide-react'
+import Can from '@/components/can'
+import AppEmpty from '@/components/app-empty'
+import { formatShortDate } from '@/utils/app-utils'
+
+function ProjectRowActions({ row }: { row: Project; index: number }) {
+  return (
+    <Can permission="project.update">
+      <div className="inline-flex justify-end" onClick={(e) => e.stopPropagation()}>
+        <ProjectModal project={row} triggerVariant="ghost" />
+      </div>
+    </Can>
+  )
+}
 
 const Projects = () => {
-  const { projects } = usePage<SharedData & { projects: Project[] }>().props;
+  const { projects } = usePage<SharedData & { projects: Project[] }>().props
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('create') === '1') {
+      setCreateModalOpen(true)
+      window.history.replaceState({}, '', '/projects')
+    }
+  }, [])
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: 'Projects',
       href: '/projects',
     },
-  ];
+  ]
+
+  const projectColumns = useMemo<AppTableColumn<Project>[]>(
+    () => [
+      {
+        id: 'name',
+        header: 'Name',
+        headerClassName: 'min-w-[200px]',
+        cellClassName: 'font-medium',
+        render: (project) => (
+          <Link
+            href={`/projects/${project.slug}`}
+            className="inline-flex items-center gap-2 hover:underline"
+          >
+            <span className="rounded-md bg-primary/10 p-1.5 text-primary md:hidden">
+              <FolderKanban className="h-4 w-4" />
+            </span>
+            <span className="line-clamp-1">{project.name}</span>
+          </Link>
+        ),
+      },
+      {
+        id: 'description',
+        header: 'Description',
+        headerClassName: 'hidden md:table-cell',
+        cellClassName: 'hidden max-w-md text-muted-foreground md:table-cell',
+        render: (project) => (
+          <span className="line-clamp-2">{project.description || '—'}</span>
+        ),
+      },
+      {
+        id: 'created',
+        header: 'Created',
+        headerClassName: 'w-[140px] whitespace-nowrap',
+        cellClassName: 'whitespace-nowrap text-muted-foreground',
+        render: (project) => (
+          <span className="inline-flex items-center gap-1.5 text-sm">
+            <Calendar className="h-3.5 w-3.5 shrink-0" />
+            {formatShortDate(project.created_at)}
+          </span>
+        ),
+      },
+    ],
+    []
+  )
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Projects" />
 
-      <div className="px-12 py-8">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
+      <div className="px-4 py-6 sm:px-6 lg:px-12 lg:py-8">
+        <div className="mb-6 flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Projects</h1>
+            <p className="mt-2 text-muted-foreground">
               Manage and organize your projects in one place
             </p>
           </div>
           <Can permission="project.create">
-            <ProjectModal triggerClassName="w-full md:w-fit" />
+            <ProjectModal
+              triggerClassName="w-full md:w-fit"
+              open={createModalOpen}
+              onOpenChange={setCreateModalOpen}
+            />
           </Can>
         </div>
 
-        {/* Projects Grid */}
         {projects && projects.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <Link key={project.id} href={`/projects/${project.slug}`}>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer border-border hover:border-primary/50 h-full">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                          <FolderKanban className="h-5 w-5 text-primary" />
-                        </div>
-                      </div>
-                      {/* Edit Button */}
-                      <Can permission="project.update">
-                        <div onClick={(e) => e.preventDefault()}>
-                          <ProjectModal project={project} triggerVariant="ghost" />
-                        </div>
-                      </Can>
-                    </div>
-                    <CardTitle className="mt-4 line-clamp-1">{project.name}</CardTitle>
-                    <CardDescription className="line-clamp-2 min-h-[2.5rem]">
-                      {project.description || 'No description provided'}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>Created {new Date(project.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
+          <AppTable
+            items={projects}
+            columns={projectColumns}
+            action={ProjectRowActions}
+            tableClassName='bg-background/10 shadow-sm rounded-md'
+          />
         ) : (
           <AppEmpty
             title="No projects yet."
             description="Get started by creating your first project to organize your work and collaborate with your team."
-            icon={<FolderCodeIcon className='text-primary' />}
+            icon={<FolderCodeIcon className="text-primary" />}
             action={<ProjectModal />}
           />
         )}
       </div>
-    </AppLayout >
+    </AppLayout>
   )
 }
 

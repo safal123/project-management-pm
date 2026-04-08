@@ -1,0 +1,1700 @@
+/* biome-ignore-all lint/a11y/useGenericFontNames: icon fonts don't need generic fallbacks */
+/*
+ * Codicon styles for portal-website
+ * Enables use of <Icon> component from @anysphere/ui
+ *
+ * Font files are located in public/fonts/
+ */
+
+/* Cursor Icons Outline font - custom Cursor icons that override specific codicons */
+@font-face {
+    font-family: "cursor-icons";
+    font-display: block;
+    src: url("/fonts/cursor-icons-outline.woff2") format("woff2");
+  }
+
+  /* Cursor Icons 16 - pixel-hinted for 16px */
+  @font-face {
+    font-family: "cursor-icons-16";
+    font-display: block;
+    src: url("/fonts/cursor-icons-16.woff2") format("woff2");
+  }
+
+  /* Base codicon styles */
+  .codicon[class*="codicon-"] {
+    font: normal normal normal 16px / 1 codicon;
+    display: inline-block;
+    text-decoration: none;
+    text-rendering: auto;
+    text-align: center;
+    text-transform: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* =============================================
+     Cursor Icons - CSS Overrides
+     These rules override specific codicon icons to use Cursor's custom icons
+     ============================================= */
+
+  /* Direct cursor icon mappings */
+  .codicon.codicon-archive::before {
+    font-family: "cursor-icons";
+    content: "\ea98";
+  }
+  .codicon.codicon-arrow-block-down::before {
+    font-family: "cursor-icons";
+    content: "\f2c3";
+  }
+  .codicon.codicon-arrow-block-left::before {
+    font-family: "cursor-icons";
+    content: "\f2c4";
+  }
+  .codicon.codicon-arrow-block-right::before {
+    font-family: "cursor-icons";
+    content: "\f2c5";
+  }
+  .codicon.codicon-arrow-block-up::before {
+    font-family: "cursor-icons";
+    content: "\f2c6";
+  }
+  .codicon.codicon-arrow-ccw::before {
+    font-family: "cursor-icons";
+    content: "\ead2";
+  }
+  .codicon.codicon-arrow-circle-down::before {
+    font-family: "cursor-icons";
+    content: "\ebfc";
+  }
+  .codicon.codicon-arrow-circle-left::before {
+    font-family: "cursor-icons";
+    content: "\ebfd";
+  }
+  .codicon.codicon-arrow-circle-right::before {
+    font-family: "cursor-icons";
+    content: "\ebfe";
+  }
+  .codicon.codicon-arrow-circle-up::before {
+    font-family: "cursor-icons";
+    content: "\ebff";
+  }
+  .codicon.codicon-arrow-cw::before {
+    font-family: "cursor-icons";
+    content: "\eb37";
+  }
+  .codicon.codicon-arrow-down::before {
+    font-family: "cursor-icons";
+    content: "\ea9a";
+  }
+  .codicon.codicon-arrow-left::before {
+    font-family: "cursor-icons";
+    content: "\ea9b";
+  }
+  .codicon.codicon-arrow-left-down::before {
+    font-family: "cursor-icons";
+    content: "\f2c7";
+  }
+  .codicon.codicon-arrow-left-up::before {
+    font-family: "cursor-icons";
+    content: "\f2c8";
+  }
+  .codicon.codicon-arrow-right::before {
+    font-family: "cursor-icons";
+    content: "\ea9c";
+  }
+  .codicon.codicon-arrow-right-down::before {
+    font-family: "cursor-icons";
+    content: "\f2c9";
+  }
+  .codicon.codicon-arrow-right-up::before {
+    font-family: "cursor-icons";
+    content: "\edc1";
+  }
+  .codicon.codicon-arrow-square-down::before {
+    font-family: "cursor-icons";
+    content: "\f2f3";
+  }
+  .codicon.codicon-arrow-square-left::before {
+    font-family: "cursor-icons";
+    content: "\f2f5";
+  }
+  .codicon.codicon-arrow-square-left-down::before {
+    font-family: "cursor-icons";
+    content: "\f2fc";
+  }
+  .codicon.codicon-arrow-square-left-top::before {
+    font-family: "cursor-icons";
+    content: "\f2fb";
+  }
+  .codicon.codicon-arrow-square-right::before {
+    font-family: "cursor-icons";
+    content: "\f2f4";
+  }
+  .codicon.codicon-arrow-square-right-down::before {
+    font-family: "cursor-icons";
+    content: "\f2fa";
+  }
+  .codicon.codicon-arrow-square-right-top::before {
+    font-family: "cursor-icons";
+    content: "\edc2";
+  }
+  .codicon.codicon-arrow-square-up::before {
+    font-family: "cursor-icons";
+    content: "\f2f6";
+  }
+  .codicon.codicon-arrow-up::before {
+    font-family: "cursor-icons";
+    content: "\eaa1";
+  }
+  .codicon.codicon-arrows-both-horizontal::before {
+    font-family: "cursor-icons";
+    content: "\ea99";
+  }
+  .codicon.codicon-arrows-both-vertical::before {
+    font-family: "cursor-icons";
+    content: "\f2ca";
+  }
+  .codicon.codicon-arrows-ccw::before {
+    font-family: "cursor-icons";
+    content: "\f30f";
+  }
+  .codicon.codicon-arrows-ccw-angular::before {
+    font-family: "cursor-icons";
+    content: "\f2cc";
+  }
+  .codicon.codicon-arrows-contract::before {
+    font-family: "cursor-icons";
+    content: "\f2bc";
+  }
+  .codicon.codicon-arrows-contract-simple::before {
+    font-family: "cursor-icons";
+    content: "\f2cd";
+  }
+  .codicon.codicon-arrows-cw::before {
+    font-family: "cursor-icons";
+    content: "\ea77";
+  }
+  .codicon.codicon-arrows-down-up::before {
+    font-family: "cursor-icons";
+    content: "\f2ce";
+  }
+  .codicon.codicon-arrows-expand::before {
+    font-family: "cursor-icons";
+    content: "\f2bd";
+  }
+  .codicon.codicon-arrows-expand-simple::before {
+    font-family: "cursor-icons";
+    content: "\f2cf";
+  }
+  .codicon.codicon-arrows-left-right::before {
+    font-family: "cursor-icons";
+    content: "\ebcb";
+  }
+  .codicon.codicon-asterisk::before {
+    font-family: "cursor-icons";
+    content: "\edbf";
+  }
+  .codicon.codicon-at::before {
+    font-family: "cursor-icons";
+    content: "\ec55";
+  }
+  .codicon.codicon-bell::before {
+    font-family: "cursor-icons";
+    content: "\eaa2";
+  }
+  .codicon.codicon-bell-dot::before {
+    font-family: "cursor-icons";
+    content: "\eb9a";
+  }
+  .codicon.codicon-bell-slash::before {
+    font-family: "cursor-icons";
+    content: "\ec08";
+  }
+  .codicon.codicon-book-open::before {
+    font-family: "cursor-icons";
+    content: "\eaa4";
+  }
+  .codicon.codicon-bookmark::before {
+    font-family: "cursor-icons";
+    content: "\eaa5";
+  }
+  .codicon.codicon-books::before {
+    font-family: "cursor-icons";
+    content: "\eb9c";
+  }
+  .codicon.codicon-brackets-curly::before {
+    font-family: "cursor-icons";
+    content: "\eb0f";
+  }
+  .codicon.codicon-brackets-curly-dot::before {
+    font-family: "cursor-icons";
+    content: "\ebe5";
+  }
+  .codicon.codicon-brackets-curly-x::before {
+    font-family: "cursor-icons";
+    content: "\ebe6";
+  }
+  .codicon.codicon-brain::before {
+    font-family: "cursor-icons";
+    content: "\ed87";
+  }
+  .codicon.codicon-briefcase::before {
+    font-family: "cursor-icons";
+    content: "\eaac";
+  }
+  .codicon.codicon-bugbot::before {
+    font-family: "cursor-icons";
+    content: "\ec59";
+  }
+  .codicon.codicon-bullseye::before {
+    font-family: "cursor-icons";
+    content: "\ebf8";
+  }
+  .codicon.codicon-calendar::before {
+    font-family: "cursor-icons";
+    content: "\eab0";
+  }
+  .codicon.codicon-camera::before {
+    font-family: "cursor-icons";
+    content: "\eada";
+  }
+  .codicon.codicon-chart-bars::before {
+    font-family: "cursor-icons";
+    content: "\eb03";
+  }
+  .codicon.codicon-chart-line::before {
+    font-family: "cursor-icons";
+    content: "\ebe2";
+  }
+  .codicon.codicon-chart-pie::before {
+    font-family: "cursor-icons";
+    content: "\ebe4";
+  }
+  .codicon.codicon-chart-scatter::before {
+    font-family: "cursor-icons";
+    content: "\ebe3";
+  }
+  .codicon.codicon-chatBubble::before {
+    font-family: "cursor-icons";
+    content: "\ed95";
+  }
+  .codicon.codicon-chatBubble-ellipsis::before {
+    font-family: "cursor-icons";
+    content: "\f2d0";
+  }
+  .codicon.codicon-chatBubble-exclamation::before {
+    font-family: "cursor-icons";
+    content: "\eb42";
+  }
+  .codicon.codicon-chatBubble-question::before {
+    font-family: "cursor-icons";
+    content: "\f23c";
+  }
+  .codicon.codicon-chatBubbles::before {
+    font-family: "cursor-icons";
+    content: "\f2d1";
+  }
+  .codicon.codicon-check::before {
+    font-family: "cursor-icons";
+    content: "\eab2";
+  }
+  .codicon.codicon-check-circle::before {
+    font-family: "cursor-icons";
+    content: "\edba";
+  }
+  .codicon.codicon-check-square::before {
+    font-family: "cursor-icons";
+    content: "\f2d2";
+  }
+  .codicon.codicon-chevron-down::before {
+    font-family: "cursor-icons";
+    content: "\eab4";
+  }
+  .codicon.codicon-chevron-down-small::before {
+    font-family: "cursor-icons";
+    content: "\f2d3";
+  }
+  .codicon.codicon-chevron-left::before {
+    font-family: "cursor-icons";
+    content: "\eab5";
+  }
+  .codicon.codicon-chevron-left-small::before {
+    font-family: "cursor-icons";
+    content: "\f2d4";
+  }
+  .codicon.codicon-chevron-right::before {
+    font-family: "cursor-icons";
+    content: "\eab6";
+  }
+  .codicon.codicon-chevron-right-small::before {
+    font-family: "cursor-icons";
+    content: "\f2d5";
+  }
+  .codicon.codicon-chevron-up::before {
+    font-family: "cursor-icons";
+    content: "\eab7";
+  }
+  .codicon.codicon-chevron-up-small::before {
+    font-family: "cursor-icons";
+    content: "\f2d6";
+  }
+  .codicon.codicon-chevrons-left-right::before {
+    font-family: "cursor-icons";
+    content: "\f2d7";
+  }
+  .codicon.codicon-chevrons-up-down::before {
+    font-family: "cursor-icons";
+    content: "\edcb";
+  }
+  .codicon.codicon-chip::before {
+    font-family: "cursor-icons";
+    content: "\ec19";
+  }
+  .codicon.codicon-circle::before {
+    font-family: "cursor-icons";
+    content: "\ebb5";
+  }
+  .codicon.codicon-circle-circle::before {
+    font-family: "cursor-icons";
+    content: "\eba7";
+  }
+  .codicon.codicon-circle-dashed::before {
+    font-family: "cursor-icons";
+    content: "\edbb";
+  }
+  .codicon.codicon-circles::before {
+    font-family: "cursor-icons";
+    content: "\ea97";
+  }
+  .codicon.codicon-clock::before {
+    font-family: "cursor-icons";
+    content: "\edc0";
+  }
+  .codicon.codicon-cloud::before {
+    font-family: "cursor-icons";
+    content: "\ebaa";
+  }
+  .codicon.codicon-cloud-arrow-down::before {
+    font-family: "cursor-icons";
+    content: "\eac2";
+  }
+  .codicon.codicon-cloud-arrow-up::before {
+    font-family: "cursor-icons";
+    content: "\eac3";
+  }
+  .codicon.codicon-code-brackets::before {
+    font-family: "cursor-icons";
+    content: "\eac4";
+  }
+  .codicon.codicon-cog::before {
+    font-family: "cursor-icons";
+    content: "\eaf8";
+  }
+  .codicon.codicon-color-mode::before {
+    font-family: "cursor-icons";
+    content: "\eac6";
+  }
+  .codicon.codicon-command::before {
+    font-family: "cursor-icons";
+    content: "\f2d8";
+  }
+  .codicon.codicon-comment::before {
+    font-family: "cursor-icons";
+    content: "\ea6b";
+  }
+  .codicon.codicon-comment-dot::before {
+    font-family: "cursor-icons";
+    content: "\ec0a";
+  }
+  .codicon.codicon-compass::before {
+    font-family: "cursor-icons";
+    content: "\ebd5";
+  }
+  .codicon.codicon-compass-check::before {
+    font-family: "cursor-icons";
+    content: "\ebd7";
+  }
+  .codicon.codicon-compass-dot::before {
+    font-family: "cursor-icons";
+    content: "\ebd6";
+  }
+  .codicon.codicon-copy::before {
+    font-family: "cursor-icons";
+    content: "\ebcc";
+  }
+  .codicon.codicon-corners-out::before {
+    font-family: "cursor-icons";
+    content: "\f2d9";
+  }
+  .codicon.codicon-corners-out-check::before {
+    font-family: "cursor-icons";
+    content: "\f2da";
+  }
+  .codicon.codicon-credit-card::before {
+    font-family: "cursor-icons";
+    content: "\eac9";
+  }
+  .codicon.codicon-cube::before {
+    font-family: "cursor-icons";
+    content: "\edcc";
+  }
+  .codicon.codicon-cube-nodes::before {
+    font-family: "cursor-icons";
+    content: "\edc8";
+  }
+  .codicon.codicon-cube-transparent::before {
+    font-family: "cursor-icons";
+    content: "\f2db";
+  }
+  .codicon.codicon-cursor-logo::before {
+    font-family: "cursor-icons";
+    content: "\edd9";
+  }
+  .codicon.codicon-cursor-text::before {
+    font-family: "cursor-icons";
+    content: "\f304";
+  }
+  .codicon.codicon-database::before {
+    font-family: "cursor-icons";
+    content: "\eace";
+  }
+  .codicon.codicon-diff::before {
+    font-family: "cursor-icons";
+    content: "\eae1";
+  }
+  .codicon.codicon-diff-added::before {
+    font-family: "cursor-icons";
+    content: "\eadc";
+  }
+  .codicon.codicon-diff-ignored::before {
+    font-family: "cursor-icons";
+    content: "\eadd";
+  }
+  .codicon.codicon-diff-modified::before {
+    font-family: "cursor-icons";
+    content: "\eade";
+  }
+  .codicon.codicon-diff-multiple::before {
+    font-family: "cursor-icons";
+    content: "\ec23";
+  }
+  .codicon.codicon-diff-removed::before {
+    font-family: "cursor-icons";
+    content: "\eadf";
+  }
+  .codicon.codicon-diff-renamed::before {
+    font-family: "cursor-icons";
+    content: "\eae0";
+  }
+  .codicon.codicon-diff-single::before {
+    font-family: "cursor-icons";
+    content: "\ec22";
+  }
+  .codicon.codicon-display::before {
+    font-family: "cursor-icons";
+    content: "\ea7a";
+  }
+  .codicon.codicon-dots-3-horizontal::before {
+    font-family: "cursor-icons";
+    content: "\ea7c";
+  }
+  .codicon.codicon-dots-3-vertical::before {
+    font-family: "cursor-icons";
+    content: "\eb10";
+  }
+  .codicon.codicon-envelope::before {
+    font-family: "cursor-icons";
+    content: "\eb1c";
+  }
+  .codicon.codicon-eraser::before {
+    font-family: "cursor-icons";
+    content: "\eda0";
+  }
+  .codicon.codicon-exclamation-circle::before {
+    font-family: "cursor-icons";
+    content: "\edbc";
+  }
+  .codicon.codicon-exclamation-triangle::before {
+    font-family: "cursor-icons";
+    content: "\ea6c";
+  }
+  .codicon.codicon-extensions::before {
+    font-family: "cursor-icons";
+    content: "\eae6";
+  }
+  .codicon.codicon-eye::before {
+    font-family: "cursor-icons";
+    content: "\ea70";
+  }
+  .codicon.codicon-file::before {
+    font-family: "cursor-icons";
+    content: "\ea7b";
+  }
+  .codicon.codicon-file-plus::before {
+    font-family: "cursor-icons";
+    content: "\ed8d";
+  }
+  .codicon.codicon-files::before {
+    font-family: "cursor-icons";
+    content: "\eaf0";
+  }
+  .codicon.codicon-flask::before {
+    font-family: "cursor-icons";
+    content: "\ea79";
+  }
+  .codicon.codicon-flask-slash-circle::before {
+    font-family: "cursor-icons";
+    content: "\ebe1";
+  }
+  .codicon.codicon-focus-window::before {
+    font-family: "cursor-icons";
+    content: "\ede6";
+  }
+  .codicon.codicon-folder::before {
+    font-family: "cursor-icons";
+    content: "\ea83";
+  }
+  .codicon.codicon-folder-check::before {
+    font-family: "cursor-icons";
+    content: "\eaf6";
+  }
+  .codicon.codicon-folder-library::before {
+    font-family: "cursor-icons";
+    content: "\ebdf";
+  }
+  .codicon.codicon-folder-plus::before {
+    font-family: "cursor-icons";
+    content: "\ea80";
+  }
+  .codicon.codicon-funnel::before {
+    font-family: "cursor-icons";
+    content: "\eaf1";
+  }
+  .codicon.codicon-funnel-simple::before {
+    font-family: "cursor-icons";
+    content: "\eb83";
+  }
+  .codicon.codicon-gauge::before {
+    font-family: "cursor-icons";
+    content: "\eacd";
+  }
+  .codicon.codicon-gem::before {
+    font-family: "cursor-icons";
+    content: "\eb48";
+  }
+  .codicon.codicon-gift::before {
+    font-family: "cursor-icons";
+    content: "\eaf9";
+  }
+  .codicon.codicon-git-branch::before {
+    font-family: "cursor-icons";
+    content: "\edb4";
+  }
+  .codicon.codicon-git-commit::before {
+    font-family: "cursor-icons";
+    content: "\eafc";
+  }
+  .codicon.codicon-git-commit-horizontal::before {
+    font-family: "cursor-icons";
+    content: "\f303";
+  }
+  .codicon.codicon-git-compare::before {
+    font-family: "cursor-icons";
+    content: "\eafd";
+  }
+  .codicon.codicon-git-fetch::before {
+    font-family: "cursor-icons";
+    content: "\ec1d";
+  }
+  .codicon.codicon-git-merge::before {
+    font-family: "cursor-icons";
+    content: "\eafe";
+  }
+  .codicon.codicon-git-pull::before {
+    font-family: "cursor-icons";
+    content: "\eb40";
+  }
+  .codicon.codicon-git-pull-request::before {
+    font-family: "cursor-icons";
+    content: "\ea64";
+  }
+  .codicon.codicon-git-pull-request-closed::before {
+    font-family: "cursor-icons";
+    content: "\ebda";
+  }
+  .codicon.codicon-git-pull-request-create::before {
+    font-family: "cursor-icons";
+    content: "\ebbc";
+  }
+  .codicon.codicon-git-pull-request-done::before {
+    font-family: "cursor-icons";
+    content: "\ec46";
+  }
+  .codicon.codicon-git-pull-request-draft::before {
+    font-family: "cursor-icons";
+    content: "\ebdb";
+  }
+  .codicon.codicon-git-push::before {
+    font-family: "cursor-icons";
+    content: "\eb41";
+  }
+  .codicon.codicon-globe::before {
+    font-family: "cursor-icons";
+    content: "\eb01";
+  }
+  .codicon.codicon-heart::before {
+    font-family: "cursor-icons";
+    content: "\eb05";
+  }
+  .codicon.codicon-house::before {
+    font-family: "cursor-icons";
+    content: "\eb06";
+  }
+  .codicon.codicon-i-circle::before {
+    font-family: "cursor-icons";
+    content: "\ea74";
+  }
+  .codicon.codicon-image::before {
+    font-family: "cursor-icons";
+    content: "\f309";
+  }
+  .codicon.codicon-image-square::before {
+    font-family: "cursor-icons";
+    content: "\f2dc";
+  }
+  .codicon.codicon-infinity::before {
+    font-family: "cursor-icons";
+    content: "\ed8e";
+  }
+  .codicon.codicon-key::before {
+    font-family: "cursor-icons";
+    content: "\eb11";
+  }
+  .codicon.codicon-keyboard::before {
+    font-family: "cursor-icons";
+    content: "\edac";
+  }
+  .codicon.codicon-keyboard-tab::before {
+    font-family: "cursor-icons";
+    content: "\ec3c";
+  }
+  .codicon.codicon-laptop::before {
+    font-family: "cursor-icons";
+    content: "\edd2";
+  }
+  .codicon.codicon-layout-centered::before {
+    font-family: "cursor-icons";
+    content: "\ebf7";
+  }
+  .codicon.codicon-layout-panel-bottom::before {
+    font-family: "cursor-icons";
+    content: "\ec01";
+  }
+  .codicon.codicon-layout-panel-bottom-dock::before {
+    font-family: "cursor-icons";
+    content: "\ec49";
+  }
+  .codicon.codicon-layout-panel-bottom-on::before {
+    font-family: "cursor-icons";
+    content: "\ebf2";
+  }
+  .codicon.codicon-layout-panel-bottom-undock::before {
+    font-family: "cursor-icons";
+    content: "\f2dd";
+  }
+  .codicon.codicon-layout-sidebar-left::before {
+    font-family: "cursor-icons";
+    content: "\ec02";
+  }
+  .codicon.codicon-layout-sidebar-left-dock::before {
+    font-family: "cursor-icons";
+    content: "\ec4a";
+  }
+  .codicon.codicon-layout-sidebar-left-on::before {
+    font-family: "cursor-icons";
+    content: "\ebf3";
+  }
+  .codicon.codicon-layout-sidebar-left-undock::before {
+    font-family: "cursor-icons";
+    content: "\f23a";
+  }
+  .codicon.codicon-layout-sidebar-right::before {
+    font-family: "cursor-icons";
+    content: "\ec00";
+  }
+  .codicon.codicon-layout-sidebar-right-dock::before {
+    font-family: "cursor-icons";
+    content: "\ec4b";
+  }
+  .codicon.codicon-layout-sidebar-right-on::before {
+    font-family: "cursor-icons";
+    content: "\ebf4";
+  }
+  .codicon.codicon-layout-sidebar-right-undock::before {
+    font-family: "cursor-icons";
+    content: "\f23b";
+  }
+  .codicon.codicon-layout-split-horizontal::before {
+    font-family: "cursor-icons";
+    content: "\ec5c";
+  }
+  .codicon.codicon-layout-split-horizontal-right-dock::before {
+    font-family: "cursor-icons";
+    content: "\f305";
+  }
+  .codicon.codicon-layout-split-horizontal-right-undock::before {
+    font-family: "cursor-icons";
+    content: "\f306";
+  }
+  .codicon.codicon-layout-split-vertical::before {
+    font-family: "cursor-icons";
+    content: "\eb57";
+  }
+  .codicon.codicon-lightbulb::before {
+    font-family: "cursor-icons";
+    content: "\ea61";
+  }
+  .codicon.codicon-link::before {
+    font-family: "cursor-icons";
+    content: "\eb15";
+  }
+  .codicon.codicon-list-todo::before {
+    font-family: "cursor-icons";
+    content: "\edd0";
+  }
+  .codicon.codicon-lock-locked::before {
+    font-family: "cursor-icons";
+    content: "\ea75";
+  }
+  .codicon.codicon-lock-unlocked::before {
+    font-family: "cursor-icons";
+    content: "\eb74";
+  }
+  .codicon.codicon-logo-azure::before {
+    font-family: "cursor-icons";
+    content: "\ebd8";
+  }
+  .codicon.codicon-logo-azure-devops::before {
+    font-family: "cursor-icons";
+    content: "\ebe8";
+  }
+  .codicon.codicon-logo-github::before {
+    font-family: "cursor-icons";
+    content: "\ea84";
+  }
+  .codicon.codicon-logo-mcp::before {
+    font-family: "cursor-icons";
+    content: "\ec47";
+  }
+  .codicon.codicon-logo-python::before {
+    font-family: "cursor-icons";
+    content: "\ec39";
+  }
+  .codicon.codicon-logo-vscode::before {
+    font-family: "cursor-icons";
+    content: "\ec29";
+  }
+  .codicon.codicon-logo-vscode-insiders::before {
+    font-family: "cursor-icons";
+    content: "\ec2a";
+  }
+  .codicon.codicon-magnet::before {
+    font-family: "cursor-icons";
+    content: "\ebae";
+  }
+  .codicon.codicon-magnifyingGlass::before {
+    font-family: "cursor-icons";
+    content: "\ea6d";
+  }
+  .codicon.codicon-magnifyingGlass-minus::before {
+    font-family: "cursor-icons";
+    content: "\eb82";
+  }
+  .codicon.codicon-magnifyingGlass-plus::before {
+    font-family: "cursor-icons";
+    content: "\eb81";
+  }
+  .codicon.codicon-magnifyingGlass-slash-circle::before {
+    font-family: "cursor-icons";
+    content: "\eb4e";
+  }
+  .codicon.codicon-map::before {
+    font-family: "cursor-icons";
+    content: "\ec05";
+  }
+  .codicon.codicon-map-pin::before {
+    font-family: "cursor-icons";
+    content: "\eb1a";
+  }
+  .codicon.codicon-menu::before {
+    font-family: "cursor-icons";
+    content: "\eb94";
+  }
+  .codicon.codicon-mic::before {
+    font-family: "cursor-icons";
+    content: "\ec12";
+  }
+  .codicon.codicon-minus::before {
+    font-family: "cursor-icons";
+    content: "\eb3b";
+  }
+  .codicon.codicon-minus-circle::before {
+    font-family: "cursor-icons";
+    content: "\f2de";
+  }
+  .codicon.codicon-mobile::before {
+    font-family: "cursor-icons";
+    content: "\eadb";
+  }
+  .codicon.codicon-moon::before {
+    font-family: "cursor-icons";
+    content: "\f2df";
+  }
+  .codicon.codicon-music::before {
+    font-family: "cursor-icons";
+    content: "\ec1b";
+  }
+  .codicon.codicon-paperclip::before {
+    font-family: "cursor-icons";
+    content: "\ec54";
+  }
+  .codicon.codicon-paperplane::before {
+    font-family: "cursor-icons";
+    content: "\ec0f";
+  }
+  .codicon.codicon-paragraph::before {
+    font-family: "cursor-icons";
+    content: "\f2e1";
+  }
+  .codicon.codicon-pause::before {
+    font-family: "cursor-icons";
+    content: "\ead1";
+  }
+  .codicon.codicon-pause-circle::before {
+    font-family: "cursor-icons";
+    content: "\f2e2";
+  }
+  .codicon.codicon-pen-nib::before {
+    font-family: "cursor-icons";
+    content: "\f2e3";
+  }
+  .codicon.codicon-pencil::before {
+    font-family: "cursor-icons";
+    content: "\ea73";
+  }
+  .codicon.codicon-pencil-square::before {
+    font-family: "cursor-icons";
+    content: "\eddd";
+  }
+  .codicon.codicon-people::before {
+    font-family: "cursor-icons";
+    content: "\ea7e";
+  }
+  .codicon.codicon-percent::before {
+    font-family: "cursor-icons";
+    content: "\ec33";
+  }
+  .codicon.codicon-person::before {
+    font-family: "cursor-icons";
+    content: "\ea67";
+  }
+  .codicon.codicon-person-circle::before {
+    font-family: "cursor-icons";
+    content: "\eb99";
+  }
+  .codicon.codicon-person-plus::before {
+    font-family: "cursor-icons";
+    content: "\ebcd";
+  }
+  .codicon.codicon-piano::before {
+    font-family: "cursor-icons";
+    content: "\ec1a";
+  }
+  .codicon.codicon-pilcrow::before {
+    font-family: "cursor-icons";
+    content: "\eb7d";
+  }
+  .codicon.codicon-pin::before {
+    font-family: "cursor-icons";
+    content: "\eb2b";
+  }
+  .codicon.codicon-plan::before {
+    font-family: "cursor-icons";
+    content: "\f2e4";
+  }
+  .codicon.codicon-play::before {
+    font-family: "cursor-icons";
+    content: "\eb2c";
+  }
+  .codicon.codicon-play-circle::before {
+    font-family: "cursor-icons";
+    content: "\eba6";
+  }
+  .codicon.codicon-plug::before {
+    font-family: "cursor-icons";
+    content: "\eb2d";
+  }
+  .codicon.codicon-plug-slash::before {
+    font-family: "cursor-icons";
+    content: "\ead0";
+  }
+  .codicon.codicon-plus::before {
+    font-family: "cursor-icons";
+    content: "\ea60";
+  }
+  .codicon.codicon-plus-circle::before {
+    font-family: "cursor-icons";
+    content: "\f232";
+  }
+  .codicon.codicon-plus-minus::before {
+    font-family: "cursor-icons";
+    content: "\f302";
+  }
+  .codicon.codicon-pointer-arrow::before {
+    font-family: "cursor-icons";
+    content: "\ec57";
+  }
+  .codicon.codicon-question::before {
+    font-family: "cursor-icons";
+    content: "\f2e5";
+  }
+  .codicon.codicon-question-circle::before {
+    font-family: "cursor-icons";
+    content: "\eb32";
+  }
+  .codicon.codicon-radio-tower::before {
+    font-family: "cursor-icons";
+    content: "\eb34";
+  }
+  .codicon.codicon-rect-magnifyingGlass::before {
+    font-family: "cursor-icons";
+    content: "\f2e6";
+  }
+  .codicon.codicon-review::before {
+    font-family: "cursor-icons";
+    content: "\f2e7";
+  }
+  .codicon.codicon-robot::before {
+    font-family: "cursor-icons";
+    content: "\ec20";
+  }
+  .codicon.codicon-ruler::before {
+    font-family: "cursor-icons";
+    content: "\ea96";
+  }
+  .codicon.codicon-seal::before {
+    font-family: "cursor-icons";
+    content: "\f2e8";
+  }
+  .codicon.codicon-seal-check::before {
+    font-family: "cursor-icons";
+    content: "\eb77";
+  }
+  .codicon.codicon-seal-question::before {
+    font-family: "cursor-icons";
+    content: "\eb76";
+  }
+  .codicon.codicon-server::before {
+    font-family: "cursor-icons";
+    content: "\eb50";
+  }
+  .codicon.codicon-shield::before {
+    font-family: "cursor-icons";
+    content: "\eb53";
+  }
+  .codicon.codicon-shield-check::before {
+    font-family: "cursor-icons";
+    content: "\ebc1";
+  }
+  .codicon.codicon-shield-question::before {
+    font-family: "cursor-icons";
+    content: "\ebc3";
+  }
+  .codicon.codicon-shield-x::before {
+    font-family: "cursor-icons";
+    content: "\ebc2";
+  }
+  .codicon.codicon-slash-circle::before {
+    font-family: "cursor-icons";
+    content: "\eabd";
+  }
+  .codicon.codicon-sliders::before {
+    font-family: "cursor-icons";
+    content: "\eb52";
+  }
+  .codicon.codicon-smartwatch::before {
+    font-family: "cursor-icons";
+    content: "\f2e9";
+  }
+  .codicon.codicon-smiley-happy::before {
+    font-family: "cursor-icons";
+    content: "\f234";
+  }
+  .codicon.codicon-smiley-neutral::before {
+    font-family: "cursor-icons";
+    content: "\f235";
+  }
+  .codicon.codicon-smiley-plus::before {
+    font-family: "cursor-icons";
+    content: "\eb35";
+  }
+  .codicon.codicon-smiley-sad::before {
+    font-family: "cursor-icons";
+    content: "\f233";
+  }
+  .codicon.codicon-sort-ascending::before {
+    font-family: "cursor-icons";
+    content: "\f2ea";
+  }
+  .codicon.codicon-sort-descending::before {
+    font-family: "cursor-icons";
+    content: "\f2eb";
+  }
+  .codicon.codicon-sparkles::before {
+    font-family: "cursor-icons";
+    content: "\ec10";
+  }
+  .codicon.codicon-speaker-waves::before {
+    font-family: "cursor-icons";
+    content: "\eb75";
+  }
+  .codicon.codicon-speaker-x::before {
+    font-family: "cursor-icons";
+    content: "\eb24";
+  }
+  .codicon.codicon-spinner::before {
+    font-family: "cursor-icons";
+    content: "\edca";
+  }
+  .codicon.codicon-square::before {
+    font-family: "cursor-icons";
+    content: "\ea72";
+  }
+  .codicon.codicon-squares::before {
+    font-family: "cursor-icons";
+    content: "\eabb";
+  }
+  .codicon.codicon-stack::before {
+    font-family: "cursor-icons";
+    content: "\ebd2";
+  }
+  .codicon.codicon-star::before {
+    font-family: "cursor-icons";
+    content: "\ea6a";
+  }
+  .codicon.codicon-stop::before {
+    font-family: "cursor-icons";
+    content: "\f2ec";
+  }
+  .codicon.codicon-stop-circle::before {
+    font-family: "cursor-icons";
+    content: "\eba5";
+  }
+  .codicon.codicon-sun::before {
+    font-family: "cursor-icons";
+    content: "\f2ed";
+  }
+  .codicon.codicon-table::before {
+    font-family: "cursor-icons";
+    content: "\ebb7";
+  }
+  .codicon.codicon-tabs::before {
+    font-family: "cursor-icons";
+    content: "\f2be";
+  }
+  .codicon.codicon-tag::before {
+    font-family: "cursor-icons";
+    content: "\ea66";
+  }
+  .codicon.codicon-terminal::before {
+    font-family: "cursor-icons";
+    content: "\ea85";
+  }
+  .codicon.codicon-text-aa::before {
+    font-family: "cursor-icons";
+    content: "\eab1";
+  }
+  .codicon.codicon-text-ab::before {
+    font-family: "cursor-icons";
+    content: "\eb2e";
+  }
+  .codicon.codicon-text-b::before {
+    font-family: "cursor-icons";
+    content: "\eaa3";
+  }
+  .codicon.codicon-text-italic::before {
+    font-family: "cursor-icons";
+    content: "\eb0d";
+  }
+  .codicon.codicon-text-t::before {
+    font-family: "cursor-icons";
+    content: "\f2ee";
+  }
+  .codicon.codicon-text-t-square::before {
+    font-family: "cursor-icons";
+    content: "\f2c1";
+  }
+  .codicon.codicon-text-tt::before {
+    font-family: "cursor-icons";
+    content: "\eb69";
+  }
+  .codicon.codicon-thumbs-down::before {
+    font-family: "cursor-icons";
+    content: "\ed96";
+  }
+  .codicon.codicon-thumbs-up::before {
+    font-family: "cursor-icons";
+    content: "\ed97";
+  }
+  .codicon.codicon-trafficCone::before {
+    font-family: "cursor-icons";
+    content: "\f2c0";
+  }
+  .codicon.codicon-trash::before {
+    font-family: "cursor-icons";
+    content: "\ea81";
+  }
+  .codicon.codicon-tray::before {
+    font-family: "cursor-icons";
+    content: "\eb09";
+  }
+  .codicon.codicon-video-camera::before {
+    font-family: "cursor-icons";
+    content: "\ead9";
+  }
+  .codicon.codicon-watch::before {
+    font-family: "cursor-icons";
+    content: "\eb7c";
+  }
+  .codicon.codicon-window-pointer-arrow::before {
+    font-family: "cursor-icons";
+    content: "\ebd1";
+  }
+  .codicon.codicon-windows::before {
+    font-family: "cursor-icons";
+    content: "\f2bf";
+  }
+  .codicon.codicon-x::before {
+    font-family: "cursor-icons";
+    content: "\ed82";
+  }
+  .codicon.codicon-x-circle::before {
+    font-family: "cursor-icons";
+    content: "\ea87";
+  }
+
+  /* Semantic mappings: VSCode codicon names -> Cursor icons */
+  .codicon.codicon-search::before {
+    font-family: "cursor-icons";
+    content: "\ea6d";
+  }
+  .codicon.codicon-search-stop::before {
+    font-family: "cursor-icons";
+    content: "\eb4e";
+  }
+  .codicon.codicon-zoom-in::before {
+    font-family: "cursor-icons";
+    content: "\eb81";
+  }
+  .codicon.codicon-zoom-out::before {
+    font-family: "cursor-icons";
+    content: "\eb82";
+  }
+  .codicon.codicon-refresh::before {
+    font-family: "cursor-icons";
+    content: "\ead2";
+  }
+  .codicon.codicon-sync::before {
+    font-family: "cursor-icons";
+    content: "\ea77";
+  }
+  .codicon.codicon-redo::before {
+    font-family: "cursor-icons";
+    content: "\eb37";
+  }
+  .codicon.codicon-close::before {
+    font-family: "cursor-icons";
+    content: "\ed82";
+  }
+  .codicon.codicon-remove-close::before {
+    font-family: "cursor-icons";
+    content: "\ed82";
+  }
+  .codicon.codicon-add::before {
+    font-family: "cursor-icons";
+    content: "\ea60";
+  }
+  .codicon.codicon-remove::before {
+    font-family: "cursor-icons";
+    content: "\eb3b";
+  }
+  .codicon.codicon-settings-gear::before {
+    font-family: "cursor-icons";
+    content: "\eaf8";
+  }
+  .codicon.codicon-gear::before {
+    font-family: "cursor-icons";
+    content: "\eaf8";
+  }
+  .codicon.codicon-settings::before {
+    font-family: "cursor-icons";
+    content: "\eb52";
+  }
+  .codicon.codicon-new-file::before {
+    font-family: "cursor-icons";
+    content: "\ed8d";
+  }
+  .codicon.codicon-file-add::before {
+    font-family: "cursor-icons";
+    content: "\ed8d";
+  }
+  .codicon.codicon-new-folder::before {
+    font-family: "cursor-icons";
+    content: "\ea80";
+  }
+  .codicon.codicon-file-directory-create::before {
+    font-family: "cursor-icons";
+    content: "\ea80";
+  }
+  .codicon.codicon-file-directory::before {
+    font-family: "cursor-icons";
+    content: "\ea83";
+  }
+  .codicon.codicon-folder-opened::before {
+    font-family: "cursor-icons";
+    content: "\ea83";
+  }
+  .codicon.codicon-folder-active::before {
+    font-family: "cursor-icons";
+    content: "\eaf6";
+  }
+  .codicon.codicon-symbol-folder::before {
+    font-family: "cursor-icons";
+    content: "\ea83";
+  }
+  .codicon.codicon-mail::before {
+    font-family: "cursor-icons";
+    content: "\eb1c";
+  }
+  .codicon.codicon-send::before {
+    font-family: "cursor-icons";
+    content: "\ec0f";
+  }
+  .codicon.codicon-comment-discussion::before {
+    font-family: "cursor-icons";
+    content: "\f2d1";
+  }
+  .codicon.codicon-feedback::before {
+    font-family: "cursor-icons";
+    content: "\f2d0";
+  }
+  .codicon.codicon-report::before {
+    font-family: "cursor-icons";
+    content: "\eb42";
+  }
+  .codicon.codicon-home::before {
+    font-family: "cursor-icons";
+    content: "\eb06";
+  }
+  .codicon.codicon-info::before {
+    font-family: "cursor-icons";
+    content: "\ea74";
+  }
+  .codicon.codicon-warning::before {
+    font-family: "cursor-icons";
+    content: "\ea6c";
+  }
+  .codicon.codicon-alert::before {
+    font-family: "cursor-icons";
+    content: "\ea6c";
+  }
+  .codicon.codicon-error::before {
+    font-family: "cursor-icons";
+    content: "\ea87";
+  }
+  .codicon.codicon-issues::before {
+    font-family: "cursor-icons";
+    content: "\edbc";
+  }
+  .codicon.codicon-trashcan::before {
+    font-family: "cursor-icons";
+    content: "\ea81";
+  }
+  .codicon.codicon-edit::before {
+    font-family: "cursor-icons";
+    content: "\ea73";
+  }
+  .codicon.codicon-discard::before {
+    font-family: "cursor-icons";
+    content: "\ed82";
+  }
+  .codicon.codicon-run::before {
+    font-family: "cursor-icons";
+    content: "\eb2c";
+  }
+  .codicon.codicon-debug-start::before {
+    font-family: "cursor-icons";
+    content: "\eb2c";
+  }
+  .codicon.codicon-debug-pause::before {
+    font-family: "cursor-icons";
+    content: "\ead1";
+  }
+  .codicon.codicon-debug-restart::before {
+    font-family: "cursor-icons";
+    content: "\ead2";
+  }
+  .codicon.codicon-debug-stop::before {
+    font-family: "cursor-icons";
+    content: "\eba5";
+  }
+  .codicon.codicon-source-control::before {
+    font-family: "cursor-icons";
+    content: "\edb4";
+  }
+  .codicon.codicon-device-desktop::before {
+    font-family: "cursor-icons";
+    content: "\ea7a";
+  }
+  .codicon.codicon-vm::before {
+    font-family: "cursor-icons";
+    content: "\ea7a";
+  }
+  .codicon.codicon-device-camera::before {
+    font-family: "cursor-icons";
+    content: "\eada";
+  }
+  .codicon.codicon-device-camera-video::before {
+    font-family: "cursor-icons";
+    content: "\ead9";
+  }
+  .codicon.codicon-device-mobile::before {
+    font-family: "cursor-icons";
+    content: "\eadb";
+  }
+  .codicon.codicon-filter::before {
+    font-family: "cursor-icons";
+    content: "\eaf1";
+  }
+  .codicon.codicon-list-filter::before {
+    font-family: "cursor-icons";
+    content: "\eb83";
+  }
+  .codicon.codicon-graph::before {
+    font-family: "cursor-icons";
+    content: "\eb03";
+  }
+  .codicon.codicon-graph-line::before {
+    font-family: "cursor-icons";
+    content: "\ebe2";
+  }
+  .codicon.codicon-graph-scatter::before {
+    font-family: "cursor-icons";
+    content: "\ebe3";
+  }
+  .codicon.codicon-pie-chart::before {
+    font-family: "cursor-icons";
+    content: "\ebe4";
+  }
+  .codicon.codicon-book::before {
+    font-family: "cursor-icons";
+    content: "\eaa4";
+  }
+  .codicon.codicon-library::before {
+    font-family: "cursor-icons";
+    content: "\eb9c";
+  }
+  .codicon.codicon-beaker::before {
+    font-family: "cursor-icons";
+    content: "\ea79";
+  }
+  .codicon.codicon-microscope::before {
+    font-family: "cursor-icons";
+    content: "\ea79";
+  }
+  .codicon.codicon-beaker-stop::before {
+    font-family: "cursor-icons";
+    content: "\ebe1";
+  }
+  .codicon.codicon-cloud-download::before {
+    font-family: "cursor-icons";
+    content: "\eac2";
+  }
+  .codicon.codicon-cloud-upload::before {
+    font-family: "cursor-icons";
+    content: "\eac3";
+  }
+  .codicon.codicon-desktop-download::before {
+    font-family: "cursor-icons";
+    content: "\eac2";
+  }
+  .codicon.codicon-code::before {
+    font-family: "cursor-icons";
+    content: "\eac4";
+  }
+  .codicon.codicon-bracket::before {
+    font-family: "cursor-icons";
+    content: "\eb0f";
+  }
+  .codicon.codicon-json::before {
+    font-family: "cursor-icons";
+    content: "\eb0f";
+  }
+  .codicon.codicon-bracket-dot::before {
+    font-family: "cursor-icons";
+    content: "\ebe5";
+  }
+  .codicon.codicon-bracket-error::before {
+    font-family: "cursor-icons";
+    content: "\ebe6";
+  }
+  .codicon.codicon-ellipsis::before {
+    font-family: "cursor-icons";
+    content: "\ea7c";
+  }
+  .codicon.codicon-more::before {
+    font-family: "cursor-icons";
+    content: "\ea7c";
+  }
+  .codicon.codicon-kebab-horizontal::before {
+    font-family: "cursor-icons";
+    content: "\ea7c";
+  }
+  .codicon.codicon-kebab-vertical::before {
+    font-family: "cursor-icons";
+    content: "\eb10";
+  }
+  .codicon.codicon-split-horizontal::before {
+    font-family: "cursor-icons";
+    content: "\ec5c";
+  }
+  .codicon.codicon-split-vertical::before {
+    font-family: "cursor-icons";
+    content: "\eb57";
+  }
+  .codicon.codicon-layout-sidebar-left-off::before {
+    font-family: "cursor-icons";
+    content: "\ec02";
+  }
+  .codicon.codicon-layout-sidebar-right-off::before {
+    font-family: "cursor-icons";
+    content: "\ec00";
+  }
+  .codicon.codicon-layout-panel-off::before {
+    font-family: "cursor-icons";
+    content: "\ec01";
+  }
+  .codicon.codicon-organization::before {
+    font-family: "cursor-icons";
+    content: "\ea7e";
+  }
+  .codicon.codicon-organization-filled::before {
+    font-family: "cursor-icons";
+    content: "\ea7e";
+  }
+  .codicon.codicon-person-follow::before {
+    font-family: "cursor-icons";
+    content: "\ebcd";
+  }
+  .codicon.codicon-person-add::before {
+    font-family: "cursor-icons";
+    content: "\ebcd";
+  }
+  .codicon.codicon-account::before {
+    font-family: "cursor-icons";
+    content: "\eb99";
+  }
+  .codicon.codicon-lock::before {
+    font-family: "cursor-icons";
+    content: "\ea75";
+  }
+  .codicon.codicon-unlock::before {
+    font-family: "cursor-icons";
+    content: "\eb74";
+  }
+  .codicon.codicon-verified::before {
+    font-family: "cursor-icons";
+    content: "\eb77";
+  }
+  .codicon.codicon-unverified::before {
+    font-family: "cursor-icons";
+    content: "\eb76";
+  }
+  .codicon.codicon-mark-github::before {
+    font-family: "cursor-icons";
+    content: "\ea84";
+  }
+  .codicon.codicon-github::before {
+    font-family: "cursor-icons";
+    content: "\ea84";
+  }
+  .codicon.codicon-location::before {
+    font-family: "cursor-icons";
+    content: "\eb1a";
+  }
+  .codicon.codicon-unmute::before {
+    font-family: "cursor-icons";
+    content: "\eb75";
+  }
+  .codicon.codicon-mute::before {
+    font-family: "cursor-icons";
+    content: "\eb24";
+  }
+  .codicon.codicon-target::before {
+    font-family: "cursor-icons";
+    content: "\ebf8";
+  }
+  .codicon.codicon-sparkle::before {
+    font-family: "cursor-icons";
+    content: "\ec10";
+  }
+  .codicon.codicon-copilot::before {
+    font-family: "cursor-icons";
+    content: "\ec10";
+  }
+  .codicon.codicon-wand::before {
+    font-family: "cursor-icons";
+    content: "\ec10";
+  }
+  .codicon.codicon-lightbulb-sparkle::before {
+    font-family: "cursor-icons";
+    content: "\ec10";
+  }
+  .codicon.codicon-zap::before {
+    font-family: "cursor-icons";
+    content: "\ec10";
+  }
+  .codicon.codicon-layers::before {
+    font-family: "cursor-icons";
+    content: "\ebd2";
+  }
+  .codicon.codicon-inspect::before {
+    font-family: "cursor-icons";
+    content: "\ebd1";
+  }
+  .codicon.codicon-history::before {
+    font-family: "cursor-icons";
+    content: "\edc0";
+  }
+  .codicon.codicon-pass::before {
+    font-family: "cursor-icons";
+    content: "\edba";
+  }
+  .codicon.codicon-issue-closed::before {
+    font-family: "cursor-icons";
+    content: "\edba";
+  }
+  .codicon.codicon-thumbsdown::before {
+    font-family: "cursor-icons";
+    content: "\ed96";
+  }
+  .codicon.codicon-thumbsup::before {
+    font-family: "cursor-icons";
+    content: "\ed97";
+  }
+  .codicon.codicon-inbox::before {
+    font-family: "cursor-icons";
+    content: "\eb09";
+  }
+  .codicon.codicon-clone::before {
+    font-family: "cursor-icons";
+    content: "\ebcc";
+  }
+  .codicon.codicon-arrow-swap::before {
+    font-family: "cursor-icons";
+    content: "\ebcb";
+  }
+  .codicon.codicon-link-external::before {
+    font-family: "cursor-icons";
+    content: "\ede6";
+  }
+  .codicon.codicon-browser::before {
+    font-family: "cursor-icons";
+    content: "\eb01";
+  }
+  .codicon.codicon-hourglass::before {
+    font-family: "cursor-icons";
+    content: "\edcf";
+  }
+  .codicon.codicon-hourglass-two::before {
+    font-family: "cursor-icons";
+    content: "\edd1";
+  }
+  .codicon.codicon-loading::before {
+    font-family: "cursor-icons";
+    content: "\edca";
+  }
+  .codicon.codicon-file-code::before {
+    font-family: "cursor-icons";
+    content: "\ea7b";
+  }
+  .codicon.codicon-file-media::before {
+    font-family: "cursor-icons";
+    content: "\f309";
+  }
+  .codicon.codicon-file-zip::before {
+    font-family: "cursor-icons";
+    content: "\ea7b";
+  }
+  .codicon.codicon-file-pdf::before {
+    font-family: "cursor-icons";
+    content: "\ea7b";
+  }
+  .codicon.codicon-file-binary::before {
+    font-family: "cursor-icons";
+    content: "\ea7b";
+  }
+  .codicon.codicon-markdown::before {
+    font-family: "cursor-icons";
+    content: "\ea7b";
+  }
+  .codicon.codicon-mention::before {
+    font-family: "cursor-icons";
+    content: "\ec55";
+  }
+  .codicon.codicon-mcp::before {
+    font-family: "cursor-icons";
+    content: "\ec47";
+  }
+  .codicon.codicon-rules::before {
+    font-family: "cursor-icons";
+    content: "\eaa4";
+  }
+  .codicon.codicon-skills::before {
+    font-family: "cursor-icons";
+    content: "\ec10";
+  }
+  .codicon.codicon-agents::before {
+    font-family: "cursor-icons";
+    content: "\ec20";
+  }
+  .codicon.codicon-status-done::before {
+    font-family: "cursor-icons";
+    content: "\edba";
+  }
+  .codicon.codicon-status-draft::before {
+    font-family: "cursor-icons";
+    content: "\edbb";
+  }
+  .codicon.codicon-status-needs-attention::before {
+    font-family: "cursor-icons";
+    content: "\edbc";
+  }
+  .codicon.codicon-replace::before {
+    font-family: "cursor-icons";
+    content: "\f2e6";
+  }
+  .codicon.codicon-replace-all::before {
+    font-family: "cursor-icons";
+    content: "\f2e6";
+  }
+  .codicon.codicon-star-empty::before {
+    font-family: "cursor-icons";
+    content: "\ea6a";
+  }
+  .codicon.codicon-star-full::before {
+    font-family: "cursor-icons";
+    content: "\ea6a";
+  }
