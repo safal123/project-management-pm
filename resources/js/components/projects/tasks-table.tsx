@@ -127,11 +127,12 @@ export default function TasksTable({ paginatedTasks }: TasksTableProps) {
     )
   }
 
-  const { data: tasks, current_page, last_page, from, to, total } = paginatedTasks
+  const { data: tasks } = paginatedTasks
+  const { current_page, last_page, total, from, to } = paginatedTasks.meta
 
   const navigateToPage = (page: number) => {
     router.get(
-      route('projects.tasks', { project: project.slug }),
+      route('projects.show', { project: project.slug }),
       { page, tab: 'table' },
       { preserveState: true, preserveScroll: true, only: ['paginatedTasks'] }
     )
@@ -164,7 +165,7 @@ export default function TasksTable({ paginatedTasks }: TasksTableProps) {
 
       {last_page > 1 && (
         <DataTablePaginationRow>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground w-[200px]">
             Showing {from}–{to} of {total} tasks
           </p>
           <Pagination>

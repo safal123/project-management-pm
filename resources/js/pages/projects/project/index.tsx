@@ -13,7 +13,7 @@ import TasksTable from '@/components/projects/tasks-table';
 import Can from '@/components/can';
 
 export default function ProjectShow() {
-  const { project, tasks, paginatedTasks } = usePage<SharedData & { project: Project; tasks: Task[]; paginatedTasks?: PaginatedData<Task> }>().props;
+  const { project, tasks, paginatedTasks } = usePage<SharedData & { project: Project; tasks: any; paginatedTasks?: PaginatedData<Task> }>().props;
   const url = usePage().url;
   const params = new URLSearchParams(url.split('?')[1]);
   const activeTab = params.get('tab') ?? 'board';
@@ -48,7 +48,7 @@ export default function ProjectShow() {
             setParam('tab', value);
             if (value === 'table' && !paginatedTasks) {
               router.get(
-                route('projects.tasks', { project: project.slug }),
+                route('projects.show', { project: project.slug }),
                 { tab: 'table' },
                 { preserveState: true, preserveScroll: true, only: ['paginatedTasks'] }
               );
@@ -95,7 +95,7 @@ export default function ProjectShow() {
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6 px-6 py-6 focus-visible:outline-none overflow-y-auto">
-            <ProjectDashboard project={project} tasks={tasks} />
+            <ProjectDashboard project={project} tasks={tasks.data} />
           </TabsContent>
 
           {/* Table Tab */}

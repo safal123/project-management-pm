@@ -26,43 +26,31 @@ export function AddKanbanItem(props: AddKanbanItemProps) {
 
   const add = () => {
     setIsAdding(true)
-
-    if (props.type === 'column') {
-      router.post(
-        route('tasks.store'),
-        {
-          title: 'New Section',
-          description: 'New Section Description',
-          project_id: project.id,
-          parent_task_id: null,
-          workspace_id: project.workspace_id,
-        },
-        {
-          preserveScroll: true,
-          onSuccess: () => toast.success('New column created'),
-          onError: () => toast.error('Failed to create new column'),
-          onFinish: () => setIsAdding(false),
-        }
-      )
-    } else {
-      router.post(
-        route('tasks.store'),
-        {
-          title: 'New Task',
-          description: 'New Task Description',
-          project_id: props.column.project_id,
-          parent_task_id: props.column.id,
-          workspace_id: props.column.workspace_id,
-        },
-        {
-          preserveScroll: true,
-          only: ['tasks'],
-          onSuccess: () => toast.success('New task added'),
-          onError: () => toast.error('Failed to add new task'),
-          onFinish: () => setIsAdding(false),
-        }
-      )
+    const isColumn = props.type === 'column'
+    const payload = {
+      title: isColumn ? 'New Section' : 'New Task',
+      description: isColumn
+        ? 'New Section Description'
+        : 'New Task Description',
+      project_id: isColumn ? project.id : props.column.project_id,
+      parent_task_id: isColumn ? null : props.column.id,
+      workspace_id: isColumn
+        ? project.workspace_id
+        : props.column.workspace_id,
     }
+
+    router.post(route('tasks.store'), payload, {
+      preserveScroll: true,
+      only: ['tasks', 'paginatedTasks'],
+      onSuccess: () => {
+        toast.success(isColumn ? 'New column created' : 'New task added')
+      },
+      onError: () =>
+        toast.error(
+          isColumn ? 'Failed to create new column' : 'Failed to add new task'
+        ),
+      onFinish: () => setIsAdding(false),
+    })
   }
 
   if (props.type === 'task' && props.variant === 'dropdown') {
@@ -78,33 +66,16 @@ export function AddKanbanItem(props: AddKanbanItemProps) {
     )
   }
 
-  if (props.type === 'column') {
-    return (
-      <div className="w-[350px] flex-shrink-0 pr-12">
-        <Button
-          onClick={add}
-          disabled={isAdding}
-          variant="outline"
-          className="dark:bg-primary/5 dark:border-primary/20 text-primary w-full max-h-[120px] flex items-center justify-center gap-2 border-2 border-dashed hover:border-primary/50 hover:bg-accent/5 transition-colors"
-        >
-          {isAdding ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
-          <span className="text-sm font-medium">{isAdding ? 'Adding...' : 'Add Column'}</span>
-        </Button>
-      </div>
-    )
-  }
-
   return (
-    <div className="text-center text-sm">
+    <div className="max-w-[350px] w-fit flex-shrink-0 pr-12">
       <Button
         onClick={add}
-        size="sm"
-        className={`w-full ${props.type === 'task' && props.className ? props.className : ''}`}
         disabled={isAdding}
+        variant="outline"
+        className="dark:bg-black/40 dark:border-primary/20 text-primary w-full max-h-[120px] flex items-center justify-center gap-2 border-2 border-dashed hover:border-primary/50 hover:bg-accent/5 transition-colors"
       >
-        <Plus className="h-4 w-4" />
-        {isAdding && <Loader2 className="h-4 w-4 animate-spin" />}
-        Add New Task
+        {isAdding ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
+        <span className="text-sm font-medium">{isAdding ? 'Adding...' : 'Add Column'}</span>
       </Button>
     </div>
   )

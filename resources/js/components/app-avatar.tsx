@@ -58,9 +58,9 @@ export default function AppAvatar({
     <Avatar className={cn(sizeClasses[size], className)}>
       {src && <AvatarImage src={src} alt={name} className="object-cover" />}
       {showFallback && (
-        <AvatarFallback className="bg-primary/10">
+        <AvatarFallback className="bg-primary">
           {name ? (
-            <span className={cn('font-semibold text-primary select-none', textSizes[size])}>
+            <span className={cn('font-semibold text-white select-none', textSizes[size])}>
               {getInitials(name)}
             </span>
           ) : (

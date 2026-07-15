@@ -35,7 +35,7 @@ export function DashboardStats({
 }: DashboardStatsProps) {
   const s = stats ?? {};
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-3">
       <AppStatCard
         title="Total Projects"
         value={s.total_projects ?? projectsCount ?? 0}

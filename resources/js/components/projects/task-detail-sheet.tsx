@@ -23,6 +23,7 @@ import { Label } from '../ui/label';
 import { cn } from '@/lib/utils';
 import AppImagePreview from '../app-image-preview';
 import AppFileUpload from '../app-file-upload';
+import { Separator } from '../ui/separator';
 
 interface TaskDetailSheetProps {
   task: Task | null;
@@ -74,10 +75,11 @@ export function TaskDetailSheet({ task, open, onOpenChange }: TaskDetailSheetPro
         </div>
 
         <div
-          className="flex-1 overflow-y-auto px-6 space-y-6 gap-4"
+          className="flex-1 overflow-y-auto px-6 space-y-6"
         >
           <EditableTaskTitle task={task} />
           <TaskAssignee task={task} />
+          <Separator />
           <div className="flex items-center gap-2">
             <Label className="text-sm w-24">Due Date</Label>
             <TaskDueDate task={task} />
@@ -87,7 +89,7 @@ export function TaskDetailSheet({ task, open, onOpenChange }: TaskDetailSheetPro
           <TaskFields task={task} />
           <AppTextEditor task={task} />
           {/* Attachments */}
-          <div className="border bg-amber-100/10 dark:bg-primary/10 p-4 rounded-md">
+          <div className="border bg-white dark:bg-primary/10 p-4 rounded-md">
             <Label className="w-24 text-sm">
               <p>Attachements {task.media && task.media.length > 0 && `(${task.media.length})`}</p>
             </Label>

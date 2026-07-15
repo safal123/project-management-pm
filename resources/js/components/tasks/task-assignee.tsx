@@ -100,9 +100,9 @@ export default function TaskAssignee({ task, className }: Props) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
-            className="gap-2 justify-start -ml-1 py-5"
+            className="gap-2 justify-start -ml-1 py-5 border"
           >
             {loading && <LoaderCircle className="h-4 w-4 animate-spin" />}
             {/* {task.assigned_to.profile_picture?.url} */}

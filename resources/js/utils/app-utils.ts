@@ -2,6 +2,27 @@
 // Dates
 // -----------------------------------------------------------------------------
 
+/**
+ * Parse a date string from Laravel (e.g. "2026-04-17 09:00:00") into a Date
+ * treated as local time.  Handles ISO strings with "Z" suffix by stripping it,
+ * and space-separated formats by replacing the space with "T".
+ */
+export function parseLaravelDate(dateStr: string): Date {
+  const normalised = dateStr
+    .replace(/\.000000Z$/, '')   // "2026-04-17T09:00:00.000000Z" → drop µs + Z
+    .replace(/Z$/, '')           // any remaining trailing Z
+    .replace(' ', 'T');          // "2026-04-17 09:00:00" → ISO-ish local
+  return new Date(normalised);
+}
+
+/**
+ * Extract just the YYYY-MM-DD portion from a Laravel date string without
+ * going through Date (avoids any timezone shift).
+ */
+export function toDateKey(dateStr: string): string {
+  return dateStr.slice(0, 10);
+}
+
 /** e.g. "Dec 26, 2025" */
 export function formatShortDate(date: string | Date): string {
   return new Date(date).toLocaleDateString('en-US', {

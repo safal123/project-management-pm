@@ -20,6 +20,7 @@ import AppTooltip from '@/components/app-tooltip'
 import AppEmojiPicker from '@/components/app-emoji-picker'
 import { cn } from '@/lib/utils'
 import { Task } from '@/types'
+import { Label } from '@/components/ui/label'
 
 interface AppTextEditorProps {
   task: Task
@@ -129,7 +130,7 @@ export default function AppTextEditor({ task, className }: AppTextEditorProps) {
 
   return (
     <div className={cn('w-full', className)}>
-      <p className="text-sm mb-2">Description</p>
+      <Label className="text-sm mb-2">Description</Label>
 
       <div
         className={cn(

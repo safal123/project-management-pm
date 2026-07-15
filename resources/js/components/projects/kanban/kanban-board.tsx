@@ -13,7 +13,7 @@ type GroupedTasks = Record<string, Task[]>
 
 export const KanbanBoard = () => {
   const { tasks } = usePage<SharedData & { tasks: Task[] }>().props
-  const { parentTasks, groupTasksByColumn } = useKanban(tasks)
+  const { parentTasks, groupTasksByColumn } = useKanban(tasks.data)
 
   const [columns, setColumns] = useState<GroupedTasks>(() => groupTasksByColumn())
   const snapshotRef = useRef<GroupedTasks | null>(null)

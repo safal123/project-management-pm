@@ -69,12 +69,12 @@ class User extends Authenticatable
             ->latestOfMany();
     }
 
-    public function profilePicture(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->media
-        )->shouldCache();
-    }
+    // public function profilePicture(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: fn () => $this->media
+    //     )->shouldCache();
+    // }
 
     public function currentWorkspaceId()
     {

@@ -46,7 +46,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user()
                     ? (new UserResource($request
                         ->user()
-                        ->load('workspaces', 'currentWorkspace')))
+                        ->load('workspaces', 'currentWorkspace', 'media')))
                     : null,
                 'permissions' => [
                     'can' => [

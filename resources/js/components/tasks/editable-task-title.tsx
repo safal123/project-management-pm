@@ -68,6 +68,7 @@ export default function EditableTaskTitle({
     <div className={cn('flex-1', className)}>
       {isEditing ? (
         <input
+          id={`task-title-${task.id}`}
           autoFocus
           disabled={isSubmitting}
           value={value}

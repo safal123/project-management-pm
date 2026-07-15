@@ -22,6 +22,8 @@ class MediaResource extends JsonResource
             'original_filename' => $this->original_filename,
             'workspace_id' => $this->workspace_id,
             'created_at' => $this->created_at,
+            'mediable_type' => $this->mediable_type,
+            'mediable_id' => $this->mediable_id,
         ];
     }
 }

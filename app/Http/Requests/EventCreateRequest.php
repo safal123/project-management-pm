@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EventCreateRequest extends FormRequest
@@ -39,9 +40,19 @@ class EventCreateRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $this->merge([
-            'created_by' => auth()->id(),
+        $merge = [
+            'created_by'   => auth()->id(),
             'workspace_id' => auth()->user()->current_workspace_id,
-        ]);
+        ];
+
+        if ($this->start_date && $this->start_time) {
+            $merge['start_date'] = Carbon::parse($this->start_date)->format('Y-m-d') . ' ' . $this->start_time;
+        }
+
+        if ($this->end_date && $this->end_time) {
+            $merge['end_date'] = Carbon::parse($this->end_date)->format('Y-m-d') . ' ' . $this->end_time;
+        }
+
+        $this->merge($merge);
     }
 }

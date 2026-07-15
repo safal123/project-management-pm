@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Http\Resources\ProjectResource;
-use Illuminate\Support\Facades\DB;
+use App\Http\Resources\TaskResource;
 
 class ProjectController extends Controller
 {
@@ -49,7 +49,7 @@ class ProjectController extends Controller
         }
     }
 
-    public function show(Project $project)
+    public function show(Project $project, Request $request)
     {
         $userId = Auth::id();
 
@@ -57,60 +57,37 @@ class ProjectController extends Controller
             'users',
             'createdBy',
             'invitations' => fn($q) => $q
-                ->where('expires_at', '>', now())
+                ->where('expires_at', '>=', now())
                 ->with([
                     'invitedBy',
                     'invitedTo',
                 ]),
-            'tasks' => fn($q) => $q
-                ->with(['media', 'assignedTo'])
-                ->withCount([
-                    'likes',
-                    'likes as is_liked_by_user' => fn($q) => $q->where('user_id', $userId),
-                ]),
         ]);
 
-        return Inertia::render('projects/project/index', [
-            'project' => ProjectResource::make($project),
-            'tasks' => $project->tasks->sortBy('order')->values(),
-        ]);
-    }
-
-    public function tasks(Project $project, Request $request)
-    {
-        $userId = Auth::id();
-        DB::enableQueryLog();
-        $tasks = Task::where('project_id', $project->id)
-            ->whereNotNull('parent_task_id')
-            ->with(['assignedTo', 'parentTask:id,title', 'media'])
+        $tasks = Task::query()
+            ->where('project_id', $project->id)
+            ->with([
+                'assignedTo',
+                'assignedTo.media',
+                'media',
+                'parentTask:id,title',
+            ])
             ->withCount([
                 'likes',
                 'likes as is_liked_by_user' => fn($q) => $q->where('user_id', $userId),
             ])
-            ->orderBy('order')
-            ->paginate(15)
-            ->withQueryString();
+            ->orderBy('order');
 
-        $project->load([
-            'users',
-            'createdBy',
-            'invitations',
-            'invitations.invitedBy',
-            'invitations.invitedTo',
-            'tasks' => fn($q) => $q
-                ->with(['media', 'assignedTo'])
-                ->withCount([
-                    'likes',
-                    'likes as is_liked_by_user' => fn($q) => $q->where('user_id', $userId),
-                ]),
-        ]);
-
-        dd(DB::getQueryLog());
+        $paginatedTasks = $request->get('tab') === 'table'
+            ? $tasks->paginate(10)->withQueryString()
+            : null;
 
         return Inertia::render('projects/project/index', [
             'project' => ProjectResource::make($project),
-            'tasks' => $project->tasks->sortBy('order')->values(),
-            'paginatedTasks' => $tasks,
+            'tasks' => TaskResource::collection($tasks->get()),
+            'paginatedTasks' => $paginatedTasks
+                ? TaskResource::collection($paginatedTasks)
+                : null,
         ]);
     }
 

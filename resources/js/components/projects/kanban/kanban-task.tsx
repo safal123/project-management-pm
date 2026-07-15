@@ -27,7 +27,7 @@ import TaskStatus from '@/components/tasks/task-status'
 import TaskPriority from '@/components/tasks/task-priority'
 import { taskPrioritySurfaceClasses, getDueDateDisplay } from '@/utils/app-utils'
 import { cn } from '@/lib/utils'
-import { useKanbanTask } from '@/hooks/use-kanban'
+import { useKanban } from '@/hooks/use-kanban'
 import { CircularProgressChip } from '@/components/projects/kanban/project-progress'
 import AppTooltip from '@/components/app-tooltip'
 import { LikeButton } from '@/components/like-button'
@@ -46,6 +46,7 @@ interface KanbanTaskProps {
 
 const KanbanTask = memo(({ task, columns, index, columnId }: KanbanTaskProps) => {
   const [element, setElement] = useState<Element | null>(null)
+  const [isTaskDetailOpen, setIsTaskDetailOpen] = useState(false)
   const { isDragging } = useSortable({
     id: task.id,
     index,
@@ -54,14 +55,8 @@ const KanbanTask = memo(({ task, columns, index, columnId }: KanbanTaskProps) =>
     element,
     data: task,
   })
-  const {
-    isTaskDetailOpen,
-    setIsTaskDetailOpen,
-    deleteTask,
-    moveTaskToColumn,
-    openTaskDetailSheet,
-    availableColumns,
-  } = useKanbanTask(task, columns)
+  const { deleteTask, moveTaskToColumn, getAvailableColumns } = useKanban(columns)
+  const availableColumns = getAvailableColumns(task)
 
   if (isDragging) {
     return (
@@ -78,10 +73,10 @@ const KanbanTask = memo(({ task, columns, index, columnId }: KanbanTaskProps) =>
         isDragging={isDragging}
         isTaskDetailOpen={isTaskDetailOpen}
         setIsTaskDetailOpen={setIsTaskDetailOpen}
-        openTaskDetailSheet={openTaskDetailSheet}
+        openTaskDetailSheet={() => setIsTaskDetailOpen(true)}
         availableColumns={availableColumns}
-        moveTaskToColumn={moveTaskToColumn}
-        deleteTask={deleteTask}
+        moveTaskToColumn={(columnId) => moveTaskToColumn(task, columnId)}
+        deleteTask={() => deleteTask(task)}
       />
     </div>
   )
@@ -102,7 +97,7 @@ export const TaskCard = memo(({
   return (
     <>
       <Card className={cn(
-        'bg-card py-2 gap-2 dark:bg-primary/5 dark:border-primary/20',
+        'bg-card py-2 gap-2 dark:bg-black/40 dark:border-primary/20',
         taskPrioritySurfaceClasses(task.priority),
         isTaskDetailOpen && "bg-primary/10 rounded-md",
         isDragging && "opacity-50",
@@ -131,7 +126,10 @@ export const TaskCard = memo(({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
+                    <DropdownMenuSubTrigger
+                      disabled={availableColumns.length === 0}
+                      className={availableColumns.length === 0 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+                    >
                       <ArrowRightIcon className="h-4 w-4 mr-2" />
                       Move to
                     </DropdownMenuSubTrigger>
@@ -148,13 +146,6 @@ export const TaskCard = memo(({
                   </DropdownMenuSub>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={deleteTask}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete task
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -162,6 +153,13 @@ export const TaskCard = memo(({
                     }}>
                     <Edit2Icon className="h-4 w-4 mr-2" />
                     Edit task
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={deleteTask}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete task
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -172,7 +170,7 @@ export const TaskCard = memo(({
           task.status === "done" && "bg-primary/10 opacity-40",
         )}>
           <Separator />
-          <div className="px-4 flex items-center justify-between mt-3">
+          <div className="px-2 flex items-center justify-between mt-3">
             <div className="flex items-center gap-2 mr-2">
               <TaskDueDate task={task} />
               <TaskStatus task={task} />
@@ -201,7 +199,6 @@ export const TaskCard = memo(({
           <Separator />
           <div className="flex items-center gap-2 px-4">
             <div className="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2">
-
               <AppAvatar
                 src={task.assigned_to?.profile_picture?.url}
                 name={task.assigned_to?.name}

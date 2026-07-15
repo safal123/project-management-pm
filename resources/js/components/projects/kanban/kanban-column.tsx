@@ -26,11 +26,11 @@ export const KanbanColumn = memo(({ column, columns, tasks }: KanbanColumnProps)
     <div
       ref={ref}
       className={cn(
-        'w-[350px] h-full shrink-0 rounded-lg transition-colors',
+        'w-[370px] h-full shrink-0 rounded-lg transition-colors',
         isDropTarget && 'bg-primary/10'
       )}
     >
-      <Card className="h-[800px] flex flex-col bg-card">
+      <Card className="max-h-[800px] flex flex-col bg-card">
         <CardHeader className="flex-shrink-0 -my-6 pt-2 border-b">
           <CardTitle className="flex items-center justify-between mb-2">
             <EditableTaskTitle task={column} variant="small" className="flex-1" childTasksCount={tasks.length} />

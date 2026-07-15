@@ -17,14 +17,16 @@ class Event extends Model
         'end_date',
         'location',
         'type',
+        'completed_at',
         'created_by',
         'updated_by',
         'workspace_id',
     ];
 
     protected $casts = [
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
+        'start_date'   => 'datetime',
+        'end_date'     => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     public function createdBy()

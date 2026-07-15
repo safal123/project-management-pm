@@ -122,6 +122,7 @@ export interface Task {
   is_liked_by_user?: boolean;
 }
 
+
 export interface Event {
   id: string;
   title: string;
@@ -132,6 +133,7 @@ export interface Event {
   end_time: string;
   location: string;
   type: 'meeting' | 'deadline' | 'reminder' | 'call';
+  completed_at: string | null;
   attendees: User[];
   created_by: User;
   created_at: string;
@@ -167,17 +169,29 @@ export interface WorkspaceSelectorProps {
   workspaces: Workspace[];
 }
 
+export interface TaskData {
+  data: Task[];
+}
+
 export interface PaginatedData<T> {
   data: T[];
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-  from: number | null;
-  to: number | null;
-  links: {
+  current_page?: number;
+  last_page?: number;
+  per_page?: number;
+  total?: number;
+  from?: number | null;
+  to?: number | null;
+  links?: {
     url: string | null;
     label: string;
     active: boolean;
-  }[];
+  }[] | null;
+  meta?: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+  };
 }

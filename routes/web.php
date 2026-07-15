@@ -28,9 +28,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('projects', ProjectController::class)
         ->only(['index', 'store', 'show', 'update', 'destroy']);
 
-    Route::get('projects/{project}/tasks', [ProjectController::class, 'tasks'])
-        ->name('projects.tasks');
-
     // TODO: Need to remove this.
     // Route::post('projects/{project}/members/invite', [ProjectController::class, 'inviteMember'])
     //     ->name('projects.members.invite');
@@ -59,6 +56,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('events', EventController::class)
         ->only(['store', 'update', 'destroy'])
         ->names('events');
+
+    Route::post('events/{event}/toggle-complete', [EventController::class, 'toggleComplete'])
+        ->name('events.toggle-complete');
 
     // S3 Upload
     Route::post('s3/upload', [S3UploadController::class, 'generateSignedUrl'])

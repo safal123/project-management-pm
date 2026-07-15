@@ -48,6 +48,7 @@ export const LikeButton = memo(function LikeButton({
         {
           preserveScroll: true,
           preserveState: true,
+          only: ['tasks'],
           onSuccess: () => {
             setOptimisticLiked(null)
             setOptimisticCount(null)

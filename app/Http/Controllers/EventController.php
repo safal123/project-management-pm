@@ -38,6 +38,17 @@ class EventController extends Controller
         return redirect()->route('calendar.index')->with('success', 'Event updated successfully');
     }
 
+    public function toggleComplete(Event $event)
+    {
+        $event->update([
+            'completed_at' => $event->completed_at ? null : now(),
+        ]);
+
+        return redirect()->back()->with('success',
+            $event->completed_at ? 'Event marked as completed' : 'Event marked as incomplete'
+        );
+    }
+
     public function destroy(Event $event)
     {
         $event->attendees()->detach();

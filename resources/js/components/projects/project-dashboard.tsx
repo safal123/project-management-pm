@@ -8,7 +8,6 @@ import {
   Kanban,
   CheckCircle2,
   Users as UsersIcon,
-  TrendingUp,
   AlertCircle,
   Clock,
   BarChart3,
@@ -22,7 +21,7 @@ import { AppStatCard } from '@/components/app-stat-card';
 
 interface ProjectDashboardProps {
   project: Project;
-  tasks: Task[];
+  tasks: Task[]
 }
 
 export default function ProjectDashboard({ project, tasks }: ProjectDashboardProps) {
@@ -31,7 +30,6 @@ export default function ProjectDashboard({ project, tasks }: ProjectDashboardPro
     const subTasks = tasks.filter((t) => t.parent_task_id !== null);
     const totalTasks = subTasks.length;
 
-    // Assume last column is 'Done' if there's no explicit status
     const lastColumnId = parentTasks[parentTasks.length - 1]?.id;
     const completedTasks = subTasks.filter((t) => t.parent_task_id === lastColumnId).length;
 
