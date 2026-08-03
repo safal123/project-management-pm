@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Project;
+use App\Models\Task;
 use Illuminate\Foundation\Http\FormRequest;
 
 class TaskCreateRequest extends FormRequest
@@ -11,7 +13,13 @@ class TaskCreateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        if (! $this->filled('project_id')) {
+            return true;
+        }
+
+        $project = Project::query()->find($this->input('project_id'));
+
+        return $project !== null && $this->user()->can('create', [Task::class, $project]);
     }
 
     /**

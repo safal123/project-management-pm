@@ -141,7 +141,7 @@ export default function AppTextEditor({ task, className }: AppTextEditorProps) {
         )}
       >
         {/* Editor */}
-        <div className="p-3 min-h-[140px]">
+        <div className="p-1 min-h-[140px]">
           <div
             ref={editorRef}
             className={cn(
@@ -154,7 +154,7 @@ export default function AppTextEditor({ task, className }: AppTextEditorProps) {
         </div>
 
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-1 border-t bg-muted/40 p-1.5">
+        <div className="flex flex-wrap items-center gap-1 border-t bg-muted/40 p-1.5 rounded-b-lg">
           {tool(<Heading1 className="h-4 w-4" />, formats.header === 1, () => toggle('header', 1), 'Heading 1')}
           {tool(<Heading2 className="h-4 w-4" />, formats.header === 2, () => toggle('header', 2), 'Heading 2')}
 

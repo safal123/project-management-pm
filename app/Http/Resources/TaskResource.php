@@ -50,6 +50,11 @@ class TaskResource extends JsonResource
                 fn() => (bool) $this->is_liked_by_user,
                 false
             ),
+            'comments_count'   => $this->when(
+                isset($this->comments_count),
+                fn() => (int) $this->comments_count,
+                0
+            ),
         ];
     }
 }

@@ -2,9 +2,12 @@
 
 namespace Tests\Traits;
 
+use App\Models\Comment;
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\User;
 use App\Models\Workspace;
+use Illuminate\Support\Str;
 
 trait CreatesTestData
 {
@@ -44,5 +47,33 @@ trait CreatesTestData
         ]));
 
         return $projects;
+    }
+
+    public function createTaskForProject(User $user, Project $project, array $attributes = []): Task
+    {
+        return Task::query()->create([
+            'title' => 'Test task',
+            'slug' => Str::slug('Test task').'-'.Str::random(6),
+            'project_id' => $project->id,
+            'workspace_id' => $project->workspace_id,
+            'created_by' => $user->id,
+            'assigned_by' => $user->id,
+            'status' => 'todo',
+            'priority' => 'medium',
+            'order' => 1,
+            ...$attributes,
+        ]);
+    }
+
+    public function createCommentForTask(User $user, Task $task, array $attributes = []): Comment
+    {
+        return Comment::query()->create([
+            'user_id' => $user->id,
+            'commentable_id' => $task->id,
+            'commentable_type' => Task::class,
+            'workspace_id' => $task->workspace_id,
+            'body' => 'Test comment',
+            ...$attributes,
+        ]);
     }
 }

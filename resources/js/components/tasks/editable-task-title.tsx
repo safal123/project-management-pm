@@ -1,8 +1,9 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { router } from '@inertiajs/react';
+import { toast } from 'sonner';
+
 import { cn } from '@/lib/utils';
 import { Task } from '@/types';
-import { toast } from 'sonner';
 
 interface EditableTaskTitleProps {
   task: Task;
@@ -14,24 +15,42 @@ interface EditableTaskTitleProps {
 export default function EditableTaskTitle({
   task,
   className,
-  variant = 'default',
   childTasksCount = 0,
+  variant = 'default',
 }: EditableTaskTitleProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [value, setValue] = useState(task.title);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [title, setTitle] = useState(task.title);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const baseTextClass = cn(
-    'leading-tight font-semibold rounded-lg transition-colors',
+  useEffect(() => {
+    setTitle(task.title);
+  }, [task.title]);
+
+  useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [isEditing]);
+
+  const textClass = cn(
+    'rounded-lg font-semibold leading-tight transition-colors',
     variant === 'default' ? 'text-2xl' : 'text-sm'
   );
 
-  const handleSubmit = useCallback(() => {
-    const nextTitle = value.trim();
+  const cancelEditing = useCallback(() => {
+    setTitle(task.title);
+    setIsEditing(false);
+  }, [task.title]);
+
+  const saveTitle = useCallback(() => {
+    if (isSubmitting) return;
+
+    const nextTitle = title.trim();
 
     if (!nextTitle || nextTitle === task.title) {
-      setValue(task.title);
-      setIsEditing(false);
+      cancelEditing();
       return;
     }
 
@@ -44,24 +63,37 @@ export default function EditableTaskTitle({
         preserveScroll: true,
         preserveState: true,
         only: ['tasks', 'paginatedTasks'],
+
+        onSuccess: () => {
+          toast.success('Task title updated');
+          setIsEditing(false);
+        },
+
+        onError: () => {
+          toast.error('Failed to update task title');
+          setTitle(task.title);
+        },
+
         onFinish: () => {
           setIsSubmitting(false);
-          setIsEditing(false);
-          toast.success('Task title updated');
         },
       }
     );
-  }, [value, task.id, task.title]);
+  }, [cancelEditing, isSubmitting, task.id, task.title, title]);
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') handleSubmit();
-      if (e.key === 'Escape') {
-        setValue(task.title);
-        setIsEditing(false);
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      switch (event.key) {
+        case 'Enter':
+          saveTitle();
+          break;
+
+        case 'Escape':
+          cancelEditing();
+          break;
       }
     },
-    [handleSubmit, task.title]
+    [saveTitle, cancelEditing]
   );
 
   return (
@@ -69,15 +101,15 @@ export default function EditableTaskTitle({
       {isEditing ? (
         <input
           id={`task-title-${task.id}`}
-          autoFocus
+          ref={inputRef}
           disabled={isSubmitting}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onBlur={handleSubmit}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onBlur={saveTitle}
           onKeyDown={handleKeyDown}
           className={cn(
-            baseTextClass,
-            'w-full px-3 py-3 -mx-3 focus:outline-none hover:border'
+            textClass,
+            'w-full -mx-3 px-3 py-3 focus:outline-none hover:border'
           )}
         />
       ) : (
@@ -85,12 +117,20 @@ export default function EditableTaskTitle({
           role="button"
           tabIndex={0}
           className={cn(
-            baseTextClass,
-            'cursor-pointer px-3 py-3 -ml-3 hover:bg-muted/50 hover:border'
+            textClass,
+            'cursor-pointer -ml-3 px-3 py-3 hover:border hover:bg-muted/50'
           )}
+          onMouseDown={(event) => event.preventDefault()}
           onClick={() => setIsEditing(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setIsEditing(true);
+            }
+          }}
         >
-          {value}
+          {title}
+
           {childTasksCount > 0 && (
             <span className="ml-1 text-muted-foreground">
               ({childTasksCount})
