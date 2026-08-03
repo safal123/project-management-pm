@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\InvitationController;
@@ -77,6 +78,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('likes/toggle', [LikeController::class, 'toggle'])
         ->name('likes.toggle');
+
+    Route::get('comments', [CommentController::class, 'index'])
+        ->name('comments.index');
+    Route::post('comments', [CommentController::class, 'store'])
+        ->name('comments.store');
+    Route::patch('comments/{comment}', [CommentController::class, 'update'])
+        ->name('comments.update');
+    Route::delete('comments/{comment}', [CommentController::class, 'destroy'])
+        ->name('comments.destroy');
 
     Route::post('invitations', [InvitationController::class, 'store'])
         ->name('invitations.store');

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasComments;
 use App\Models\Concerns\HasLikes;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Task extends Model
 {
-    use HasFactory, HasLikes, HasUlids;
+    use HasComments, HasFactory, HasLikes, HasUlids;
 
     // Status constants
     public const STATUS_TODO = 'todo';

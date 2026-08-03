@@ -30,7 +30,12 @@ export default function TaskCommentsSection({ task, className = '' }: TaskCommen
       <Tabs defaultValue="comments" className="w-full">
         <div className="flex items-center justify-between px-6 py-3 border-b">
           <TabsList>
-            <TabsTrigger value="comments">Comments</TabsTrigger>
+            <TabsTrigger value="comments">
+              Comments
+              {!!task.comments_count && (
+                <span className="ml-1 text-muted-foreground">({task.comments_count})</span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="activity">All activity</TabsTrigger>
           </TabsList>
           <DropdownMenu>

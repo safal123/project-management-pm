@@ -120,6 +120,18 @@ export interface Task {
   color?: string | null;
   likes_count?: number;
   is_liked_by_user?: boolean;
+  comments_count?: number;
+}
+
+export interface Comment {
+  id: string;
+  body: string;
+  user: User;
+  parent_comment_id: string | null;
+  replies?: Comment[];
+  can_edit: boolean;
+  can_delete: boolean;
+  created_at: string;
 }
 
 

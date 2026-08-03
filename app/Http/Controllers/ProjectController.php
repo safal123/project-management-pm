@@ -75,6 +75,7 @@ class ProjectController extends Controller
             ->withCount([
                 'likes',
                 'likes as is_liked_by_user' => fn($q) => $q->where('user_id', $userId),
+                'comments',
             ])
             ->orderBy('order');
 

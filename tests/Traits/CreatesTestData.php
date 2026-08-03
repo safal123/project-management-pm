@@ -2,6 +2,7 @@
 
 namespace Tests\Traits;
 
+use App\Models\Comment;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -60,6 +61,18 @@ trait CreatesTestData
             'status' => 'todo',
             'priority' => 'medium',
             'order' => 1,
+            ...$attributes,
+        ]);
+    }
+
+    public function createCommentForTask(User $user, Task $task, array $attributes = []): Comment
+    {
+        return Comment::query()->create([
+            'user_id' => $user->id,
+            'commentable_id' => $task->id,
+            'commentable_type' => Task::class,
+            'workspace_id' => $task->workspace_id,
+            'body' => 'Test comment',
             ...$attributes,
         ]);
     }

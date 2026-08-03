@@ -5,9 +5,12 @@ namespace App\Policies;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use App\Policies\Concerns\ChecksProjectAccess;
 
 class TaskPolicy
 {
+    use ChecksProjectAccess;
+
     /**
      * Determine whether the user can create models for the given project.
      */
@@ -30,17 +33,5 @@ class TaskPolicy
     public function delete(User $user, Task $task): bool
     {
         return $this->canAccessProjectInCurrentWorkspace($user, $task->project_id, $task->workspace_id);
-    }
-
-    protected function canAccessProjectInCurrentWorkspace(User $user, string $projectId, string $workspaceId): bool
-    {
-        if ($user->current_workspace_id !== $workspaceId) {
-            return false;
-        }
-
-        return Project::query()
-            ->whereKey($projectId)
-            ->forUser($user)
-            ->exists();
     }
 }
