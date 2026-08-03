@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @method bool update(array<string, mixed> $attributes = [], array<string, mixed> $options = [])
+ */
 class Task extends Model
 {
-    use HasFactory, HasUlids, HasLikes;
+    use HasFactory, HasLikes, HasUlids;
 
     // Status constants
     public const STATUS_TODO = 'todo';
@@ -41,6 +44,10 @@ class Task extends Model
         'status',
         'priority',
         'due_date',
+    ];
+
+    protected $casts = [
+        'due_date' => 'datetime',
     ];
 
     public function project()
@@ -76,6 +83,16 @@ class Task extends Model
     public function media()
     {
         return $this->morphMany(Media::class, 'mediable');
+    }
+
+    /**
+     * Next order value for a task within a project column or parent task group.
+     */
+    public static function nextOrder(string $projectId, ?string $parentTaskId): int
+    {
+        return static::where('project_id', $projectId)
+            ->where('parent_task_id', $parentTaskId)
+            ->max('order') + 1;
     }
 
     /**

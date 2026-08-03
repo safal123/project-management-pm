@@ -3,8 +3,10 @@
 namespace Tests\Traits;
 
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\User;
 use App\Models\Workspace;
+use Illuminate\Support\Str;
 
 trait CreatesTestData
 {
@@ -44,5 +46,21 @@ trait CreatesTestData
         ]));
 
         return $projects;
+    }
+
+    public function createTaskForProject(User $user, Project $project, array $attributes = []): Task
+    {
+        return Task::query()->create([
+            'title' => 'Test task',
+            'slug' => Str::slug('Test task').'-'.Str::random(6),
+            'project_id' => $project->id,
+            'workspace_id' => $project->workspace_id,
+            'created_by' => $user->id,
+            'assigned_by' => $user->id,
+            'status' => 'todo',
+            'priority' => 'medium',
+            'order' => 1,
+            ...$attributes,
+        ]);
     }
 }

@@ -21,6 +21,7 @@ const MarkTaskAsComplete = ({ task, type = 'button' }: MarkTaskAsCompleteProps) 
     router.patch(`/tasks/${task.id}`,
       { status: isCompleted ? 'todo' : 'done' },
       {
+        only: ['tasks'],
         preserveScroll: true,
         onSuccess: () => toast.success(`Task ${isCompleted ? 'marked as incomplete' : 'marked as complete'}.`),
         onError: () => toast.error('Failed to mark task as complete'),

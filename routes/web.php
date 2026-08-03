@@ -6,7 +6,9 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\MoveTaskColumnController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ReorderTasksController;
 use App\Http\Controllers\S3UploadController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\WorkspaceController;
@@ -47,10 +49,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->only(['store', 'destroy', 'update'])
         ->names('tasks');
 
-    Route::post('tasks/reorder', [TaskController::class, 'reorder'])
+    Route::post('tasks/reorder', ReorderTasksController::class)
         ->name('tasks.reorder');
 
-    Route::post('tasks/move', [TaskController::class, 'move'])
+    Route::post('tasks/move', MoveTaskColumnController::class)
         ->name('tasks.move');
 
     Route::resource('events', EventController::class)
@@ -96,5 +98,5 @@ Route::middleware(['signed'])->group(function () {
 Route::post('invitations/{token}', [InvitationController::class, 'update'])
     ->name('invitations.update');
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
