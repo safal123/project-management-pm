@@ -26,6 +26,8 @@ class CommentResource extends JsonResource
             'can_edit' => $this->user_id === $userId,
             'can_delete' => $this->user_id === $userId,
             'created_at' => $this->created_at,
+            'likes_count' => $this->when(isset($this->likes_count), fn () => (int) $this->likes_count, 0),
+            'is_liked_by_user' => $this->when(isset($this->is_liked_by_user), fn () => (bool) $this->is_liked_by_user, false),
             'replies' => CommentResource::collection($this->whenLoaded('replies')),
         ];
     }

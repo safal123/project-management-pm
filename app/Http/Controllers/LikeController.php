@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
+use App\Models\Event;
+use App\Models\Media;
+use App\Models\Project;
+use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,9 +17,12 @@ class LikeController extends Controller
      * Polymorphic model map — extend this when adding likes to new entities.
      */
     private const LIKEABLE_MODELS = [
-        'task' => \App\Models\Task::class,
-        'project' => \App\Models\Project::class,
-        'event' => \App\Models\Event::class,
+        'task' => Task::class,
+        'project' => Project::class,
+        'event' => Event::class,
+        'media' => Media::class,
+        'comment' => Comment::class,
+        'user' => User::class,
     ];
 
     public function toggle(Request $request)
@@ -27,6 +36,13 @@ class LikeController extends Controller
         $likeable = $modelClass::findOrFail($request->likeable_id);
 
         $isLiked = $likeable->toggleLike(Auth::id());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'liked' => $isLiked,
+                'likes_count' => $likeable->likes()->count(),
+            ]);
+        }
 
         return back()->with('success', $isLiked ? 'Liked' : 'Unliked');
     }

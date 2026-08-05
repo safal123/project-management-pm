@@ -5,6 +5,7 @@ import { LoaderCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { LikeButton } from '@/components/like-button';
 import { Comment } from '@/types';
 
 interface CommentItemProps {
@@ -13,6 +14,7 @@ interface CommentItemProps {
   onReply?: (parentCommentId: string, body: string) => Promise<void>;
   onEdit: (commentId: string, body: string) => Promise<void>;
   onDelete: (commentId: string) => Promise<void>;
+  onToggleLike: (commentId: string) => Promise<void>;
 }
 
 export default function CommentItem({
@@ -21,6 +23,7 @@ export default function CommentItem({
   onReply,
   onEdit,
   onDelete,
+  onToggleLike,
 }: CommentItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(comment.body);
@@ -133,6 +136,14 @@ export default function CommentItem({
 
         {!isEditing && (
           <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+            <LikeButton
+              likeableType="comment"
+              likeableId={comment.id}
+              isLiked={!!comment.is_liked_by_user}
+              likesCount={comment.likes_count ?? 0}
+              size="sm"
+              onToggle={() => onToggleLike(comment.id)}
+            />
             {!isReply && onReply && (
               <button
                 type="button"
@@ -214,6 +225,7 @@ export default function CommentItem({
                 isReply
                 onEdit={onEdit}
                 onDelete={onDelete}
+                onToggleLike={onToggleLike}
               />
             ))}
           </div>
