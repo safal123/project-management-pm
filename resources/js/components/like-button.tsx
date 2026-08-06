@@ -3,7 +3,7 @@ import { router } from '@inertiajs/react'
 import { ThumbsUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export type LikeableType = 'task' | 'project' | 'event'
+export type LikeableType = 'task' | 'project' | 'event' | 'media' | 'comment' | 'user'
 
 interface LikeButtonProps {
   likeableType: LikeableType
@@ -13,6 +13,13 @@ interface LikeButtonProps {
   className?: string
   size?: 'sm' | 'md' | 'lg'
   stopPropagation?: boolean
+  /** Inertia partial-reload keys for the default visit-based toggle. Ignored when `onToggle` is provided. */
+  only?: string[]
+  /**
+   * Override the default Inertia visit — e.g. for entities managed via local state (comments, media),
+   * where an axios request + local state update is more appropriate than a full page visit.
+   */
+  onToggle?: () => Promise<void>
 }
 
 const iconSizes = { sm: 'h-3.5 w-3.5', md: 'h-4 w-4', lg: 'h-5 w-5' } as const
@@ -26,6 +33,8 @@ export const LikeButton = memo(function LikeButton({
   className,
   size = 'md',
   stopPropagation = true,
+  only = ['tasks'],
+  onToggle,
 }: LikeButtonProps) {
   const [optimisticLiked, setOptimisticLiked] = useState<boolean | null>(null)
   const [optimisticCount, setOptimisticCount] = useState<number | null>(null)
@@ -42,25 +51,29 @@ export const LikeButton = memo(function LikeButton({
       setOptimisticLiked(newLiked)
       setOptimisticCount(newCount)
 
+      const reset = () => {
+        setOptimisticLiked(null)
+        setOptimisticCount(null)
+      }
+
+      if (onToggle) {
+        onToggle().then(reset).catch(reset)
+        return
+      }
+
       router.post(
         route('likes.toggle'),
         { likeable_type: likeableType, likeable_id: likeableId },
         {
           preserveScroll: true,
           preserveState: true,
-          only: ['tasks'],
-          onSuccess: () => {
-            setOptimisticLiked(null)
-            setOptimisticCount(null)
-          },
-          onError: () => {
-            setOptimisticLiked(null)
-            setOptimisticCount(null)
-          },
+          only,
+          onSuccess: reset,
+          onError: reset,
         }
       )
     },
-    [isLiked, likesCount, likeableType, likeableId, stopPropagation]
+    [isLiked, likesCount, likeableType, likeableId, stopPropagation, only, onToggle]
   )
 
   return (

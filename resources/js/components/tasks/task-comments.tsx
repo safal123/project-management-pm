@@ -134,6 +134,40 @@ export default function TaskComments({ task, className = '' }: TaskCommentsProps
     }
   };
 
+  const handleToggleLike = async (commentId: string) => {
+    try {
+      const { data } = await axios.post<{ liked: boolean; likes_count: number }>(
+        route('likes.toggle'),
+        { likeable_type: 'comment', likeable_id: commentId }
+      );
+
+      setComments((current) =>
+        current.map((comment) => {
+          if (comment.id === commentId) {
+            return { ...comment, is_liked_by_user: data.liked, likes_count: data.likes_count };
+          }
+
+          if (comment.replies?.some((reply) => reply.id === commentId)) {
+            return {
+              ...comment,
+              replies: comment.replies.map((reply) =>
+                reply.id === commentId
+                  ? { ...reply, is_liked_by_user: data.liked, likes_count: data.likes_count }
+                  : reply
+              ),
+            };
+          }
+
+          return comment;
+        })
+      );
+    } catch (error) {
+      console.error('Failed to toggle like', error);
+      toast.error('Failed to update like');
+      throw error;
+    }
+  };
+
   return (
     <div className={`space-y-4 ${className}`}>
       <div className="flex gap-3">
@@ -177,6 +211,7 @@ export default function TaskComments({ task, className = '' }: TaskCommentsProps
                 onReply={handleReply}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onToggleLike={handleToggleLike}
               />
             ))}
           </div>

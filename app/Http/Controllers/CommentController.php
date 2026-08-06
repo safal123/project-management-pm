@@ -35,9 +35,19 @@ class CommentController extends Controller
         // Viewing comments requires the same project/workspace access as creating one.
         $this->authorize('create', [Comment::class, $commentable]);
 
+        $userId = $request->user()->id;
+        $likeCounts = [
+            'likes',
+            'likes as is_liked_by_user' => fn ($query) => $query->where('user_id', $userId),
+        ];
+
         $comments = $commentable->comments()
             ->topLevel()
-            ->with(['user', 'replies.user'])
+            ->with(['user'])
+            ->withCount($likeCounts)
+            ->with(['replies' => fn ($query) => $query
+                ->with('user')
+                ->withCount($likeCounts)])
             ->oldest()
             ->get();
 
