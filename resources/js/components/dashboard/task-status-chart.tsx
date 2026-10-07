@@ -45,15 +45,15 @@ export function TaskStatusChart({ tasksByStatus }: TaskStatusChartProps) {
   const hasData = total > 0;
 
   return (
-    <Card className="dark:bg-primary/5 dark:border-primary/20">
-      <CardHeader>
-        <CardTitle>Task Status</CardTitle>
-        <CardDescription>Distribution of tasks by status</CardDescription>
+    <Card className="gap-3 py-3.5 shadow-sm">
+      <CardHeader className="px-4">
+        <CardTitle className="text-[13px] font-medium">Task status</CardTitle>
+        <CardDescription className="text-xs">Distribution of tasks by status</CardDescription>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="px-4">
         {hasData ? (
-          <div className="h-[260px] w-full">
+          <div className="h-[200px] w-full">
             <ChartContainer
               config={chartConfig}
               className="h-full w-full aspect-auto
@@ -69,8 +69,8 @@ export function TaskStatusChart({ tasksByStatus }: TaskStatusChartProps) {
                   nameKey="name"
                   cx="50%"
                   cy="45%"
-                  innerRadius={50}
-                  outerRadius={80}
+                  innerRadius={40}
+                  outerRadius={65}
                   paddingAngle={2}
                   strokeWidth={1}
                   stroke="var(--card)"

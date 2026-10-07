@@ -1,8 +1,6 @@
 import { memo } from 'react'
 import { Task } from '@/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { taskPrioritySurfaceClasses } from '@/utils/app-utils'
 import { cn } from '@/lib/utils'
 import AppAvatar from '@/components/app-avatar'
 import { CircularProgressChip } from './project-progress'
@@ -14,9 +12,6 @@ interface TaskCardDragPreviewProps {
   className?: string
 }
 
-const truncate = (s: string, len: number) =>
-  s.length > len ? s.slice(0, len).concat('...') : s
-
 export const TaskCardDragPreview = memo(function TaskCardDragPreview({
   task,
   floating = false,
@@ -25,28 +20,20 @@ export const TaskCardDragPreview = memo(function TaskCardDragPreview({
   return (
     <div
       className={cn(
-        'w-[320px]',
-        floating && 'rotate-2 shadow-lg'
+        'w-[336px]',
+        floating && 'rotate-1'
       )}
     >
-      <Card
+      <div
         className={cn(
-          'border-2 border-dashed border-primary/30 bg-card/95 backdrop-blur-sm py-2 gap-2',
-          taskPrioritySurfaceClasses(task.priority),
-          floating && 'shadow-md',
+          'rounded-md border border-neutral-200/90 bg-white px-2.5 py-2 shadow-md dark:border-white/10 dark:bg-neutral-800',
+          task.priority === 'high' && 'border-l-2 border-l-neutral-800 dark:border-l-neutral-200',
           className
         )}
       >
-        <CardHeader className="px-4 py-2">
-          <CardTitle className="text-sm font-medium">
-            <div className="flex items-center justify-between gap-2">
-              <span className="truncate">{truncate(task.title, 36)}</span>
-              <span className="text-xs text-muted-foreground shrink-0">#{task.order}</span>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 px-4 pb-3 space-y-2">
-          <div className="flex items-center justify-between gap-2">
+        <p className="truncate text-[13px] font-medium">{task.title}</p>
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1">
             {task.status && (
               <Badge variant="secondary" className="text-[10px] capitalize">
                 {task.status.replace('_', ' ')}
@@ -58,7 +45,7 @@ export const TaskCardDragPreview = memo(function TaskCardDragPreview({
               </Badge>
             )}
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
             <AppAvatar
               src={task.assigned_to?.profile_picture?.url}
               name={task.assigned_to?.name}
@@ -66,8 +53,8 @@ export const TaskCardDragPreview = memo(function TaskCardDragPreview({
             />
             <CircularProgressChip percent={task.progress ?? 0} />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 })

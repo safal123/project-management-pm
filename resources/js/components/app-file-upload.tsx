@@ -22,6 +22,7 @@ interface AppFileUploadProps {
   mediableType?: string;
   showPlaceholder?: boolean;
   accept?: string;
+  className?: string;
 }
 
 export default function AppFileUpload({
@@ -30,6 +31,7 @@ export default function AppFileUpload({
   mediableType = 'task',
   showPlaceholder = false,
   accept = 'image/*',
+  className,
 }: AppFileUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -123,7 +125,7 @@ export default function AppFileUpload({
             variant="ghost"
             size="icon"
             disabled={isUploading}
-            className="h-9 w-9"
+            className={className ?? 'h-9 w-9'}
           >
             {isUploading ? (
               <LoaderCircle className="h-4 w-4 animate-spin" />

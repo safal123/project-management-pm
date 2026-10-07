@@ -24,6 +24,7 @@ class TaskResource extends JsonResource
             'workspace_id'     => $this->workspace_id,
             'created_by'       => $this->created_by,
             'parent_task_id'   => $this->parent_task_id,
+            'depends_on_task_id' => $this->depends_on_task_id,
             'description'      => $this->when(! is_null($this->description), $this->description),
             'status'           => $this->when(! is_null($this->status), $this->status),
             'priority'         => $this->when(! is_null($this->priority), $this->priority),
@@ -38,6 +39,10 @@ class TaskResource extends JsonResource
                 'id'    => $this->parentTask->id,
                 'title' => $this->parentTask->title,
             ]),
+            'depends_on'       => $this->whenLoaded('dependsOn', fn () => $this->dependsOn ? [
+                'id'    => $this->dependsOn->id,
+                'title' => $this->dependsOn->title,
+            ] : null),
             'assigned_by'      => new UserResource($this->whenLoaded('assignedBy')),
             'assigned_to'      => new UserResource($this->whenLoaded('assignedTo')),
             'media'            => MediaResource::collection($this->whenLoaded('media')),

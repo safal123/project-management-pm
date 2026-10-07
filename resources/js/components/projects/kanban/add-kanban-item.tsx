@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { Plus, Loader2 } from 'lucide-react'
 import { Project, SharedData, Task } from '@/types'
+import { cn } from '@/lib/utils'
 
 interface AddColumnProps {
   type: 'column'
@@ -58,24 +59,26 @@ export function AddKanbanItem(props: AddKanbanItemProps) {
       <DropdownMenuItem
         onClick={add}
         disabled={isAdding}
-        className="font-medium cursor-pointer bg-primary/10 mb-1 hover:bg-primary/20 dark:hover:bg-primary/20"
+        className="mb-1 cursor-pointer text-[13px] font-medium"
       >
-        {isAdding ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
-        Add New Task
+        {isAdding ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Plus className="mr-2 h-3.5 w-3.5" />}
+        Add task
       </DropdownMenuItem>
     )
   }
 
+  const isColumn = props.type === 'column'
+
   return (
-    <div className="max-w-[350px] w-fit flex-shrink-0 pr-12">
+    <div className={cn(isColumn && 'w-[360px] shrink-0')}>
       <Button
         onClick={add}
         disabled={isAdding}
         variant="outline"
-        className="dark:bg-black/40 dark:border-primary/20 text-primary w-full max-h-[120px] flex items-center justify-center gap-2 border-2 border-dashed hover:border-primary/50 hover:bg-accent/5 transition-colors"
+        className="h-8 w-full gap-1.5 border-dashed border-neutral-300 bg-transparent text-[13px] text-muted-foreground hover:border-neutral-400 hover:bg-white/60 hover:text-foreground dark:border-white/15 dark:hover:bg-white/5"
       >
-        {isAdding ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
-        <span className="text-sm font-medium">{isAdding ? 'Adding...' : 'Add Column'}</span>
+        {isAdding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+        <span>{isAdding ? 'Adding…' : isColumn ? 'Add column' : 'Add task'}</span>
       </Button>
     </div>
   )

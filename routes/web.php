@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\ComingSoonController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
@@ -27,6 +28,12 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
+
+    Route::get('people', [ComingSoonController::class, 'people'])->name('people.index');
+    Route::get('activity', [ComingSoonController::class, 'activity'])->name('activity.index');
+    Route::get('emails', [ComingSoonController::class, 'emails'])->name('emails.index');
+    Route::get('billing', [ComingSoonController::class, 'billing'])->name('billing.index');
+    Route::get('archive', [ComingSoonController::class, 'archive'])->name('archive.index');
 
     Route::resource('workspaces', WorkspaceController::class)
         ->only(['store']);

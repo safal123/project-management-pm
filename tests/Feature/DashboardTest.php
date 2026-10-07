@@ -33,3 +33,21 @@ test('dashboard displays the correct projects and workspaces count for the user'
                 ->has('workspaces', 2)
         );
 });
+
+test('dashboard includes a 14-day task activity series', function () {
+    ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
+    $project = $this->createProjectsForUser($user, $workspaces->first())->first();
+    $this->createTaskForProject($user, $project, ['status' => 'todo']);
+    $this->createTaskForProject($user, $project, ['status' => 'done']);
+
+    actingAs($user)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertInertia(
+            fn (\Inertia\Testing\AssertableInertia $page) => $page
+                ->component('dashboard')
+                ->has('taskActivity', 14)
+                ->where('taskActivity.13.created', 2)
+                ->where('taskActivity.13.completed', 1)
+        );
+});

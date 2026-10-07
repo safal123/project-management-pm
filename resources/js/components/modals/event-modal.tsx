@@ -74,10 +74,11 @@ interface EventModalProps {
   selectedDate?: Date
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  showTrigger?: boolean
 }
 
-export function EventModal({ event, selectedDate, open: controlledOpen, onOpenChange }: EventModalProps) {
-  const { members } = usePage<SharedData & { members: User[] }>().props
+export function EventModal({ event, selectedDate, open: controlledOpen, onOpenChange, showTrigger = true }: EventModalProps) {
+  const { members, project } = usePage<SharedData & { members: User[]; project?: { id: string } }>().props
   const [internalOpen, setInternalOpen] = useState(false)
   const [hasEndDate, setHasEndDate] = useState(false)
   const [hasAttendees, setHasAttendees] = useState(false)
@@ -135,6 +136,7 @@ export function EventModal({ event, selectedDate, open: controlledOpen, onOpenCh
       location: d.location,
       start_date: format(d.start_date as Date, 'yyyy-MM-dd'),
       start_time: d.start_time,
+      ...(project?.id && { project_id: project.id }),
       ...(hasAttendees && { attendees: d.attendees }),
       ...(hasEndDate && {
         end_date: format(d.end_date as Date, 'yyyy-MM-dd'),
@@ -166,10 +168,10 @@ export function EventModal({ event, selectedDate, open: controlledOpen, onOpenCh
       open={open}
       onOpenChange={handleOpenChange}
       trigger={
-        !isEditMode ? (
-          <Button size="sm">
-            <Plus className="h-4 w-4" />
-            New Event
+        !isEditMode && showTrigger ? (
+          <Button size="sm" className="h-8 px-3 text-[13px]">
+            <Plus className="h-3.5 w-3.5" />
+            New event
           </Button>
         ) : undefined
       }

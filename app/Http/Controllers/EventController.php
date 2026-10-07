@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\EventCreateRequest;
 use App\Models\Activity;
 use App\Models\Event;
+use Illuminate\Http\RedirectResponse;
 
 class EventController extends Controller
 {
@@ -17,13 +18,13 @@ class EventController extends Controller
 
         $event = Event::create($validated);
 
-        if (!empty($attendees)) {
+        if (! empty($attendees)) {
             $event->attendees()->attach($attendees);
         }
 
         Activity::record($event, Activity::TYPE_CREATED, $event->workspace_id, $request->user());
 
-        return redirect()->route('calendar.index')->with('success', 'Event created successfully');
+        return $this->redirectToProjectCalendar($event);
     }
 
     public function update(EventCreateRequest $request, Event $event)
@@ -54,7 +55,7 @@ class EventController extends Controller
             ]);
         }
 
-        return redirect()->route('calendar.index')->with('success', 'Event updated successfully');
+        return $this->redirectToProjectCalendar($event);
     }
 
     public function toggleComplete(Event $event)
@@ -74,9 +75,29 @@ class EventController extends Controller
 
     public function destroy(Event $event)
     {
+        $project = $event->project;
         $event->attendees()->detach();
         $event->delete();
 
-        return redirect()->route('calendar.index')->with('success', 'Event deleted successfully');
+        if ($project) {
+            return redirect()
+                ->route('projects.show', ['project' => $project->slug, 'tab' => 'calendar'])
+                ->with('success', 'Event deleted successfully');
+        }
+
+        return redirect()->route('projects.index')->with('success', 'Event deleted successfully');
+    }
+
+    private function redirectToProjectCalendar(Event $event): RedirectResponse
+    {
+        $project = $event->project ?? $event->project()->first();
+
+        if ($project) {
+            return redirect()
+                ->route('projects.show', ['project' => $project->slug, 'tab' => 'calendar'])
+                ->with('success', 'Event saved successfully');
+        }
+
+        return redirect()->route('projects.index')->with('success', 'Event saved successfully');
     }
 }

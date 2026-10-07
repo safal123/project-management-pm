@@ -17,13 +17,13 @@ interface AppEmptyProps {
 
 const AppEmpty = ({ title, description, icon, action }: AppEmptyProps) => {
   return (
-    <Empty className='dark:bg-primary/5 dark:border-primary/20 border border-dashed border-primary/50'>
+    <Empty className="border border-dashed border-border p-8 md:p-10">
       <EmptyHeader>
-        <EmptyMedia variant="icon" className='dark:text-muted-foreground'>
+        <EmptyMedia variant="icon" className="size-9 [&_svg:not([class*='size-'])]:size-4">
           {icon}
         </EmptyMedia>
-        <EmptyTitle>{title}</EmptyTitle>
-        <EmptyDescription className='text-muted-foreground'>
+        <EmptyTitle className="text-[13px] font-medium">{title}</EmptyTitle>
+        <EmptyDescription className="text-xs text-muted-foreground">
           {description}
         </EmptyDescription>
       </EmptyHeader>

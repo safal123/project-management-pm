@@ -10,10 +10,10 @@ import {
   DashboardStats,
   TaskStatusChart,
   TasksByProjectChart,
+  TaskActivityChart,
   RecentActivityTable,
-  RecentProjects,
-  OverallProgress,
 } from '@/components/dashboard';
+import type { TaskActivityPoint } from '@/components/dashboard/task-activity-chart';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -52,11 +52,11 @@ interface TasksByProject {
 export default function Dashboard() {
   const {
     projects,
-    workspaces,
     auth,
     stats,
     tasksByStatus,
     tasksByProject,
+    taskActivity,
     recentTasks,
   } = usePage<SharedData>().props as {
     projects: Project[];
@@ -64,6 +64,7 @@ export default function Dashboard() {
     stats: DashboardStatsData;
     tasksByStatus: { todo: number; in_progress: number; done: number };
     tasksByProject: TasksByProject[];
+    taskActivity: TaskActivityPoint[];
     recentTasks: RecentTask[];
   };
 
@@ -76,48 +77,35 @@ export default function Dashboard() {
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Dashboard" />
 
-      <div className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">
-            Welcome back, {auth.user.name}!
+      <div className="px-4 py-4 lg:px-6">
+        <div className="mb-4">
+          <h1 className="text-lg font-semibold tracking-tight">
+            Welcome back, {auth.user.name}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-            Here's an overview of your workspace and projects
+          <p className="mt-0.5 text-[13px] text-muted-foreground">
+            Overview of your workspace and projects
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="mb-8">
+        <div className="mb-4">
           <DashboardStats
             stats={stats ?? {}}
             completionRate={completionRate}
             activeWorkspaceName={auth.user.current_workspace?.name}
             projectsCount={projects?.length}
-          // workspacesCount={workspaces?.length}
           />
         </div>
 
-        {/* Charts Row */}
-        <div className="mb-6 grid gap-4 sm:mb-8 sm:gap-6 lg:grid-cols-2">
+        <div className="mb-4">
+          <TaskActivityChart data={taskActivity ?? []} />
+        </div>
+
+        <div className="mb-4 grid gap-3 lg:grid-cols-2">
           <TaskStatusChart tasksByStatus={tasksByStatus ?? { todo: 0, in_progress: 0, done: 0 }} />
           <TasksByProjectChart data={tasksByProject ?? []} />
         </div>
 
-        {/* Table + Projects Row */}
-        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
-          <RecentActivityTable tasks={recentTasks ?? []} />
-          <RecentProjects projects={projects ?? []} />
-        </div>
-
-        {/* Completion Progress */}
-        <div className="mt-8">
-          <OverallProgress
-            tasksDone={stats?.tasks_done ?? 0}
-            totalTasks={stats?.total_tasks ?? 0}
-            completionRate={completionRate}
-          />
-        </div>
+        <RecentActivityTable tasks={recentTasks ?? []} />
       </div>
     </AppLayout>
   );

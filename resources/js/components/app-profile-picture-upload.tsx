@@ -114,7 +114,7 @@ export default function AppProfilePictureUpload({
   };
 
   return (
-    <div className={cn('flex flex-col sm:flex-row items-start sm:items-center gap-6', className)}>
+    <div className={cn('flex flex-col items-start gap-4 sm:flex-row sm:items-center', className)}>
       <div className="relative group flex-shrink-0">
         <AppAvatar
           src={currentPicture?.url}
@@ -137,10 +137,10 @@ export default function AppProfilePictureUpload({
         </button>
       </div>
 
-      <div className="flex flex-col gap-3 flex-1">
+      <div className="flex flex-1 flex-col gap-2.5">
         <div>
-          <h3 className="text-sm font-medium mb-1">Profile Picture</h3>
-          <p className="text-xs text-muted-foreground">
+          <h3 className="mb-0.5 text-[13px] font-medium">Profile Picture</h3>
+          <p className="text-[11px] text-muted-foreground">
             Upload a professional photo. Accepted formats: JPG, PNG, GIF, or WEBP. Max size 5MB.
           </p>
         </div>
@@ -152,7 +152,7 @@ export default function AppProfilePictureUpload({
             size="sm"
             onClick={openFilePicker}
             disabled={isUploading || isDeleting}
-            className="min-w-[120px]"
+            className="h-8 min-w-[100px] px-3 text-[13px]"
           >
             {isUploading ? (
               <>
@@ -174,7 +174,7 @@ export default function AppProfilePictureUpload({
               size="sm"
               onClick={handleDelete}
               disabled={isUploading || isDeleting}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="h-8 px-3 text-[13px] text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
               {isDeleting ? (
                 <>

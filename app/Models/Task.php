@@ -41,6 +41,7 @@ class Task extends Model
         'order',
         'progress',
         'parent_task_id',
+        'depends_on_task_id',
         'assigned_by',
         'assigned_to',
         'status',
@@ -85,6 +86,11 @@ class Task extends Model
     public function parentTask()
     {
         return $this->belongsTo(Task::class, 'parent_task_id');
+    }
+
+    public function dependsOn()
+    {
+        return $this->belongsTo(Task::class, 'depends_on_task_id');
     }
 
     public function branchCreatedBy()

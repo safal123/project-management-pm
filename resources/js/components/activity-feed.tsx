@@ -5,7 +5,6 @@ import { History, LoaderCircle } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import AppEmpty from '@/components/app-empty';
 import { Activity } from '@/types';
 
 interface ActivityFeedProps {
@@ -41,39 +40,37 @@ export default function ActivityFeed({ subjectType, subjectId, className = '' }:
 
   if (isLoading) {
     return (
-      <div className={`flex items-center justify-center py-6 text-muted-foreground ${className}`}>
-        <LoaderCircle className="h-4 w-4 animate-spin" />
+      <div className={`flex h-full items-center justify-center text-muted-foreground ${className}`}>
+        <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
       </div>
     );
   }
 
   if (activities.length === 0) {
     return (
-      <div className={className}>
-        <AppEmpty
-          title="No activity yet"
-          description="Actions like creating, moving, commenting, and liking will show up here."
-          icon={<History />}
-        />
+      <div className={`flex h-full flex-col items-center justify-center gap-1 text-center ${className}`}>
+        <History className="h-4 w-4 text-muted-foreground" />
+        <p className="text-[13px] font-medium">No activity yet</p>
+        <p className="text-[12px] text-muted-foreground">Creates, moves, and comments show up here.</p>
       </div>
     );
   }
 
   return (
-    <ScrollArea className={`h-64 pr-3 -mr-3 ${className}`}>
-      <div className="space-y-4 pb-1">
+    <ScrollArea className={`h-full pr-2 ${className}`}>
+      <div className="space-y-3 pb-1">
         {activities.map((activity) => (
-          <div key={activity.id} className="flex gap-3">
+          <div key={activity.id} className="flex gap-2">
             <Avatar className="h-6 w-6 flex-shrink-0">
               <AvatarImage src={activity.user?.avatar} alt={activity.user?.name} />
-              <AvatarFallback className="text-xs">
+              <AvatarFallback className="text-[10px]">
                 {activity.user?.name?.slice(0, 2).toUpperCase() ?? '?'}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1 min-w-0 text-sm">
+            <div className="min-w-0 flex-1 text-[13px]">
               <span className="font-medium">{activity.user?.name ?? 'Someone'}</span>{' '}
               <span className="text-muted-foreground">{activity.description}</span>
-              <div className="text-xs text-muted-foreground">
+              <div className="text-[11px] text-muted-foreground">
                 {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
               </div>
             </div>

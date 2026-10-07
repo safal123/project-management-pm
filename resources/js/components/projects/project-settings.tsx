@@ -46,18 +46,17 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
   };
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      {/* GitHub Integration */}
-      <Card className="dark:bg-primary/5 dark:border-primary/20">
-        <CardHeader>
-          <CardTitle>Integrations</CardTitle>
-          <CardDescription>Connect external tools to this project</CardDescription>
+    <div className="max-w-3xl space-y-4">
+      <Card className="gap-3 py-3.5 shadow-sm">
+        <CardHeader className="px-4">
+          <CardTitle className="text-[13px] font-medium">Integrations</CardTitle>
+          <CardDescription className="text-xs">Connect external tools to this project</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
-                <Github className="h-5 w-5" />
+        <CardContent className="px-4">
+          <div className="flex items-center justify-between rounded-md border px-3 py-2.5">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
+                <Github className="h-3.5 w-3.5" />
               </div>
               {gitIntegration ? (
                 <div className="space-y-1 min-w-0">
@@ -82,7 +81,7 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
                 </div>
               ) : (
                 <div className="space-y-0.5">
-                  <p className="text-sm font-medium">GitHub</p>
+                    <p className="text-[13px] font-medium">GitHub</p>
                   <p className="text-xs text-muted-foreground">
                     Connect a repository so tasks can spawn real branches
                   </p>
@@ -94,7 +93,7 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
                 onClick={handleDisconnectGit}
                 variant="outline"
                 size="sm"
-                className="gap-2 text-destructive hover:text-destructive shrink-0"
+                className="h-8 shrink-0 gap-1.5 text-[13px] text-destructive hover:text-destructive"
               >
                 Disconnect
               </Button>
@@ -102,8 +101,8 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
               <ConnectGitModal
                 project={project}
                 trigger={
-                  <Button variant="outline" size="sm" className="gap-2 shrink-0">
-                    <Github className="h-4 w-4" />
+                  <Button variant="outline" size="sm" className="h-8 shrink-0 gap-1.5 text-[13px]">
+                    <Github className="h-3.5 w-3.5" />
                     Connect GitHub
                   </Button>
                 }
@@ -114,20 +113,20 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
       </Card>
 
       {/* Danger Zone */}
-      <Card className="border-destructive/20 bg-destructive/5">
-        <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          <CardDescription>Actions that cannot be undone</CardDescription>
+      <Card className="gap-3 border-destructive/20 bg-destructive/5 py-3.5 shadow-sm">
+        <CardHeader className="px-4">
+          <CardTitle className="text-[13px] font-medium text-destructive">Danger zone</CardTitle>
+          <CardDescription className="text-xs">Actions that cannot be undone</CardDescription>
         </CardHeader>
-        <CardContent className="flex items-center justify-between">
+        <CardContent className="flex items-center justify-between px-4">
           <div className="space-y-0.5">
-            <p className="text-sm font-medium">Delete this project</p>
+            <p className="text-[13px] font-medium">Delete this project</p>
             <p className="text-xs text-muted-foreground">
               Once you delete a project, there is no going back. Please be certain.
             </p>
           </div>
-          <Button onClick={handleDeleteProject} variant="destructive" size="sm">
-            Delete Project
+          <Button onClick={handleDeleteProject} variant="destructive" size="sm" className="h-8 text-[13px]">
+            Delete project
           </Button>
         </CardContent>
       </Card>

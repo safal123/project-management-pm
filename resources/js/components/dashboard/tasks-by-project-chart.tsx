@@ -58,14 +58,14 @@ export function TasksByProjectChart({ data }: TasksByProjectChartProps) {
   const hasData = normalizedData.length > 0;
 
   return (
-    <Card className="dark:bg-primary/5 dark:border-primary/20">
-      <CardHeader>
-        <CardTitle>Tasks by Project</CardTitle>
-        <CardDescription>Task count across your top projects</CardDescription>
+    <Card className="gap-3 py-3.5 shadow-sm">
+      <CardHeader className="px-4">
+        <CardTitle className="text-[13px] font-medium">Tasks by project</CardTitle>
+        <CardDescription className="text-xs">Task count across your top projects</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4">
         {hasData ? (
-          <div className="h-[260px] w-full">
+          <div className="h-[200px] w-full">
             <ChartContainer
               config={barChartConfig}
               className="h-full w-full"

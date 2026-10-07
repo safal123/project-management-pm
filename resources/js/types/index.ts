@@ -28,6 +28,7 @@ export interface SharedData {
   name: string;
   quote: { message: string; author: string };
   auth: Auth;
+  sidebar_projects?: { id: string; name: string; slug: string }[];
   [key: string]: unknown;
 }
 
@@ -115,6 +116,8 @@ export interface Task {
   name: string;
   slug: string;
   parent_task_id: string | null;
+  depends_on_task_id?: string | null;
+  depends_on?: { id: string; title: string } | null;
   description: string;
   project_id: string;
   workspace_id: string;
@@ -171,6 +174,7 @@ export interface Event {
   type: 'meeting' | 'deadline' | 'reminder' | 'call';
   completed_at: string | null;
   attendees: User[];
+  project_id?: string | null;
   created_by: User;
   created_at: string;
   updated_at: string;

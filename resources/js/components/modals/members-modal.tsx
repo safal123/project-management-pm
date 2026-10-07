@@ -138,8 +138,8 @@ export const MembersModal = () => {
       open={open}
       onOpenChange={setOpen}
       trigger={
-        <Button variant="outline" className="gap-2">
-          <Users className="h-4 w-4" />
+        <Button variant="outline" size="sm" className="h-8 gap-1.5 px-2.5 text-[13px]">
+          <Users className="h-3.5 w-3.5" />
           Members
         </Button>
       }

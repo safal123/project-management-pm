@@ -4,100 +4,127 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from '@/components/ui/sidebar'
 import { SharedData, Workspace } from '@/types'
-import { LayoutDashboard, FolderKanban, Calendar, Plus } from 'lucide-react'
+import { Archive, Clock, CreditCard, Folder, LayoutDashboard, Mail, Plus, Settings, Users } from 'lucide-react'
 import WorkspaceSelector from './workspace-switcher'
 import { NavUser } from '@/components/nav-user'
 
-const navItems = [
-  {
-    label: 'Overview',
-    items: [
-      { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-    ],
-  },
-  {
-    label: 'Work',
-    items: [
-      { title: 'Projects', url: '/projects', icon: FolderKanban },
-      { title: 'Calendar', url: '/calendar', icon: Calendar },
-    ],
-  },
+const mainNav = [
+  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+  { title: 'Projects', url: '/projects', icon: Folder },
 ]
 
+const workspaceNav = [
+  { title: 'People', url: '/people', icon: Users },
+  { title: 'Activities', url: '/activity', icon: Clock },
+  { title: 'Emails', url: '/emails', icon: Mail },
+  { title: 'Billing', url: '/billing', icon: CreditCard },
+  { title: 'Archive', url: '/archive', icon: Archive },
+  { title: 'Settings', url: '/settings', icon: Settings },
+]
+
+const navItemClass =
+  'text-muted-foreground border border-transparent data-[active=true]:border-neutral-300 data-[active=true]:bg-neutral-200/80 data-[active=true]:text-foreground dark:data-[active=true]:border-neutral-700 dark:data-[active=true]:bg-neutral-800/80'
+
 export function AppSidebar() {
-  const { url } = usePage()
-  const workspaces = usePage<SharedData>().props.auth.user.workspaces
+  const page = usePage<SharedData>()
+  const path = page.url.split('?')[0]
+  const workspaces = page.props.auth.user.workspaces
+  const projects = page.props.sidebar_projects ?? []
 
   return (
-    <Sidebar collapsible="icon" variant="floating">
-      <SidebarHeader className="dark:bg-background rounded-lg">
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
         <WorkspaceSelector workspaces={workspaces as Workspace[]} />
       </SidebarHeader>
 
       <SidebarContent>
-        {navItems.map((group) => (
-          <SidebarGroup key={group.label} className="px-2 py-3">
-            <SidebarGroupLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              {group.label}
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      tooltip={item.title}
-                      asChild
-                      isActive={url === item.url || url.startsWith(item.url + '/')}
-                      className="data-[active=true]:bg-primary data-[active=true]:text-white dark:data-[active=true]:text-black hover:bg-primary/10"
-                    >
-                      <Link href={item.url} prefetch className="gap-3">
-                        <item.icon className="h-4 w-4 shrink-0" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))
-        }
-
-        <SidebarSeparator />
-
-        <SidebarGroup className="px-2 py-2">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild tooltip="New project"
-                className="text-primary hover:text-primary"
-              >
-                <Link
-                  href="/projects?create=1"
-                  prefetch
-                  className="gap-3 text-primary hover:text-primary"
-                >
-                  <Plus className="h-4 w-4 shrink-0" />
-                  <span>New project</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {mainNav.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    asChild
+                    isActive={path === item.url}
+                    className={navItemClass}
+                  >
+                    <Link href={item.url} prefetch>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
         </SidebarGroup>
-      </SidebarContent >
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Projects</SidebarGroupLabel>
+          <SidebarGroupAction asChild title="New project" className="top-1.5 right-2 [&>svg]:size-3.5">
+            <Link href="/projects?create=1" prefetch>
+              <Plus />
+              <span className="sr-only">New project</span>
+            </Link>
+          </SidebarGroupAction>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {projects.map((project) => (
+                <SidebarMenuItem key={project.id}>
+                  <SidebarMenuButton
+                    tooltip={project.name}
+                    asChild
+                    isActive={path === `/projects/${project.slug}` || path.startsWith(`/projects/${project.slug}/`)}
+                    className={navItemClass}
+                  >
+                    <Link href={`/projects/${project.slug}`} prefetch>
+                      <Folder />
+                      <span>{project.name}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {workspaceNav.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    asChild
+                    isActive={path === item.url || path.startsWith(item.url + '/')}
+                    className={navItemClass}
+                  >
+                    <Link href={item.url} prefetch>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
 
       <SidebarFooter>
         <NavUser />
       </SidebarFooter>
-    </Sidebar >
+    </Sidebar>
   )
 }

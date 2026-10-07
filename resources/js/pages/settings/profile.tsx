@@ -41,16 +41,18 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
       <Head title="Profile settings" />
 
       <SettingsLayout>
-        <div className="space-y-6 bg-card p-4 rounded-lg border shadow-sm">
+        <div className="space-y-4 rounded-md border bg-card p-4 shadow-sm">
           <HeadingSmall title="Profile information" description="Update your name and email address" />
 
-          <form onSubmit={submit} className="space-y-6">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
+          <form onSubmit={submit} className="space-y-3.5">
+            <div className="grid gap-1.5">
+              <Label htmlFor="name" className="text-[13px]">
+                Name
+              </Label>
 
               <Input
                 id="name"
-                className="mt-1 block w-full"
+                className="h-8 text-[13px]"
                 value={data.name}
                 onChange={(e) => setData('name', e.target.value)}
                 required
@@ -58,16 +60,18 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 placeholder="Full name"
               />
 
-              <InputError className="mt-2" message={errors.name} />
+              <InputError message={errors.name} />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email address</Label>
+            <div className="grid gap-1.5">
+              <Label htmlFor="email" className="text-[13px]">
+                Email address
+              </Label>
 
               <Input
                 id="email"
                 type="email"
-                className="mt-1 block w-full"
+                className="h-8 text-[13px]"
                 value={data.email}
                 onChange={(e) => setData('email', e.target.value)}
                 required
@@ -75,12 +79,12 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 placeholder="Email address"
               />
 
-              <InputError className="mt-2" message={errors.email} />
+              <InputError message={errors.email} />
             </div>
 
             {mustVerifyEmail && auth.user.email_verified_at === null && (
               <div>
-                <p className="text-muted-foreground -mt-4 text-sm">
+                <p className="text-muted-foreground -mt-2 text-[13px]">
                   Your email address is unverified.{' '}
                   <Link
                     href={route('verification.send')}
@@ -93,15 +97,17 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 </p>
 
                 {status === 'verification-link-sent' && (
-                  <div className="mt-2 text-sm font-medium text-green-600">
+                    <div className="mt-2 text-[13px] font-medium text-foreground">
                     A new verification link has been sent to your email address.
                   </div>
                 )}
               </div>
             )}
 
-            <div className="flex items-center gap-4">
-              <Button disabled={processing}>Save</Button>
+            <div className="flex items-center gap-3">
+              <Button disabled={processing} size="sm" className="h-8 px-3 text-[13px]">
+                Save
+              </Button>
 
               <Transition
                 show={recentlySuccessful}
@@ -110,11 +116,11 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 leave="transition ease-in-out"
                 leaveTo="opacity-0"
               >
-                <p className="text-sm text-neutral-600">Saved</p>
+                <p className="text-[13px] text-muted-foreground">Saved</p>
               </Transition>
             </div>
           </form>
-          <div className="pt-4 border-t">
+          <div className="border-t pt-3.5">
             <AppProfilePictureUpload
               workspaceId={auth.user.current_workspace_id as string}
               userId={auth.user.id}

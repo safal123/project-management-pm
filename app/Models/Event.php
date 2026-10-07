@@ -23,6 +23,7 @@ class Event extends Model
         'created_by',
         'updated_by',
         'workspace_id',
+        'project_id',
     ];
 
     protected $casts = [
@@ -44,6 +45,11 @@ class Event extends Model
     public function workspace()
     {
         return $this->belongsTo(Workspace::class);
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
     }
 
     public function attendees()

@@ -34,6 +34,7 @@ class TaskUpdateRequest extends FormRequest
             'status' => ['sometimes', 'string', Rule::in(Task::getStatusOptions())],
             'priority' => ['sometimes', 'string', Rule::in(Task::getPriorityOptions())],
             'parent_task_id' => ['sometimes', 'nullable', 'exists:tasks,id'],
+            'depends_on_task_id' => ['sometimes', 'nullable', 'exists:tasks,id'],
             'order' => ['sometimes', 'integer', 'min:1'],
         ];
     }
