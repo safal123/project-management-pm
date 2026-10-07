@@ -3,6 +3,7 @@ import { SharedData, Workspace, type WorkspaceSelectorProps } from '../types/ind
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from './ui/sidebar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { formatDistanceToNow } from 'date-fns'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { DropdownMenuLabel } from './ui/dropdown-menu'
 import { Separator } from './ui/separator'
@@ -15,11 +16,10 @@ const WorkspaceSelector = ({ workspaces }: WorkspaceSelectorProps) => {
   const isMobile = useIsMobile();
   const activeTeam = auth.user.current_workspace as Workspace | null;
 
-  // If no workspace is set, use the first available workspace
   const currentWorkspace = activeTeam || workspaces[0];
 
   if (!currentWorkspace) {
-    return null; // Or show a "Create Workspace" prompt
+    return null;
   }
 
   return (
@@ -29,17 +29,22 @@ const WorkspaceSelector = ({ workspaces }: WorkspaceSelectorProps) => {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="border border-sidebar-border bg-background hover:bg-sidebar-accent data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <span className="text-xl font-semibold">{currentWorkspace.name.charAt(0)}</span>
+              <div className="flex aspect-square size-7 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
+                <span className="text-[13px] font-semibold">{currentWorkspace.name.charAt(0)}</span>
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
+              <div className="grid flex-1 text-left leading-tight">
+                <span className="truncate text-[13px] font-medium">
                   {currentWorkspace.name}
                 </span>
+                {currentWorkspace.created_at && (
+                  <span className="truncate text-[11px] text-muted-foreground">
+                    Joined {formatDistanceToNow(new Date(currentWorkspace.created_at))}
+                  </span>
+                )}
               </div>
-              <ChevronsUpDown className="ml-auto" />
+              <ChevronsUpDown className="ml-auto size-3.5 text-muted-foreground" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -47,32 +52,32 @@ const WorkspaceSelector = ({ workspaces }: WorkspaceSelectorProps) => {
             align="end"
             side={isMobile ? 'bottom' : state === 'collapsed' ? 'left' : 'bottom'}
           >
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
+            <DropdownMenuLabel className="px-2 py-1 text-[11px] text-muted-foreground">
               Workspaces
             </DropdownMenuLabel>
             <Separator />
             {workspaces.map((workspace) => (
               <DropdownMenuItem
                 onClick={() => router.visit(route('workspace.switcher', { workspace: workspace.id }), { method: 'post' })}
-                key={workspace.id} className="mt-1 px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">
+                key={workspace.id}
+                className="mt-0.5 cursor-pointer px-2 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md outline-none"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[13px] font-medium">
                     {workspace.name.substring(0, 20)}
                   </span>
                   {auth.user.current_workspace_id === workspace.id && (
-                    <Check className="ml-auto size-4 text-primary" />
+                    <Check className="ml-auto size-3.5 text-foreground" />
                   )}
                 </div>
               </DropdownMenuItem>
             ))}
-            {/* Add a new workspace button */}
-            <div className="mt-1 p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md">
+            <div className="mt-0.5 p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md">
               <AddNewWorkspace />
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
-
-      </SidebarMenuItem >
+      </SidebarMenuItem>
     </SidebarMenu>
   )
 }

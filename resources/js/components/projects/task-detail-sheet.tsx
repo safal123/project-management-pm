@@ -41,8 +41,8 @@ export function TaskDetailSheet({ task, open, onOpenChange }: TaskDetailSheetPro
     <Sheet open={open} onOpenChange={onOpenChange} modal={true}>
       <SheetContent
         className={cn(
-          "[&>button]:hidden p-0 flex flex-col overflow-hidden space-y-0 w-full sm:max-w-4xl bg-white dark:bg-background rounded-lg",
-          fullScreen && "rounded-none border border-border",
+          '[&>button]:hidden flex w-full flex-col gap-0 space-y-0 overflow-hidden bg-background p-0 text-[13px] sm:max-w-3xl',
+          fullScreen && 'rounded-none border border-border',
         )}
         style={fullScreen ? {
           position: 'fixed',
@@ -60,7 +60,7 @@ export function TaskDetailSheet({ task, open, onOpenChange }: TaskDetailSheetPro
         <SheetDescription className="sr-only">
           Task details and information for {task.title}
         </SheetDescription>
-        <div className="flex-shrink-0 bg-white dark:bg-background border-b px-4 pt-6 pr-8 py-4 flex items-center justify-between dark:bg-primary/5 dark:border-primary/20">
+        <div className="flex h-11 shrink-0 items-center justify-between border-b bg-muted/20 px-3">
           <MarkTaskAsComplete task={task} />
           <TaskActions
             task={task}
@@ -69,31 +69,28 @@ export function TaskDetailSheet({ task, open, onOpenChange }: TaskDetailSheetPro
             fullScreen={fullScreen}
           />
         </div>
-        <div className="mt-[-16px] px-4 bg-primary/10 border-b border-border py-4 flex items-center  gap-2 text-sm text-muted-foreground">
-          <span>This task is visible to everyone in {project.name}.</span>
-          <Info className="h-4 w-4" />
+        <div className="flex items-center gap-1.5 border-b bg-muted/20 px-3 py-1.5 text-xs text-muted-foreground">
+          <Info className="h-3.5 w-3.5 shrink-0" />
+          <span>Visible to everyone in {project.name}.</span>
         </div>
 
-        <div
-          className="flex-1 overflow-y-auto px-6 space-y-6"
-        >
+        <div className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
           <EditableTaskTitle task={task} />
           <TaskAssignee task={task} />
           <Separator />
-          <div className="flex items-center gap-2">
-            <Label className="text-sm w-24">Due Date</Label>
-            <TaskDueDate task={task} />
+          <div className="flex items-center gap-3">
+            <Label className="w-24 shrink-0 text-[13px] font-normal text-muted-foreground">Due date</Label>
+            <TaskDueDate task={task} variant="field" />
           </div>
           <TaskProject task={task} project={project} />
           <TaskDependencies task={task} />
           <TaskFields task={task} />
           <AppTextEditor task={task} />
-          {/* Attachments */}
-          <div className="border bg-white dark:bg-primary/10 p-4 rounded-md">
-            <Label className="w-24 text-sm">
-              <p>Attachements {task.media && task.media.length > 0 && `(${task.media.length})`}</p>
+          <div className="rounded-md border bg-muted/20 p-2.5">
+            <Label className="text-[13px] text-muted-foreground">
+              Attachments {task.media && task.media.length > 0 && `(${task.media.length})`}
             </Label>
-            <div className="flex items-center gap-2 flex-wrap mt-2 border-t border-border pt-4">
+            <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-border pt-2.5">
               {task.media && task.media.length > 0 &&
                 task.media.map((media) => (
                   <AppImagePreview
@@ -117,10 +114,6 @@ export function TaskDetailSheet({ task, open, onOpenChange }: TaskDetailSheetPro
         </div>
         <TaskCommentsSection task={task} />
       </SheetContent>
-    </Sheet >
+    </Sheet>
   );
 }
-
-
-
-

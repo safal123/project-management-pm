@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TaskReorderRequest;
+use App\Models\Activity;
 use App\Models\Task;
 use Illuminate\Support\Facades\DB;
 
@@ -11,11 +12,28 @@ class ReorderTasksController extends Controller
     public function __invoke(TaskReorderRequest $request)
     {
         $validated = $request->validated();
+        $user = $request->user();
 
-        DB::transaction(function () use ($request, $validated) {
+        DB::transaction(function () use ($request, $validated, $user) {
             if ($request->filled('parent_task_id') && $request->filled('moved_task_id')) {
-                Task::where('id', $request->moved_task_id)
-                    ->update(['parent_task_id' => $request->parent_task_id]);
+                $movedTask = Task::find($request->moved_task_id);
+
+                if ($movedTask) {
+                    $oldParentId = $movedTask->parent_task_id;
+                    $newParentId = $request->parent_task_id;
+
+                    $movedTask->update(['parent_task_id' => $newParentId]);
+
+                    if ($oldParentId !== $newParentId) {
+                        $oldColumn = $oldParentId ? Task::find($oldParentId) : null;
+                        $newColumn = Task::find($newParentId);
+
+                        Activity::record($movedTask, Activity::TYPE_MOVED, $movedTask->workspace_id, $user, [
+                            'from' => $oldColumn?->title,
+                            'to' => $newColumn?->title,
+                        ]);
+                    }
+                }
             }
 
             $taskIds = $validated['taskIds'];

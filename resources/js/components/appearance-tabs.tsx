@@ -17,21 +17,21 @@ export default function AppearanceToggleTab({ className = '', variant = 'default
   ];
 
   return (
-    <div className={cn('inline-flex gap-1 rounded-lg bg-neutral-100 p-1 dark:bg-neutral-800 w-fit', className)} {...props}>
+    <div className={cn('inline-flex w-fit gap-0.5 rounded-md border bg-muted/40 p-0.5', className)} {...props}>
       {tabs.map(({ value, icon: Icon, label }) => (
         <button
           key={value}
           onClick={() => updateAppearance(value)}
           className={cn(
-            'border flex items-center justify-center rounded-md px-3.5 py-1.5 transition-colors',
+            'flex items-center justify-center rounded-md border border-transparent px-2.5 py-1 transition-colors',
             appearance === value
-              ? 'bg-white shadow-xs dark:bg-neutral-700 dark:text-neutral-100'
-              : 'text-neutral-500 hover:bg-neutral-200/60 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-700/60',
+              ? 'border-neutral-300 bg-neutral-200/80 text-foreground dark:border-neutral-700 dark:bg-neutral-800/80'
+              : 'text-muted-foreground hover:bg-neutral-200/60 hover:text-foreground dark:hover:bg-neutral-700/60',
             variant === 'mini' && 'w-full'
           )}
         >
-          <Icon className="h-4 w-4 -ml-1" />
-          {variant === 'mini' ? null : <span className="ml-1.5 text-sm">{label}</span>}
+          <Icon className="h-3.5 w-3.5 -ml-0.5" />
+          {variant === 'mini' ? null : <span className="ml-1.5 text-[13px]">{label}</span>}
         </button>
       ))}
     </div>

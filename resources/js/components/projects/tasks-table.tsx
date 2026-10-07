@@ -90,7 +90,7 @@ export default function TasksTable({ paginatedTasks }: TasksTableProps) {
                 name={task.assigned_to.name}
                 size="sm"
               />
-              <span className="text-sm">{task.assigned_to.name}</span>
+              <span className="text-[13px]">{task.assigned_to.name}</span>
             </div>
           ) : (
             <span className="text-muted-foreground">Unassigned</span>
@@ -101,7 +101,7 @@ export default function TasksTable({ paginatedTasks }: TasksTableProps) {
         header: 'Due Date',
         render: (task) =>
           task.due_date ? (
-            <span className="text-sm">{formatShortDate(task.due_date)}</span>
+            <span className="text-[13px]">{formatShortDate(task.due_date)}</span>
           ) : (
             <span className="text-muted-foreground">—</span>
           ),
@@ -155,7 +155,7 @@ export default function TasksTable({ paginatedTasks }: TasksTableProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <AppTable
         items={tasks}
         headers={taskHeaders}
@@ -165,7 +165,7 @@ export default function TasksTable({ paginatedTasks }: TasksTableProps) {
 
       {last_page > 1 && (
         <DataTablePaginationRow>
-          <p className="text-sm text-muted-foreground w-[200px]">
+          <p className="w-[200px] text-[13px] text-muted-foreground">
             Showing {from}–{to} of {total} tasks
           </p>
           <Pagination>

@@ -20,6 +20,7 @@ class WorkspaceResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'logo' => $this->logo,
+            'created_at' => $this->created_at,
             'created_by' => new UserResource($this->whenLoaded('createdBy')),
             'users' => UserResource::collection($this->whenLoaded('users')),
         ];

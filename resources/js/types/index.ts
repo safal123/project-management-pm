@@ -28,6 +28,7 @@ export interface SharedData {
   name: string;
   quote: { message: string; author: string };
   auth: Auth;
+  sidebar_projects?: { id: string; name: string; slug: string }[];
   [key: string]: unknown;
 }
 
@@ -65,6 +66,17 @@ export interface Project {
   created_at: string;
   users: User[]
   invitations: Invitation[]
+  git_integration?: GitIntegration | null;
+}
+
+export interface GitIntegration {
+  provider: 'github';
+  repo_full_name: string;
+  repo_url: string;
+  default_branch: string;
+  masked_token: string;
+  connected_by: User | null;
+  connected_at: string;
 }
 
 export interface Invitation {
@@ -104,6 +116,8 @@ export interface Task {
   name: string;
   slug: string;
   parent_task_id: string | null;
+  depends_on_task_id?: string | null;
+  depends_on?: { id: string; title: string } | null;
   description: string;
   project_id: string;
   workspace_id: string;
@@ -121,6 +135,8 @@ export interface Task {
   likes_count?: number;
   is_liked_by_user?: boolean;
   comments_count?: number;
+  branch_name?: string | null;
+  branch_url?: string | null;
 }
 
 export interface Comment {
@@ -136,6 +152,15 @@ export interface Comment {
   is_liked_by_user?: boolean;
 }
 
+export interface Activity {
+  id: string;
+  type: string;
+  properties: Record<string, unknown> | null;
+  user: User | null;
+  description: string;
+  created_at: string;
+}
+
 
 export interface Event {
   id: string;
@@ -149,6 +174,7 @@ export interface Event {
   type: 'meeting' | 'deadline' | 'reminder' | 'call';
   completed_at: string | null;
   attendees: User[];
+  project_id?: string | null;
   created_by: User;
   created_at: string;
   updated_at: string;

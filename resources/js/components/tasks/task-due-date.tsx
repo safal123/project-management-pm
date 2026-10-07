@@ -1,81 +1,122 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Calendar, Loader2 } from 'lucide-react';
-import { Task } from '@/types';
-import { router } from '@inertiajs/react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { useState } from 'react'
+import { addDays, startOfDay } from 'date-fns'
+import { router } from '@inertiajs/react'
+import { Calendar, Loader2, X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Calendar as DatePicker } from '@/components/ui/calendar'
-import { Badge } from '@/components/ui/badge'
-import { getDueDateDisplay } from '@/utils/app-utils'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Task } from '@/types'
+import { getDueDateDisplay, toDateKey } from '@/utils/app-utils'
+import { FIELD_TRIGGER } from './field-styles'
 
 interface TaskDueDateProps {
-  task: Task;
+  task: Task
+  variant?: 'field' | 'compact'
 }
 
-export default function TaskDueDate({ task }: TaskDueDateProps) {
-  const [isUpdating, setIsUpdating] = useState(false);
+function toDateValue(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
-  const handleDateSelect = (date: Date | undefined) => {
-    const formatDate = (d: Date) => {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
+function selectedDate(value: string | null) {
+  if (!value) return undefined
+  return new Date(`${toDateKey(value)}T12:00:00`)
+}
 
-    setIsUpdating(true);
+const QUICK_OPTIONS = [
+  { label: 'Today', getDate: () => startOfDay(new Date()) },
+  { label: 'Tomorrow', getDate: () => addDays(startOfDay(new Date()), 1) },
+  { label: 'Next week', getDate: () => addDays(startOfDay(new Date()), 7) },
+]
+
+export default function TaskDueDate({ task, variant = 'compact' }: TaskDueDateProps) {
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [open, setOpen] = useState(false)
+  const display = getDueDateDisplay(task.due_date)
+
+  const saveDate = (date: Date | null) => {
+    setIsUpdating(true)
     router.patch(
       route('tasks.update', { task: task.id }),
-      { due_date: date ? formatDate(date) : null },
+      { due_date: date ? toDateValue(date) : null },
       {
         preserveScroll: true,
         only: ['tasks', 'paginatedTasks'],
-        onFinish: () => {
-          setIsUpdating(false);
-        },
+        onFinish: () => setIsUpdating(false),
       }
-    );
-  };
+    )
+    setOpen(false)
+  }
 
   return (
-    <Popover modal={true}>
+    <Popover modal open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          size="sm"
           variant="ghost"
+          size="sm"
           disabled={isUpdating}
-          className="border border-border rounded-md flex items-center gap-2 h-fit p-1.75 w-fit justify-start hover:bg-accent"
+          onClick={(event) => event.stopPropagation()}
+          className={
+            variant === 'field'
+              ? FIELD_TRIGGER
+              : 'h-6 w-fit max-w-[120px] gap-1 rounded-md border px-2 text-[11px]'
+          }
         >
           {isUpdating ? (
-            <Loader2 className="h-3 w-3 text-muted-foreground animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground" />
           ) : (
-            <Calendar className="h-3 w-3 text-muted-foreground" />
+            <Calendar className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           )}
-          <span className="text-xs text-muted-foreground">
-            {task.due_date ? (
-              <p>
-                {getDueDateDisplay(task.due_date)?.text}
-              </p>
-            ) : (
-              <Badge variant="outline" className="text-xs">NA</Badge>
-            )}
+          <span className="min-w-0 truncate">
+            {display?.text ?? 'Due date'}
           </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="p-0 m-1 border border-border rounded-lg z-[9999]"
         align="start"
-        onClick={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
+        sideOffset={6}
+        className="z-[9999] w-[252px] p-0"
+        onClick={(event) => event.stopPropagation()}
+        onMouseDown={(event) => event.stopPropagation()}
       >
+        <div className="border-b p-1.5">
+          {QUICK_OPTIONS.map((option) => (
+            <button
+              key={option.label}
+              type="button"
+              className="flex h-8 w-full items-center rounded-md px-2 text-left text-[13px] hover:bg-muted"
+              onClick={() => saveDate(option.getDate())}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
         <DatePicker
           mode="single"
-          selected={task.due_date ? new Date(task.due_date) : undefined}
-          onSelect={handleDateSelect}
-          className="w-full rounded-lg gap-2"
+          selected={selectedDate(task.due_date)}
+          defaultMonth={selectedDate(task.due_date) ?? new Date()}
+          onSelect={(date) => date && saveDate(date)}
+          className="w-[252px] p-2 [--cell-size:1.75rem]"
         />
+
+        {task.due_date && (
+          <div className="border-t p-1.5">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-full justify-start px-2 text-[13px] text-muted-foreground"
+              onClick={() => saveDate(null)}
+            >
+              <X className="h-3.5 w-3.5" />
+              Clear due date
+            </Button>
+          </div>
+        )}
       </PopoverContent>
     </Popover>
-  );
+  )
 }
-

@@ -91,8 +91,8 @@ export const KanbanBoard = () => {
         )
       }}
     >
-      <div className="h-[calc(100vh-170px)] px-6 overflow-y-auto">
-        <div className="flex gap-4">
+      <div className="h-[calc(100vh-148px)] overflow-y-auto bg-muted/30 px-4 py-3 dark:bg-black/20 lg:px-6">
+        <div className="flex gap-3">
           {parentTasks.map((column) => (
             <KanbanColumn
               key={column.id}

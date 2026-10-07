@@ -1,151 +1,234 @@
-import { useMemo, useCallback, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { router, usePage } from '@inertiajs/react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarX,
-  Users, Video, Building2, Globe, Pencil, Trash2, CircleCheck, Circle,
-} from 'lucide-react'
-import { EventModal, EventViewModal } from '@/components/modals/event-modal'
-import AppAvatar from '@/components/app-avatar'
-import { Event, PaginatedData, SharedData, User } from '@/types'
-import {
-  parseLaravelDate, toDateKey,
-  EVENT_TYPE_STYLES,
-  EVENT_TYPE_BADGE, EVENT_TYPE_ICON_COLOR, EVENT_TYPE_LABELS, EVENT_LOCATION_LABELS,
-  type EventType,
-} from '@/utils/app-utils'
+  addMonths,
+  addWeeks,
+  eachDayOfInterval,
+  endOfMonth,
+  endOfWeek,
+  format,
+  isSameMonth,
+  isToday,
+  startOfMonth,
+  startOfWeek,
+} from 'date-fns'
+import { CalendarDays, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { toast } from 'sonner'
+import { EventModal, EventViewModal } from '@/components/modals/event-modal'
+import { TaskDetailSheet } from '@/components/projects/task-detail-sheet'
+import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
+import { Checkbox } from '@/components/ui/checkbox'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Event, SharedData, Task } from '@/types'
+import { EVENT_TYPE_STYLES, parseLaravelDate, toDateKey, type EventType } from '@/utils/app-utils'
 import { cn } from '@/lib/utils'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+type ViewMode = 'month' | 'week' | 'agenda'
 
-type ViewMode = 'day' | 'week' | 'month'
+type CalendarEvent = Pick<Event, 'id' | 'title' | 'type' | 'start_date' | 'completed_at'> & {
+  date_key: string
+  end_date?: string | null
+  description?: string | null
+  location?: string | null
+  attendees?: Event['attendees']
+}
 
-type CalendarEvent = Pick<Event, 'id' | 'title' | 'type' | 'start_date' | 'completed_at'> & { date_key: string }
+type DueDateCard = {
+  id: string
+  title: string
+  due_date: string
+  date_key: string
+  status?: string | null
+  slug?: string
+}
+
+type CalendarItem = {
+  id: string
+  title: string
+  kind: 'event' | 'card'
+  dateKey: string
+  start: Date
+  end: Date | null
+  event?: CalendarEvent
+  card?: DueDateCard
+}
 
 interface PageProps extends SharedData {
-  calendarEvents: CalendarEvent[]      // lightweight grid dots
-  tableEvents: PaginatedData<Event>    // paginated full data
+  calendarEvents: CalendarEvent[]
+  dueDateCards: DueDateCard[]
   filters: { view: ViewMode; date: string }
-  members: User[]
+  tasks?: Task[] | { data?: Task[] }
 }
 
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-]
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-
-
-function toDateStr(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+function unwrapTasks(tasks?: Task[] | { data?: Task[] }) {
+  if (!tasks) return []
+  return Array.isArray(tasks) ? tasks : (tasks.data ?? [])
 }
 
-function fmtTime(dateStr: string) {
-  return parseLaravelDate(dateStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+const HOUR_HEIGHT = 48
+const HOURS = Array.from({ length: 24 }, (_, hour) => hour)
+const WEEK_STARTS_ON = 1 as const
+
+function toDateStr(date: Date) {
+  return format(date, 'yyyy-MM-dd')
 }
 
-function fmtDuration(start: string, end: string) {
-  const m = Math.round((parseLaravelDate(end).getTime() - parseLaravelDate(start).getTime()) / 60000)
-  if (m < 60) return `${m}m`
-  const h = Math.floor(m / 60)
-  const rem = m % 60
-  return rem ? `${h}h ${rem}m` : `${h}h`
+function parseDate(value?: string) {
+  if (!value) return new Date()
+  return new Date(`${value}T12:00:00`)
 }
 
-function isPastDate(dateOrStr: Date | string) {
-  const d = typeof dateOrStr === 'string' ? parseLaravelDate(dateOrStr) : new Date(dateOrStr)
-  d.setHours(0, 0, 0, 0)
-  const today = new Date(); today.setHours(0, 0, 0, 0)
-  return d < today
+function weekDays(anchor: Date) {
+  const start = startOfWeek(anchor, { weekStartsOn: WEEK_STARTS_ON })
+  return eachDayOfInterval({ start, end: endOfWeek(anchor, { weekStartsOn: WEEK_STARTS_ON }) })
 }
 
-function LocationIcon({ location }: { location: string }) {
-  return location === 'online'
-    ? <Video className="w-3.5 h-3.5" />
-    : location === 'office'
-      ? <Building2 className="w-3.5 h-3.5" />
-      : <Globe className="w-3.5 h-3.5" />
+function monthDays(anchor: Date) {
+  const start = startOfWeek(startOfMonth(anchor), { weekStartsOn: WEEK_STARTS_ON })
+  const end = endOfWeek(endOfMonth(anchor), { weekStartsOn: WEEK_STARTS_ON })
+  return eachDayOfInterval({ start, end })
 }
 
-// ─── CalendarPage ─────────────────────────────────────────────────────────────
+function formatHour(hour: number) {
+  if (hour === 0) return '12 AM'
+  if (hour === 12) return '12 PM'
+  return hour < 12 ? `${hour} AM` : `${hour - 12} PM`
+}
+
+function isTimed(date: Date) {
+  return date.getHours() !== 0 || date.getMinutes() !== 0
+}
+
+function minutesFromMidnight(date: Date) {
+  return date.getHours() * 60 + date.getMinutes()
+}
+
+function headerLabel(view: ViewMode, anchor: Date) {
+  if (view === 'week') {
+    const days = weekDays(anchor)
+    return `${format(days[0], 'd')} – ${format(days[6], 'd MMMM yyyy')}`
+  }
+
+  return format(anchor, 'MMMM yyyy')
+}
 
 export function CalendarPage() {
-  const { calendarEvents, tableEvents: paginatedEvents, filters } = usePage<PageProps>().props
+  const {
+    calendarEvents = [],
+    dueDateCards = [],
+    filters = { view: 'week' as ViewMode, date: toDateStr(new Date()) },
+    project,
+    tasks,
+  } = usePage<PageProps & { project?: { slug: string } }>().props
 
+  const [showEvents, setShowEvents] = useState(true)
+  const [showCards, setShowCards] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
   const [createDate, setCreateDate] = useState<Date | undefined>()
   const [viewingEvent, setViewingEvent] = useState<Event | null>(null)
   const [editingEvent, setEditingEvent] = useState<Event | null>(null)
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+  const selectedTask = unwrapTasks(tasks).find((task) => task.id === selectedTaskId) ?? null
 
-  // Derived from server filters (no local month/day state needed)
-  const anchorDate = new Date(`${filters.date}T12:00:00`)
-  const currentMonth = anchorDate.getMonth()
-  const currentYear = anchorDate.getFullYear()
-  const selectedDay = anchorDate.getDate()
-  const viewMode = filters.view
+  const viewMode: ViewMode = filters.view === 'month' || filters.view === 'agenda' ? filters.view : 'week'
+  const anchorDate = parseDate(filters.date)
+  const visibleWeek = useMemo(() => weekDays(anchorDate), [anchorDate])
 
-  const calendarDays = useMemo(() => {
-    const dim = new Date(currentYear, currentMonth + 1, 0).getDate()
-    const fdom = new Date(currentYear, currentMonth, 1).getDay()
-    return [
-      ...Array<null>(fdom).fill(null),
-      ...Array.from({ length: dim }, (_, i) => i + 1),
-    ] as (number | null)[]
-  }, [currentYear, currentMonth])
+  const items = useMemo<CalendarItem[]>(() => {
+    const eventItems = showEvents
+      ? calendarEvents.map((event) => ({
+          id: `event-${event.id}`,
+          title: event.title,
+          kind: 'event' as const,
+          dateKey: event.date_key ?? toDateKey(event.start_date),
+          start: parseLaravelDate(event.start_date),
+          end: event.end_date ? parseLaravelDate(event.end_date) : null,
+          event,
+        }))
+      : []
 
-  const gridLookup = useMemo(() => {
-    const map: Record<string, CalendarEvent[]> = {}
-    calendarEvents?.forEach((ev) => {
-      const key = ev.date_key ?? toDateKey(ev.start_date)
-      if (!map[key]) map[key] = []
-      map[key].push(ev)
+    const cardItems = showCards
+      ? dueDateCards.map((card) => ({
+          id: `card-${card.id}`,
+          title: card.title,
+          kind: 'card' as const,
+          dateKey: card.date_key ?? toDateKey(card.due_date),
+          start: parseLaravelDate(card.due_date),
+          end: null,
+          card,
+        }))
+      : []
+
+    return [...eventItems, ...cardItems]
+  }, [calendarEvents, dueDateCards, showEvents, showCards])
+
+  const itemsByDay = useMemo(() => {
+    const map: Record<string, CalendarItem[]> = {}
+    items.forEach((item) => {
+      if (!map[item.dateKey]) map[item.dateKey] = []
+      map[item.dateKey].push(item)
     })
     return map
-  }, [calendarEvents])
-
-  const getGridEvents = (day: number) => {
-    const key = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    return gridLookup[key] ?? []
-  }
-
+  }, [items])
 
   const go = useCallback((params: Record<string, string | number>) => {
-    router.get(route('calendar.index'), params as Record<string, string>, {
-      preserveState: true,
-      preserveScroll: true,
-      only: ['calendarEvents', 'tableEvents', 'filters'],
-    })
-  }, [])
+    if (!project?.slug) return
 
-  const changeMonth = (dir: -1 | 1) => {
-    const d = new Date(currentYear, currentMonth + dir, 1)
-    go({ date: toDateStr(d), view: viewMode })
-  }
+    router.get(
+      route('projects.show', { project: project.slug }),
+      { ...params, tab: 'calendar' } as Record<string, string>,
+      {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['calendarEvents', 'tableEvents', 'dueDateCards', 'filters', 'members', 'tasks'],
+      }
+    )
+  }, [project?.slug])
 
+  const changeView = (view: ViewMode) => go({ date: filters.date, view })
   const goToToday = () => go({ date: toDateStr(new Date()), view: viewMode })
+  const goToDate = (date: Date) => go({ date: toDateStr(date), view: viewMode })
 
-  const selectDay = (day: number) => {
-    const d = new Date(currentYear, currentMonth, day)
-    go({ date: toDateStr(d), view: 'day' })
+  const shift = (direction: -1 | 1) => {
+    const next = viewMode === 'week' ? addWeeks(anchorDate, direction) : addMonths(anchorDate, direction)
+    goToDate(next)
   }
 
-  const changeView = (v: ViewMode) =>
-    go({ date: filters.date, view: v })
-
-  const changePage = (page: number) =>
-    go({ date: filters.date, view: viewMode, page })
-
-  const openCreate = (day: number) => {
-    const d = new Date(currentYear, currentMonth, day)
-    if (isPastDate(d)) { toast.info('Cannot create events on past dates'); return }
-    setCreateDate(d)
+  const openCreate = (date = new Date()) => {
+    const next = new Date(date)
+    next.setHours(0, 0, 0, 0)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    if (next < today) {
+      toast.info('Cannot create events on past dates')
+      return
+    }
+    setCreateDate(date)
     setCreateOpen(true)
+  }
+
+  const openItem = (item: CalendarItem) => {
+    if (item.kind === 'event' && item.event) {
+      setViewingEvent(item.event as unknown as Event)
+      return
+    }
+
+    if (item.card) {
+      setSelectedTaskId(item.card.id)
+    }
+  }
+
+  const deleteEvent = (event: Event) => {
+    if (!confirm(`Delete "${event.title}"? This cannot be undone.`)) return
+    router.delete(route('events.destroy', event.id), {
+      preserveScroll: true,
+      onSuccess: () => {
+        toast.success('Event deleted')
+        setViewingEvent(null)
+      },
+      onError: () => toast.error('Failed to delete event'),
+    })
   }
 
   const toggleComplete = (event: Event) => {
@@ -159,314 +242,191 @@ export function CalendarPage() {
     })
   }
 
-  const deleteEvent = (event: Event) => {
-    if (!confirm(`Delete "${event.title}"? This cannot be undone.`)) return
-    router.delete(route('events.destroy', event.id), {
-      preserveScroll: true,
-      onSuccess: () => { toast.success('Event deleted'); setViewingEvent(null) },
-      onError: () => toast.error('Failed to delete event'),
-    })
-  }
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement
+      if (target.closest('input, textarea, [contenteditable="true"]')) return
 
-  const tableLabel = (() => {
-    if (viewMode === 'day') {
-      return anchorDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+      if (event.key === 't' || event.key === 'T') goToToday()
+      if (event.key === 'ArrowLeft') shift(-1)
+      if (event.key === 'ArrowRight') shift(1)
+      if (event.key === 'm' || event.key === 'M') changeView('month')
+      if (event.key === 'w' || event.key === 'W') changeView('week')
+      if (event.key === 'a' || event.key === 'A') changeView('agenda')
+      if (event.key === 'c' || event.key === 'C') openCreate(anchorDate)
     }
-    if (viewMode === 'week') {
-      const start = new Date(anchorDate)
-      start.setDate(anchorDate.getDate() - anchorDate.getDay())
-      const end = new Date(start); end.setDate(start.getDate() + 6)
-      return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
-    }
-    return `${MONTH_NAMES[currentMonth]} ${currentYear}`
-  })()
 
-  const events = paginatedEvents.data ?? []
-  const pg = {
-    current: paginatedEvents.current_page ?? 1,
-    last: paginatedEvents.last_page ?? 1,
-    total: paginatedEvents.total ?? 0,
-    from: paginatedEvents.from ?? 0,
-    to: paginatedEvents.to ?? 0,
-  }
-  const isAnchorPast = isPastDate(filters.date)
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [anchorDate, filters.date, viewMode, project?.slug])
 
   return (
-    <div className="p-6 min-h-screen space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Calendar</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Schedule and manage meetings, deadlines, and events</p>
+    <div className="m-3 flex h-[calc(100vh-164px)] min-h-0 flex-col overflow-hidden rounded-md border border-border bg-muted/30">
+      <header className="flex h-11 shrink-0 items-center justify-between gap-3 border-b bg-muted/40 px-3">
+        <div className="flex min-w-0 items-center gap-1">
+          <Button variant="ghost" size="sm" className="h-8 px-2.5 text-[13px]" onClick={goToToday}>
+            Today
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => shift(-1)}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => shift(1)}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <p className="truncate pl-1 text-[13px] font-medium">{headerLabel(viewMode, anchorDate)}</p>
         </div>
-        <EventModal open={createOpen} onOpenChange={setCreateOpen} selectedDate={createDate} />
+
+        <div className="flex items-center gap-2">
+          <Button size="sm" className="h-8 px-2.5 text-[13px]" onClick={() => openCreate(anchorDate)}>
+            <Plus className="h-3.5 w-3.5" />
+            New event
+          </Button>
+          <ToggleGroup
+            type="single"
+            value={viewMode}
+            onValueChange={(value) => {
+              if (value) changeView(value as ViewMode)
+            }}
+            variant="outline"
+            size="sm"
+            className="hidden sm:flex"
+          >
+            <ToggleGroupItem value="month" className="h-8 px-2.5 text-[13px]">Month</ToggleGroupItem>
+            <ToggleGroupItem value="week" className="h-8 px-2.5 text-[13px]">Week</ToggleGroupItem>
+            <ToggleGroupItem value="agenda" className="h-8 px-2.5 text-[13px]">Agenda</ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+      </header>
+
+      <div className="flex min-h-0 flex-1">
+        <aside className="hidden w-[260px] shrink-0 flex-col overflow-y-auto border-r bg-muted/20 px-3 py-3 lg:flex">
+          <Calendar
+            mode="single"
+            selected={anchorDate}
+            month={anchorDate}
+            onMonthChange={goToDate}
+            onSelect={(date) => date && goToDate(date)}
+            weekStartsOn={WEEK_STARTS_ON}
+            className="w-full p-0 [--cell-size:1.85rem]"
+            classNames={{
+              month_caption: 'text-[13px] font-medium',
+              weekday: 'text-[10px] uppercase text-muted-foreground',
+            }}
+          />
+
+          <section className="mt-6 space-y-2">
+            <h3 className="text-[11px] font-medium text-muted-foreground">On this calendar</h3>
+            <label className="flex cursor-pointer items-start gap-2 rounded-md px-1 py-1.5 hover:bg-muted/60">
+              <Checkbox checked={showEvents} onCheckedChange={(checked) => setShowEvents(Boolean(checked))} className="mt-0.5" />
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center justify-between gap-2 text-[13px]">
+                  Events
+                  <span className="text-muted-foreground">{calendarEvents.length}</span>
+                </span>
+                <span className="block text-[11px] text-muted-foreground">Meetings and milestones</span>
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-start gap-2 rounded-md px-1 py-1.5 hover:bg-muted/60">
+              <Checkbox checked={showCards} onCheckedChange={(checked) => setShowCards(Boolean(checked))} className="mt-0.5" />
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center justify-between gap-2 text-[13px]">
+                  Card due dates
+                  <span className="text-muted-foreground">{dueDateCards.length}</span>
+                </span>
+                <span className="block text-[11px] text-muted-foreground">Cards with a due date</span>
+              </span>
+            </label>
+          </section>
+
+          <section className="mt-6 space-y-2">
+            <h3 className="text-[11px] font-medium text-muted-foreground">Sync</h3>
+            <div className="flex items-center gap-2 rounded-md border px-2.5 py-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-[11px] font-semibold">G</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[13px] leading-tight">Google Calendar</span>
+                <span className="block text-[11px] text-muted-foreground">Read-only import</span>
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-[12px]"
+                onClick={() => toast.info('Google Calendar sync is coming soon')}
+              >
+                Connect
+              </Button>
+            </div>
+            <div className="flex items-center gap-2 rounded-md border px-2.5 py-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-[11px] font-semibold text-background">
+                O
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[13px] leading-tight">Microsoft 365</span>
+                <span className="block text-[11px] text-muted-foreground">Coming soon</span>
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-[12px]"
+                onClick={() => toast.info('Microsoft Calendar sync is coming soon')}
+              >
+                Connect
+              </Button>
+            </div>
+          </section>
+
+          <section className="mt-6 space-y-2">
+            <h3 className="text-[11px] font-medium text-muted-foreground">Shortcuts</h3>
+            <div className="space-y-1.5 text-[11px] text-muted-foreground">
+              <Shortcut keys="T" label="Go to today" />
+              <Shortcut keys="← →" label="Previous / next" />
+              <Shortcut keys="M W A" label="Month, week, agenda" />
+              <Shortcut keys="C" label="New event" />
+            </div>
+          </section>
+        </aside>
+
+        <div className="min-w-0 flex-1 overflow-hidden bg-background/70">
+          {viewMode === 'week' && (
+            <WeekView
+              days={visibleWeek}
+              itemsByDay={itemsByDay}
+              onSelectSlot={openCreate}
+              onOpenItem={openItem}
+            />
+          )}
+          {viewMode === 'month' && (
+            <MonthView
+              anchorDate={anchorDate}
+              itemsByDay={itemsByDay}
+              onSelectDay={goToDate}
+              onOpenItem={openItem}
+            />
+          )}
+          {viewMode === 'agenda' && (
+            <AgendaView
+              days={monthDays(anchorDate).filter((day) => isSameMonth(day, anchorDate))}
+              itemsByDay={itemsByDay}
+              onOpenItem={openItem}
+            />
+          )}
+        </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <div className="min-w-[600px]">
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-semibold">{MONTH_NAMES[currentMonth]} {currentYear}</CardTitle>
-                <div className="flex items-center gap-1.5">
-                  <Button variant="outline" size="sm" onClick={() => changeMonth(-1)}>
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={goToToday}>Today</Button>
-                  <Button variant="outline" size="sm" onClick={() => changeMonth(1)}>
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-
-            <CardContent className="pt-0">
-              <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden border dark:border-border">
-                {DAY_NAMES.map(d => (
-                  <div key={d} className="bg-muted/50 px-2 py-1.5 text-center text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-                    {d}
-                  </div>
-                ))}
-
-                {calendarDays.map((day, idx) => {
-                  if (day === null) return <div key={`e-${idx}`} className="bg-card h-20" />
-
-                  const now = new Date()
-                  const isToday = day === now.getDate() && currentMonth === now.getMonth() && currentYear === now.getFullYear()
-                  const isSelected = day === selectedDay
-                  const isPast = isPastDate(new Date(currentYear, currentMonth, day))
-                  const dayEvents = getGridEvents(day)
-
-                  return (
-                    <div
-                      key={day}
-                      onClick={() => selectDay(day)}
-                      className={cn(
-                        'rounded-lg bg-card h-20 p-1.5 flex flex-col gap-0.5 cursor-pointer transition-colors hover:bg-accent',
-                        isSelected && 'bg-primary/10 ring-1 ring-inset ring-primary hover:bg-primary/10',
-                        isPast && 'opacity-50',
-                      )}
-                    >
-                      <span className={cn(
-                        'text-xs font-medium w-5 h-5 flex items-center justify-center rounded-full self-start',
-                        isToday && 'bg-primary text-primary-foreground',
-                        !isToday && 'text-foreground',
-                      )}>
-                        {day}
-                      </span>
-
-                      <div className="flex flex-col gap-0.5 overflow-hidden flex-1">
-                        {dayEvents.length === 0 && !isPast ? (
-                          <div
-                            className="flex-1 flex items-center justify-center group "
-                          >
-                            <Plus
-                              onClick={(e) => {
-                                e.stopPropagation(); openCreate(day)
-                              }}
-                              className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
-                          </div>
-                        ) : (
-                          <>
-                            {dayEvents.slice(0, 2).map(ev => (
-                              <div key={ev.id} className={cn(
-                                'text-[9px] leading-tight px-1 py-px rounded truncate border',
-                                EVENT_TYPE_STYLES[ev.type as EventType],
-                                ev.completed_at && 'line-through opacity-60',
-                              )}>
-                                {ev.title}
-                              </div>
-                            ))}
-                            {dayEvents.length > 2 && (
-                              <span className="text-[9px] text-muted-foreground pl-1">+{dayEvents.length - 2} more</span>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                <CalendarDays className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm">{tableLabel}</p>
-                <p className="text-xs text-muted-foreground">
-                  {pg.total === 0
-                    ? 'No events'
-                    : `${pg.from}–${pg.to} of ${pg.total} event${pg.total !== 1 ? 's' : ''}`}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Select value={viewMode} onValueChange={(v) => changeView(v as ViewMode)}>
-                <SelectTrigger className="h-8 w-[110px] text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="day">Day</SelectItem>
-                  <SelectItem value="week">Week</SelectItem>
-                  <SelectItem value="month">Month</SelectItem>
-                </SelectContent>
-              </Select>
-              {!isAnchorPast && (
-                <Button size="sm" className="h-8 gap-1.5 text-xs" onClick={() => openCreate(selectedDay)}>
-                  <Plus className="w-3.5 h-3.5" />
-                  Add Event
-                </Button>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-
-        <Separator />
-
-        <CardContent className="p-0">
-          {events.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-14 gap-3 text-center">
-              <div className="rounded-full bg-muted p-4">
-                <CalendarX className="w-7 h-7 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">No events</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {isAnchorPast ? 'No events were scheduled.' : 'Select a day or click + to schedule something.'}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-xs w-[40px]" />
-                  {viewMode !== 'day' && <TableHead className="text-xs w-[100px]">Date</TableHead>}
-                  <TableHead className="text-xs w-[90px]">Time</TableHead>
-                  <TableHead className="text-xs">Title</TableHead>
-                  <TableHead className="text-xs w-[100px]">Type</TableHead>
-                  {viewMode !== 'day' && <TableHead className="text-xs w-[80px]">Duration</TableHead>}
-                  <TableHead className="text-xs w-[110px]">Location</TableHead>
-                  <TableHead className="text-xs w-[120px]">Attendees</TableHead>
-                  <TableHead className="text-xs w-[80px] text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {events.map((event) => {
-                  const type = event.type as EventType
-                  const attendees: User[] = Array.isArray(event.attendees) ? event.attendees : []
-                  const isCompleted = !!event.completed_at
-                  const eventPast = isPastDate(event.start_date)
-                  return (
-                    <TableRow key={event.id} className={cn('cursor-pointer hover:bg-muted/50', isCompleted && 'opacity-60')} onClick={() => setViewingEvent(event)}>
-                      <TableCell className="pl-3 pr-0">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); toggleComplete(event) }}
-                          className="flex items-center justify-center"
-                        >
-                          {isCompleted
-                            ? <CircleCheck className="w-4 h-4 text-emerald-500" />
-                            : <Circle className="w-4 h-4 text-muted-foreground/40 hover:text-primary transition-colors" />
-                          }
-                        </button>
-                      </TableCell>
-                      {viewMode !== 'day' && (
-                        <TableCell className="text-xs text-muted-foreground">
-                          {parseLaravelDate(event.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </TableCell>
-                      )}
-                      <TableCell className="text-xs text-muted-foreground tabular-nums">{fmtTime(event.start_date)}</TableCell>
-                      <TableCell>
-                        <span className={cn('text-sm font-medium', isCompleted && 'line-through')}>{event.title}</span>
-                        {event.description && (
-                          <p className="text-xs text-muted-foreground truncate max-w-[220px] mt-0.5">{event.description}</p>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className={cn('text-[10px] border-0 font-medium', EVENT_TYPE_BADGE[type])}>
-                          {EVENT_TYPE_LABELS[type]}
-                        </Badge>
-                      </TableCell>
-                      {viewMode !== 'day' && (
-                        <TableCell className="text-xs text-muted-foreground">
-                          {event.end_date ? fmtDuration(event.start_date, event.end_date) : '—'}
-                        </TableCell>
-                      )}
-                      <TableCell>
-                        {event.location ? (
-                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <LocationIcon location={event.location} />
-                            <span>{EVENT_LOCATION_LABELS[event.location] ?? event.location}</span>
-                          </div>
-                        ) : <span className="text-xs text-muted-foreground/40">—</span>}
-                      </TableCell>
-                      <TableCell>
-                        {attendees.length > 0 ? (
-                          <div className="flex items-center gap-1">
-                            <div className="flex -space-x-1.5">
-                              {attendees.slice(0, 3).map(a => (
-                                <AppAvatar key={a.id} src={a.avatar} name={a.name} size="xs" className="ring-1 ring-background" />
-                              ))}
-                            </div>
-                            {attendees.length > 3 && (
-                              <span className="text-[10px] text-muted-foreground ml-1">+{attendees.length - 3}</span>
-                            )}
-                          </div>
-                        ) : (
-                          <Users className={cn('w-3.5 h-3.5 text-muted-foreground/30', EVENT_TYPE_ICON_COLOR[type])} />
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          {!eventPast && (
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0"
-                              onClick={(e) => { e.stopPropagation(); setEditingEvent(event) }}>
-                              <Pencil className="w-3.5 h-3.5" />
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                            onClick={(e) => { e.stopPropagation(); deleteEvent(event) }}>
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          )}
-
-          {/* Pagination */}
-          {pg.last > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t text-xs text-muted-foreground">
-              <span>Page {pg.current} of {pg.last}</span>
-              <div className="flex items-center gap-1">
-                <Button variant="outline" size="sm" className="h-7 gap-1 text-xs"
-                  disabled={pg.current <= 1} onClick={() => changePage(pg.current - 1)}>
-                  <ChevronLeft className="w-3.5 h-3.5" /> Prev
-                </Button>
-                <Button variant="outline" size="sm" className="h-7 gap-1 text-xs"
-                  disabled={pg.current >= pg.last} onClick={() => changePage(pg.current + 1)}>
-                  Next <ChevronRight className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
+      <EventModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        selectedDate={createDate}
+        showTrigger={false}
+      />
       {viewingEvent && (
         <EventViewModal
           event={viewingEvent}
-          isPast={isPastDate(viewingEvent.start_date)}
+          isPast={parseLaravelDate(viewingEvent.start_date) < new Date(new Date().setHours(0, 0, 0, 0))}
           onClose={() => setViewingEvent(null)}
-          onEdit={() => { setEditingEvent(viewingEvent); setViewingEvent(null) }}
+          onEdit={() => {
+            setEditingEvent(viewingEvent)
+            setViewingEvent(null)
+          }}
           onDelete={() => deleteEvent(viewingEvent)}
           onToggleComplete={() => toggleComplete(viewingEvent)}
         />
@@ -475,9 +435,296 @@ export function CalendarPage() {
         <EventModal
           event={editingEvent}
           open={!!editingEvent}
-          onOpenChange={(open) => { if (!open) setEditingEvent(null) }}
+          onOpenChange={(open) => {
+            if (!open) setEditingEvent(null)
+          }}
         />
       )}
+      <TaskDetailSheet
+        task={selectedTask}
+        open={!!selectedTask}
+        onOpenChange={(open) => {
+          if (!open) setSelectedTaskId(null)
+        }}
+      />
+    </div>
+  )
+}
+
+function Shortcut({ keys, label }: { keys: string; label: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span>{label}</span>
+      <kbd className="rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground">{keys}</kbd>
+    </div>
+  )
+}
+
+function CalendarChip({ item, onClick }: { item: CalendarItem; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation()
+        onClick()
+      }}
+      className={cn(
+        'w-full truncate rounded border px-1.5 py-0.5 text-left text-[11px] leading-tight',
+        item.kind === 'event'
+          ? EVENT_TYPE_STYLES[(item.event?.type ?? 'meeting') as EventType]
+          : 'border-border bg-muted text-foreground'
+      )}
+    >
+      {item.title}
+    </button>
+  )
+}
+
+function WeekView({
+  days,
+  itemsByDay,
+  onSelectSlot,
+  onOpenItem,
+}: {
+  days: Date[]
+  itemsByDay: Record<string, CalendarItem[]>
+  onSelectSlot: (date: Date) => void
+  onOpenItem: (item: CalendarItem) => void
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const now = new Date()
+  const showNow = days.some((day) => isToday(day))
+  const nowTop = (minutesFromMidnight(now) / 60) * HOUR_HEIGHT
+
+  useEffect(() => {
+    const hour = Math.max(now.getHours() - 1, 8)
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = hour * HOUR_HEIGHT
+    }
+  }, [days[0]?.toISOString()])
+
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="grid shrink-0 grid-cols-[56px_repeat(7,minmax(0,1fr))] border-b">
+        <div />
+        {days.map((day) => (
+          <div key={day.toISOString()} className="px-2 py-2 text-center">
+            <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              {format(day, 'EEEE')}
+            </p>
+            <span
+              className={cn(
+                'mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-medium',
+                isToday(day) && 'bg-foreground text-background'
+              )}
+            >
+              {format(day, 'd')}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid shrink-0 grid-cols-[56px_repeat(7,minmax(0,1fr))] border-b">
+        <div className="px-2 py-2 text-[10px] uppercase tracking-wide text-muted-foreground">All day</div>
+        {days.map((day) => {
+          const key = toDateStr(day)
+          const allDayItems = (itemsByDay[key] ?? []).filter((item) => item.kind === 'card' || !isTimed(item.start))
+          return (
+            <div
+              key={key}
+              className={cn('min-h-10 space-y-1 border-l px-1 py-1', isToday(day) && 'bg-muted/40')}
+              onClick={() => onSelectSlot(day)}
+            >
+              {allDayItems.map((item) => (
+                <CalendarChip key={item.id} item={item} onClick={() => onOpenItem(item)} />
+              ))}
+            </div>
+          )
+        })}
+      </div>
+
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto">
+        <div className="relative grid grid-cols-[56px_repeat(7,minmax(0,1fr))]">
+          <div>
+            {HOURS.map((hour) => (
+              <div key={hour} className="relative h-12 border-b">
+                <span className="absolute -top-2 right-2 text-[10px] text-muted-foreground">{formatHour(hour)}</span>
+              </div>
+            ))}
+          </div>
+
+          {days.map((day) => {
+            const key = toDateStr(day)
+            const timedItems = (itemsByDay[key] ?? []).filter((item) => item.kind === 'event' && isTimed(item.start))
+            return (
+              <div
+                key={key}
+                className={cn('relative border-l', isToday(day) && 'bg-muted/40')}
+                onClick={() => onSelectSlot(day)}
+              >
+                {HOURS.map((hour) => (
+                  <div key={hour} className="h-12 border-b" />
+                ))}
+                {timedItems.map((item) => {
+                  const startMinutes = minutesFromMidnight(item.start)
+                  const endMinutes = item.end ? minutesFromMidnight(item.end) : startMinutes + 60
+                  const duration = Math.max(endMinutes - startMinutes, 30)
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onOpenItem(item)
+                      }}
+                      style={{
+                        top: (startMinutes / 60) * HOUR_HEIGHT,
+                        height: (duration / 60) * HOUR_HEIGHT,
+                      }}
+                      className={cn(
+                        'absolute inset-x-1 overflow-hidden rounded border px-1.5 py-1 text-left text-[11px] leading-tight',
+                        EVENT_TYPE_STYLES[(item.event?.type ?? 'meeting') as EventType]
+                      )}
+                    >
+                      <span className="block truncate font-medium">{item.title}</span>
+                      <span className="block text-[10px] opacity-70">{format(item.start, 'h:mm a')}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            )
+          })}
+
+          {showNow && (
+            <div
+              className="pointer-events-none absolute right-0 left-14 z-10"
+              style={{ top: nowTop }}
+            >
+              <div className="relative border-t border-red-500">
+                <span className="absolute -top-1.5 -left-1.5 h-3 w-3 rounded-full bg-red-500" />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MonthView({
+  anchorDate,
+  itemsByDay,
+  onSelectDay,
+  onOpenItem,
+}: {
+  anchorDate: Date
+  itemsByDay: Record<string, CalendarItem[]>
+  onSelectDay: (date: Date) => void
+  onOpenItem: (item: CalendarItem) => void
+}) {
+  const days = monthDays(anchorDate)
+  const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="grid shrink-0 grid-cols-7 border-b">
+        {labels.map((label) => (
+          <div key={label} className="px-2 py-2 text-center text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            {label}
+          </div>
+        ))}
+      </div>
+      <div className="grid min-h-0 flex-1 grid-cols-7 grid-rows-6">
+        {days.map((day) => {
+          const key = toDateStr(day)
+          const dayItems = itemsByDay[key] ?? []
+          return (
+            <div
+              key={key}
+              className={cn(
+                'min-h-0 cursor-pointer overflow-hidden border-b border-r p-1.5',
+                !isSameMonth(day, anchorDate) && 'bg-muted/20 text-muted-foreground',
+                isToday(day) && 'bg-muted/40'
+              )}
+              onClick={() => onSelectDay(day)}
+            >
+              <span
+                className={cn(
+                  'mb-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-[12px]',
+                  isToday(day) && 'bg-foreground text-background'
+                )}
+              >
+                {format(day, 'd')}
+              </span>
+              <div className="space-y-1">
+                {dayItems.slice(0, 3).map((item) => (
+                  <CalendarChip key={item.id} item={item} onClick={() => onOpenItem(item)} />
+                ))}
+                {dayItems.length > 3 && (
+                  <p className="px-1 text-[10px] text-muted-foreground">+{dayItems.length - 3} more</p>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function AgendaView({
+  days,
+  itemsByDay,
+  onOpenItem,
+}: {
+  days: Date[]
+  itemsByDay: Record<string, CalendarItem[]>
+  onOpenItem: (item: CalendarItem) => void
+}) {
+  const rows = days
+    .map((day) => ({ day, items: itemsByDay[toDateStr(day)] ?? [] }))
+    .filter((row) => row.items.length > 0)
+
+  if (rows.length === 0) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+        <CalendarDays className="h-7 w-7 text-muted-foreground" />
+        <p className="text-[13px] font-medium">No events or due dates</p>
+        <p className="text-xs text-muted-foreground">Create an event or add a due date to a card.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="h-full overflow-y-auto">
+      {rows.map(({ day, items }) => (
+        <div key={day.toISOString()} className="grid grid-cols-[88px_1fr] border-b">
+          <div className="px-3 py-3">
+            <p className="text-[11px] uppercase text-muted-foreground">{format(day, 'EEE')}</p>
+            <p className={cn('text-lg font-medium', isToday(day) && 'text-foreground')}>{format(day, 'd')}</p>
+          </div>
+          <div className="space-y-1.5 py-3 pr-4">
+            {items.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onOpenItem(item)}
+                className={cn(
+                  'flex w-full items-center justify-between rounded-md border px-2.5 py-2 text-left text-[13px]',
+                  item.kind === 'event'
+                    ? EVENT_TYPE_STYLES[(item.event?.type ?? 'meeting') as EventType]
+                    : 'bg-muted'
+                )}
+              >
+                <span className="truncate">{item.title}</span>
+                <span className="ml-3 shrink-0 text-[11px] text-muted-foreground">
+                  {item.kind === 'card' ? 'Due' : format(item.start, 'h:mm a')}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

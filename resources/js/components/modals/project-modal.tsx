@@ -121,11 +121,11 @@ export function ProjectModal({
       }
     >
       <div className="grid gap-4">
-        <div className="flex h-14 items-center gap-2 rounded-md border bg-primary/10 p-2">
+        <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-2.5 py-2">
           <Label>
             {isEditMode ? 'Project ID' : 'Create Project in Workspace for'}
           </Label>
-          <span className="text-sm font-mono text-muted-foreground">
+          <span className="font-mono text-[12px] text-muted-foreground">
             {isEditMode ? project.id : auth.user.current_workspace?.name}
           </span>
         </div>
@@ -134,7 +134,7 @@ export function ProjectModal({
           <Label htmlFor="name" className="text-[13px] leading-none font-medium">Project Name</Label>
           <Input
             id="name"
-            className="h-12 border-primary/20"
+            className="h-8 border-border"
             value={data.name}
             onChange={(e) => setData('name', e.target.value)}
             placeholder="Project Name"

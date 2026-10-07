@@ -35,13 +35,13 @@ const MarkTaskAsComplete = ({ task, type = 'button' }: MarkTaskAsCompleteProps) 
         content={task.status === "done" ? "Mark as incomplete" : "Mark as complete"}
       >
         <div className="flex items-center justify-center">
-          {isLoading ? <LoaderCircle className="h-6 w-6 animate-spin border rounded-full border-primary w-fit" /> : (
+          {isLoading ? <LoaderCircle className="h-4 w-4 animate-spin text-muted-foreground" /> : (
             <Check
               onClick={handleToggleComplete}
-              className={cn("h-6 w-6 bg-primary/10 rounded-full p-1 cursor-pointer",
+              className={cn("h-4 w-4 cursor-pointer rounded-full p-0.5",
                 task.status === "done" ?
-                  "text-green-500 border border-green-500 bg-green-500/10" :
-                  "text-gray-500 bg-gray-500/10",
+                  "bg-muted text-foreground" :
+                  "bg-muted/70 text-muted-foreground",
               )}
             />
           )}
@@ -55,7 +55,7 @@ const MarkTaskAsComplete = ({ task, type = 'button' }: MarkTaskAsCompleteProps) 
       variant={isCompleted ? "default" : "outline"}
       size="sm"
       onClick={handleToggleComplete}
-      className="gap-2"
+      className="h-8 gap-1.5 px-3 text-[13px]"
     >
       {isLoading && <LoaderCircle className="h-4 w-4 animate-spin" />}
       {isCompleted ? <Check className="h-4 w-4" /> : <CircleX className="h-4 w-4" />}

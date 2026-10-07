@@ -1,7 +1,5 @@
 import { memo } from 'react'
 import { Task } from '@/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
 import EditableTaskTitle from '@/components/tasks/editable-task-title'
 import ColumnDropdown from './column-dropdown'
 import { KanbanTask } from './kanban-task'
@@ -26,33 +24,28 @@ export const KanbanColumn = memo(({ column, columns, tasks }: KanbanColumnProps)
     <div
       ref={ref}
       className={cn(
-        'w-[370px] h-full shrink-0 rounded-lg transition-colors',
-        isDropTarget && 'bg-primary/10'
+        'flex h-full max-h-[800px] w-[360px] shrink-0 flex-col rounded-lg border border-neutral-200 bg-neutral-100 transition-colors dark:border-white/10 dark:bg-neutral-950/80',
+        isDropTarget && 'border-neutral-300 bg-neutral-200/90 dark:border-white/20 dark:bg-neutral-900'
       )}
     >
-      <Card className="max-h-[800px] flex flex-col bg-card">
-        <CardHeader className="flex-shrink-0 -my-6 pt-2 border-b">
-          <CardTitle className="flex items-center justify-between mb-2">
-            <EditableTaskTitle task={column} variant="small" className="flex-1" childTasksCount={tasks.length} />
-            <ColumnDropdown column={column} columns={columns} />
-          </CardTitle>
-        </CardHeader>
-        <Separator className="bg-border flex-shrink-0" />
-        <CardContent className="p-0 flex-1 overflow-y-auto -mt-6">
-          <div className="space-y-2 p-2">
-            {tasks.map((task, index) => (
-              <KanbanTask
-                key={task.id}
-                task={task}
-                columns={columns}
-                index={index}
-                columnId={column.id}
-              />
-            ))}
-            <AddKanbanItem type="task" column={column} />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex shrink-0 items-center justify-between gap-1 px-2.5 py-2">
+        <EditableTaskTitle task={column} variant="small" className="flex-1" childTasksCount={tasks.length} />
+        <ColumnDropdown column={column} columns={columns} />
+      </div>
+      <div className="flex-1 overflow-y-auto px-1.5 pb-1.5">
+        <div className="space-y-2">
+          {tasks.map((task, index) => (
+            <KanbanTask
+              key={task.id}
+              task={task}
+              columns={columns}
+              index={index}
+              columnId={column.id}
+            />
+          ))}
+          <AddKanbanItem type="task" column={column} />
+        </div>
+      </div>
     </div>
   )
 })

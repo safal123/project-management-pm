@@ -13,7 +13,7 @@ import { ListTodo } from 'lucide-react';
 
 /** Applied to the inner `<table>` for consistent app-wide table styling */
 export const DATA_TABLE_SURFACE_CLASS =
-  'bg-[#fafaf9] shadow-sm rounded-md dark:bg-primary/5';
+  'bg-muted/40 shadow-sm rounded-md dark:bg-primary/5';
 
 /** Outer chrome: border + radius around the scroll area */
 export const DATA_TABLE_CONTAINER_CLASS = 'rounded-md border';
@@ -43,7 +43,7 @@ type DataTableToolbarProps = {
 
 export function DataTableToolbar({ children, className }: DataTableToolbarProps) {
   return (
-    <div className={cn('mb-4 flex flex-wrap items-center gap-2', className)}>{children}</div>
+    <div className={cn('mb-3 flex flex-wrap items-center gap-2', className)}>{children}</div>
   );
 }
 
@@ -57,7 +57,7 @@ export function DataTablePaginationRow({ children, className }: DataTablePaginat
   return (
     <div
       className={cn(
-        'mt-4 flex flex-col gap-3 px-2 sm:flex-row sm:items-center sm:justify-between',
+        'mt-3 flex flex-col gap-2 px-1 text-[13px] sm:flex-row sm:items-center sm:justify-between',
         className
       )}
     >
@@ -143,19 +143,27 @@ export function AppTable<T>({
 
   return (
     <div className={cn(DATA_TABLE_CONTAINER_CLASS, className)}>
-      <Table className={cn(DATA_TABLE_SURFACE_CLASS, tableClassName)}>
+      <Table className={cn(DATA_TABLE_SURFACE_CLASS, 'text-[13px]', tableClassName)}>
         <TableHeader>
           <TableRow>
             {resolvedColumns.map((col) => (
               <TableHead
                 key={col.id}
-                className={cn(col.headerClassName, 'text-primary text-sm font-medium')}
+                className={cn(
+                  'h-8 px-3 text-[11px] font-medium text-muted-foreground',
+                  col.headerClassName
+                )}
               >
                 {col.header}
               </TableHead>
             ))}
             {showActions && (
-              <TableHead className={cn('w-[100px]', actionsHeaderClassName)}>
+              <TableHead
+                className={cn(
+                  'h-8 w-[88px] px-3 text-[11px] font-medium text-muted-foreground',
+                  actionsHeaderClassName
+                )}
+              >
                 {actionsHeader}
               </TableHead>
             )}
@@ -176,13 +184,13 @@ export function AppTable<T>({
               }
             >
               {resolvedColumns.map((col) => (
-                <TableCell key={col.id} className={col.cellClassName}>
+                <TableCell key={col.id} className={cn('px-3 py-2', col.cellClassName)}>
                   {col.render(row, index)}
                 </TableCell>
               ))}
               {showActions && (
                 <TableCell
-                  className={actionsCellClassName}
+                  className={cn('px-3 py-2', actionsCellClassName)}
                   onClick={(e) => e.stopPropagation()}
                 >
                   {renderAction

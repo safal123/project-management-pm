@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasActivities;
 use App\Models\Concerns\HasComments;
 use App\Models\Concerns\HasLikes;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Task extends Model
 {
-    use HasComments, HasFactory, HasLikes, HasUlids;
+    use HasActivities, HasComments, HasFactory, HasLikes, HasUlids;
 
     // Status constants
     public const STATUS_TODO = 'todo';
@@ -40,15 +41,21 @@ class Task extends Model
         'order',
         'progress',
         'parent_task_id',
+        'depends_on_task_id',
         'assigned_by',
         'assigned_to',
         'status',
         'priority',
         'due_date',
+        'branch_name',
+        'branch_url',
+        'branch_created_by',
+        'branch_created_at',
     ];
 
     protected $casts = [
         'due_date' => 'datetime',
+        'branch_created_at' => 'datetime',
     ];
 
     public function project()
@@ -79,6 +86,16 @@ class Task extends Model
     public function parentTask()
     {
         return $this->belongsTo(Task::class, 'parent_task_id');
+    }
+
+    public function dependsOn()
+    {
+        return $this->belongsTo(Task::class, 'depends_on_task_id');
+    }
+
+    public function branchCreatedBy()
+    {
+        return $this->belongsTo(User::class, 'branch_created_by');
     }
 
     public function media()

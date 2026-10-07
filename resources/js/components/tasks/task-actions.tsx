@@ -42,10 +42,10 @@ const TaskActions = ({
   }
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-0.5">
       <AppTooltip content="Share task">
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Share2 className="h-4 w-4" />
+        <Button variant="ghost" size="icon" className="h-7 w-7">
+          <Share2 className="h-3.5 w-3.5" />
         </Button>
       </AppTooltip>
 
@@ -53,11 +53,12 @@ const TaskActions = ({
         workspaceId={task.workspace_id}
         mediableId={task.id}
         mediableType="task"
+        className="h-7 w-7"
       />
 
       <AppTooltip content="Copy task link">
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Link className="h-4 w-4" />
+        <Button variant="ghost" size="icon" className="h-7 w-7">
+          <Link className="h-3.5 w-3.5" />
         </Button>
       </AppTooltip>
 
@@ -66,17 +67,17 @@ const TaskActions = ({
           onClick={() => setFullScreen(!fullScreen)}
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-7 w-7"
         >
-          <Maximize2 className="h-4 w-4" />
+          <Maximize2 className="h-3.5 w-3.5" />
         </Button>
       </AppTooltip>
 
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <AppTooltip content="More actions" open={menuOpen ? false : undefined}>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="h-7 w-7">
+              <MoreHorizontal className="h-3.5 w-3.5" />
             </Button>
           </DropdownMenuTrigger>
         </AppTooltip>
@@ -97,9 +98,9 @@ const TaskActions = ({
           onClick={() => onOpenChange(false)}
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-7 w-7"
         >
-          <ArrowRightToLine className="h-4 w-4" />
+          <ArrowRightToLine className="h-3.5 w-3.5" />
         </Button>
       </AppTooltip>
     </div>

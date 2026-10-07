@@ -35,8 +35,8 @@ export default function EditableTaskTitle({
   }, [isEditing]);
 
   const textClass = cn(
-    'rounded-lg font-semibold leading-tight transition-colors',
-    variant === 'default' ? 'text-2xl' : 'text-sm'
+    'rounded-md font-medium leading-tight transition-colors',
+    variant === 'default' ? 'text-[15px]' : 'text-[13px]'
   );
 
   const cancelEditing = useCallback(() => {
@@ -109,7 +109,8 @@ export default function EditableTaskTitle({
           onKeyDown={handleKeyDown}
           className={cn(
             textClass,
-            'w-full -mx-3 px-3 py-3 focus:outline-none hover:border'
+            'w-full px-1.5 py-1 focus:outline-none',
+            variant === 'small' && 'px-1 py-0.5'
           )}
         />
       ) : (
@@ -118,7 +119,8 @@ export default function EditableTaskTitle({
           tabIndex={0}
           className={cn(
             textClass,
-            'cursor-pointer -ml-3 px-3 py-3 hover:border hover:bg-muted/50'
+            'cursor-pointer px-1.5 py-1 hover:bg-muted/50',
+            variant === 'small' && 'px-1 py-0.5'
           )}
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => setIsEditing(true)}

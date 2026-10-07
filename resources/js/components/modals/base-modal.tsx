@@ -38,17 +38,17 @@ export function BaseModal({
   formProps,
 }: BaseModalProps) {
   const header = (
-    <DialogHeader className="px-6 pt-6 pb-4">
-      <div className="flex items-center gap-3">
+    <DialogHeader className="gap-0 px-4 pt-4 pb-3">
+      <div className="flex items-center gap-2.5">
         {icon && (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/20">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted [&>svg]:size-3.5">
             {icon}
           </div>
         )}
-        <div>
-          <DialogTitle className="text-lg">{title}</DialogTitle>
+        <div className="min-w-0 space-y-0.5 pr-6">
+          <DialogTitle className="text-[13px] font-medium leading-tight">{title}</DialogTitle>
           {description && (
-            <DialogDescription className="text-sm text-muted-foreground">
+            <DialogDescription className="text-xs leading-snug text-muted-foreground">
               {description}
             </DialogDescription>
           )}
@@ -57,26 +57,32 @@ export function BaseModal({
     </DialogHeader>
   )
 
-  const body = <div className="px-6 py-5">{children}</div>
+  const body = (
+    <div className="space-y-3 px-4 py-3 text-[13px] [&_label]:text-[13px]">
+      {children}
+    </div>
+  )
 
   const footerSection = footer && (
     <>
-      <Separator className="bg-primary" />
-      <DialogFooter className="px-6 py-4">{footer}</DialogFooter>
+      <Separator className="bg-border" />
+      <DialogFooter className="gap-2 px-4 py-3 [&_button]:h-8 [&_button]:text-[13px] [&_button]:px-3">
+        {footer}
+      </DialogFooter>
     </>
   )
 
   const content = formProps ? (
     <form {...formProps}>
       {header}
-      <Separator className="bg-primary" />
+      <Separator className="bg-border" />
       {body}
       {footerSection}
     </form>
   ) : (
     <>
       {header}
-      <Separator className="bg-primary" />
+      <Separator className="bg-border" />
       {body}
       {footerSection}
     </>
@@ -86,7 +92,10 @@ export function BaseModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
-        className={cn('bg-white dark:bg-background p-0 gap-0', className)}
+        className={cn(
+          'bg-white dark:bg-background gap-0 p-0 [&>button]:top-3 [&>button]:right-3',
+          className
+        )}
       >
         {content}
       </DialogContent>

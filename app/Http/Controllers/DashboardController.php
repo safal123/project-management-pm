@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\Workspace;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -89,6 +90,31 @@ class DashboardController extends Controller
             ->values()
             ->toArray();
 
+        $activityStart = now()->subDays(13)->startOfDay();
+        $createdByDay = Task::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereNull('parent_task_id')
+            ->where('created_at', '>=', $activityStart)
+            ->pluck('created_at')
+            ->countBy(fn ($date) => Carbon::parse($date)->toDateString());
+        $completedByDay = Task::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereNull('parent_task_id')
+            ->where('status', Task::STATUS_DONE)
+            ->where('updated_at', '>=', $activityStart)
+            ->pluck('updated_at')
+            ->countBy(fn ($date) => Carbon::parse($date)->toDateString());
+
+        $taskActivity = collect(range(0, 13))->map(function (int $offset) use ($createdByDay, $completedByDay) {
+            $date = now()->subDays(13 - $offset)->toDateString();
+
+            return [
+                'date' => $date,
+                'created' => (int) ($createdByDay[$date] ?? 0),
+                'completed' => (int) ($completedByDay[$date] ?? 0),
+            ];
+        })->values()->all();
+
         return Inertia::render('dashboard', [
             'projects' => $projects,
             'workspaces' => Workspace::query()->forUser($user)->get(),
@@ -103,6 +129,7 @@ class DashboardController extends Controller
             ],
             'tasksByStatus' => $tasksByStatus,
             'tasksByProject' => $tasksByProject,
+            'taskActivity' => $taskActivity,
             'recentTasks' => $recentTasks,
         ]);
     }

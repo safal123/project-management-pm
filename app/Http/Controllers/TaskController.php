@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\TaskCreateRequest;
 use App\Http\Requests\TaskUpdateRequest;
+use App\Models\Activity;
 use App\Models\Task;
 use Illuminate\Support\Str;
 
@@ -14,7 +15,7 @@ class TaskController extends Controller
         $validated = $request->validated();
         $user = $request->user();
 
-        Task::create([
+        $task = Task::create([
             ...$validated,
             'created_by' => $user->id,
             'assigned_by' => $user->id,
@@ -26,12 +27,34 @@ class TaskController extends Controller
             ),
         ]);
 
+        Activity::record($task, Activity::TYPE_CREATED, $task->workspace_id, $user);
+
         return back()->with('success', 'Task created successfully');
     }
 
     public function update(Task $task, TaskUpdateRequest $request)
     {
-        $task->update($request->validated());
+        $validated = $request->validated();
+        $user = $request->user();
+
+        $originalStatus = $task->status;
+        $originalAssignedTo = $task->assigned_to;
+
+        $task->update($validated);
+
+        if (array_key_exists('status', $validated) && $validated['status'] !== $originalStatus) {
+            Activity::record($task, Activity::TYPE_STATUS_CHANGED, $task->workspace_id, $user, [
+                'from' => $originalStatus,
+                'to' => $validated['status'],
+            ]);
+        }
+
+        if (array_key_exists('assigned_to', $validated) && $validated['assigned_to'] !== $originalAssignedTo) {
+            Activity::record($task, Activity::TYPE_ASSIGNED, $task->workspace_id, $user, [
+                'from' => $originalAssignedTo,
+                'to' => $validated['assigned_to'],
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Task updated successfully');
     }

@@ -32,6 +32,7 @@ class EventCreateRequest extends FormRequest
             'attendees' => 'nullable|array',
             'created_by' => 'required|exists:users,id',
             'workspace_id' => 'required|exists:workspaces,id',
+            'project_id' => 'nullable|exists:projects,id',
         ];
     }
     

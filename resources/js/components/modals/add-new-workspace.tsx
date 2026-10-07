@@ -28,8 +28,8 @@ export function AddNewWorkspace() {
       open={open}
       onOpenChange={setOpen}
       trigger={
-        <Button className="w-full" size="sm">
-          <Plus className="mr-2 h-4 w-4" />
+        <Button className="w-full h-7 text-[13px]" size="sm">
+          <Plus className="mr-1.5 h-3.5 w-3.5" />
           New Workspace
         </Button>
       }

@@ -62,6 +62,7 @@ class ProjectController extends Controller
                     'invitedBy',
                     'invitedTo',
                 ]),
+            'gitIntegration.connectedBy',
         ]);
 
         $tasks = Task::query()
@@ -71,6 +72,7 @@ class ProjectController extends Controller
                 'assignedTo.media',
                 'media',
                 'parentTask:id,title',
+                'dependsOn:id,title',
             ])
             ->withCount([
                 'likes',
@@ -83,13 +85,19 @@ class ProjectController extends Controller
             ? $tasks->paginate(10)->withQueryString()
             : null;
 
-        return Inertia::render('projects/project/index', [
+        $payload = [
             'project' => ProjectResource::make($project),
             'tasks' => TaskResource::collection($tasks->get()),
             'paginatedTasks' => $paginatedTasks
                 ? TaskResource::collection($paginatedTasks)
                 : null,
-        ]);
+        ];
+
+        if ($request->get('tab') === 'calendar') {
+            $payload = array_merge($payload, app(CalendarController::class)->payload($request, $project));
+        }
+
+        return Inertia::render('projects/project/index', $payload);
     }
 
     public function update(ProjectUpdateRequest $request, Project $project)

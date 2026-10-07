@@ -169,17 +169,17 @@ export default function TaskComments({ task, className = '' }: TaskCommentsProps
   };
 
   return (
-    <div className={`space-y-4 ${className}`}>
-      <div className="flex gap-3">
-        <Avatar className="h-8 w-8 flex-shrink-0">
+    <div className={`flex min-h-0 flex-col gap-2 ${className}`}>
+      <div className="flex shrink-0 gap-2">
+        <Avatar className="h-7 w-7 flex-shrink-0">
           <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
-          <AvatarFallback className="text-xs">
+          <AvatarFallback className="text-[10px]">
             {auth.user.name?.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <Textarea
           placeholder="Add a comment"
-          className="resize-none text-sm min-h-[60px] flex-1"
+          className="min-h-9 flex-1 resize-none px-2.5 py-2 text-[13px]"
           rows={2}
           value={newComment}
           disabled={isPosting}
@@ -193,17 +193,17 @@ export default function TaskComments({ task, className = '' }: TaskCommentsProps
         />
       </div>
 
-      <ScrollArea className="h-64 pr-3 -mr-3">
+      <ScrollArea className="min-h-0 flex-1 pr-2">
         {isLoading ? (
           <div className="flex items-center justify-center py-6 text-muted-foreground">
-            <LoaderCircle className="h-4 w-4 animate-spin" />
+            <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
           </div>
         ) : comments.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            No comments yet. Be the first to comment.
+          <p className="py-4 text-center text-[13px] text-muted-foreground">
+            No comments yet.
           </p>
         ) : (
-          <div className="space-y-4 pb-1">
+          <div className="space-y-3 pb-1">
             {comments.map((comment) => (
               <CommentItem
                 key={comment.id}

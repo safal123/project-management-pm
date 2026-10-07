@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\Comment;
 use App\Models\Event;
 use App\Models\Media;
@@ -36,6 +37,10 @@ class LikeController extends Controller
         $likeable = $modelClass::findOrFail($request->likeable_id);
 
         $isLiked = $likeable->toggleLike(Auth::id());
+
+        if ($isLiked && method_exists($likeable, 'activities')) {
+            Activity::record($likeable, Activity::TYPE_LIKED, $likeable->workspace_id, Auth::user());
+        }
 
         if ($request->wantsJson()) {
             return response()->json([

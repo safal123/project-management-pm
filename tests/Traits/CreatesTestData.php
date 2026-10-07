@@ -3,6 +3,7 @@
 namespace Tests\Traits;
 
 use App\Models\Comment;
+use App\Models\Event;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -73,6 +74,21 @@ trait CreatesTestData
             'commentable_type' => Task::class,
             'workspace_id' => $task->workspace_id,
             'body' => 'Test comment',
+            ...$attributes,
+        ]);
+    }
+
+    public function createEventForWorkspace(User $user, Workspace $workspace, array $attributes = []): Event
+    {
+        return Event::query()->create([
+            'title' => 'Test event',
+            'description' => 'Test event description',
+            'start_date' => now()->addDay(),
+            'end_date' => now()->addDay()->addHour(),
+            'location' => 'office',
+            'type' => 'meeting',
+            'created_by' => $user->id,
+            'workspace_id' => $workspace->id,
             ...$attributes,
         ]);
     }

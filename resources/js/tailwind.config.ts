@@ -1,5 +1,4 @@
 import type { Config } from 'tailwindcss';
-import defaultTheme from 'tailwindcss/defaultTheme';
 
 export default {
   darkMode: ['class'],
@@ -59,7 +58,13 @@ export default {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+        sans: [
+          '"DM Sans Variable"',
+          'DM Sans',
+          'ui-sans-serif',
+          'system-ui',
+          'sans-serif',
+        ],
       },
       backgroundImage: {
         'radial-gradient': 'radial-gradient(var(--tw-gradient-stops))',

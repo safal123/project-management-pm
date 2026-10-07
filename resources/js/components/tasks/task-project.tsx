@@ -1,42 +1,21 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown, X } from 'lucide-react';
-import { Task, Project } from '@/types';
+import { Label } from '@/components/ui/label'
+import { Project, Task } from '@/types'
+import { FIELD_LABEL } from './field-styles'
 
 interface TaskProjectProps {
-  task: Task;
-  project: Project;
-  className?: string;
+  task: Task
+  project: Project
+  className?: string
 }
 
-export default function TaskProject({ task, project, className = '' }: TaskProjectProps) {
-  const handleStatusChange = (status: string) => {
-    // TODO: Implement status update
-    console.log('Status changed to:', status);
-  };
-
-  const handleRemoveProject = () => {
-    // TODO: Implement project removal
-    console.log('Remove project');
-  };
-
+export default function TaskProject({ project, className = '' }: TaskProjectProps) {
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <Label className="w-24 text-sm">Project</Label>
-      <div className="flex items-center gap-2 flex-1">
-        <div className="h-2 w-2 rounded-full bg-cyan-500" />
-        <span className="text-sm">{project.name}</span>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 ml-auto"
-          onClick={handleRemoveProject}
-        >
-          <X className="h-3 w-3" />
-        </Button>
+      <Label className={FIELD_LABEL}>Project</Label>
+      <div className="flex h-8 min-w-[180px] items-center gap-2 rounded-md border border-border px-2.5 text-[13px]">
+        <span className="h-1.5 w-1.5 rounded-full bg-foreground/70" />
+        <span className="truncate">{project.name}</span>
       </div>
     </div>
-  );
+  )
 }

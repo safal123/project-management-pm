@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Resources\UserResource;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -36,12 +37,21 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+        $workspace = $user?->currentWorkspace;
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'flash' => [
                 'success' => $request->session()->get('success'),
             ],
+            'sidebar_projects' => $user && $workspace
+                ? Project::query()
+                    ->forUserAndWorkspace($user, $workspace)
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'slug'])
+                : [],
             'auth' => [
                 'user' => $request->user()
                     ? (new UserResource($request
