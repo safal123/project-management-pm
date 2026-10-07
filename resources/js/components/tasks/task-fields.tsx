@@ -3,6 +3,7 @@ import { Label } from '@/components/ui/label';
 import { Task } from '@/types';
 import TaskPriority from './task-priority';
 import TaskStatus from './task-status';
+import TaskBranch from './task-branch';
 
 interface TaskFieldsProps {
   task: Task;
@@ -21,6 +22,7 @@ export default function TaskFields({ task, className = '' }: TaskFieldsProps) {
           <Label className="text-sm mb-3 block w-24">Status</Label>
           <TaskStatus task={task} />
         </div>
+        <TaskBranch task={task} />
       </div>
     </div>
   );

@@ -28,6 +28,10 @@ class ProjectResource extends JsonResource
             'users' => UserResource::collection($this->whenLoaded('users')),
             'createdBy' => new UserResource($this->whenLoaded('createdBy')),
             'invitations' => InvitationResource::collection($this->whenLoaded('invitations')),
+            'git_integration' => $this->whenLoaded(
+                'gitIntegration',
+                fn ($gitIntegration) => new ProjectIntegrationResource($gitIntegration),
+            ),
         ];
     }
 }

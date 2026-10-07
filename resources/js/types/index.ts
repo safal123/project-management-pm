@@ -65,6 +65,17 @@ export interface Project {
   created_at: string;
   users: User[]
   invitations: Invitation[]
+  git_integration?: GitIntegration | null;
+}
+
+export interface GitIntegration {
+  provider: 'github';
+  repo_full_name: string;
+  repo_url: string;
+  default_branch: string;
+  masked_token: string;
+  connected_by: User | null;
+  connected_at: string;
 }
 
 export interface Invitation {
@@ -121,6 +132,8 @@ export interface Task {
   likes_count?: number;
   is_liked_by_user?: boolean;
   comments_count?: number;
+  branch_name?: string | null;
+  branch_url?: string | null;
 }
 
 export interface Comment {
@@ -134,6 +147,15 @@ export interface Comment {
   created_at: string;
   likes_count?: number;
   is_liked_by_user?: boolean;
+}
+
+export interface Activity {
+  id: string;
+  type: string;
+  properties: Record<string, unknown> | null;
+  user: User | null;
+  description: string;
+  created_at: string;
 }
 
 

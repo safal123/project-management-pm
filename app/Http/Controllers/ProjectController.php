@@ -62,6 +62,7 @@ class ProjectController extends Controller
                     'invitedBy',
                     'invitedTo',
                 ]),
+            'gitIntegration.connectedBy',
         ]);
 
         $tasks = Task::query()

@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CommentCreateRequest;
 use App\Http\Requests\CommentUpdateRequest;
 use App\Http\Resources\CommentResource;
+use App\Models\Activity;
 use App\Models\Comment;
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class CommentController extends Controller
@@ -67,6 +69,12 @@ class CommentController extends Controller
         ]);
 
         $comment->load('user');
+
+        if (method_exists($commentable, 'activities')) {
+            Activity::record($commentable, Activity::TYPE_COMMENTED, $commentable->workspace_id, $user, [
+                'excerpt' => Str::limit($comment->body, 80),
+            ]);
+        }
 
         return new CommentResource($comment);
     }

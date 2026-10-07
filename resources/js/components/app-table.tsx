@@ -13,7 +13,7 @@ import { ListTodo } from 'lucide-react';
 
 /** Applied to the inner `<table>` for consistent app-wide table styling */
 export const DATA_TABLE_SURFACE_CLASS =
-  'bg-[#fafaf9] shadow-sm rounded-md dark:bg-primary/5';
+  'bg-muted/40 shadow-sm rounded-md dark:bg-primary/5';
 
 /** Outer chrome: border + radius around the scroll area */
 export const DATA_TABLE_CONTAINER_CLASS = 'rounded-md border';

@@ -3,6 +3,7 @@
 namespace App\Actions\Project;
 
 use App\Exceptions\ProjectCreationException;
+use App\Models\Activity;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -34,6 +35,8 @@ class CreateProject
             ]);
 
             DB::commit();
+
+            Activity::record($project, Activity::TYPE_CREATED, $project->workspace_id, $user);
 
             return $project;
         } catch (\Exception $e) {

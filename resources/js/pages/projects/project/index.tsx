@@ -2,12 +2,12 @@ import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, Project, SharedData, Task, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LayoutDashboard, Kanban, ListTodo, TableIcon } from 'lucide-react';
+import { LayoutDashboard, Kanban, Settings, TableIcon } from 'lucide-react';
 import { KanbanBoard } from '@/components/projects/kanban/kanban-board';
 import { InviteMembersModal } from '@/components/modals/invite-members-modal';
 import { MembersModal } from '@/components/modals/members-modal';
 import { useState } from 'react';
-import ProjectOverview from '@/components/projects/project-overview';
+import ProjectSettings from '@/components/projects/project-settings';
 import ProjectDashboard from '@/components/projects/project-dashboard';
 import TasksTable from '@/components/projects/tasks-table';
 import Can from '@/components/can';
@@ -55,26 +55,38 @@ export default function ProjectShow() {
             }
           }}
           className="flex-1 flex flex-col">
-          <div className="p-6 flex items-center justify-between border-b sticky top-0 z-20">
-            <TabsList className="border bg-white dark:bg-primary/10 dark:border-primary/20">
-              <TabsTrigger value="board" className="gap-2 data-[state=active]:bg-primary/20">
+          <div className="px-6 pt-4 flex items-center justify-between border-b sticky top-0 z-20 bg-background">
+            <TabsList className="h-auto gap-1 rounded-none bg-transparent p-0">
+              <TabsTrigger
+                value="board"
+                className="gap-2 rounded-none border-b-2 border-transparent px-3 pt-1 pb-4 text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none hover:text-foreground"
+              >
                 <Kanban className="h-4 w-4" />
                 Board
               </TabsTrigger>
-              <TabsTrigger value="table" className="gap-2 data-[state=active]:bg-primary/20">
+              <TabsTrigger
+                value="table"
+                className="gap-2 rounded-none border-b-2 border-transparent px-3 pt-1 pb-4 text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none hover:text-foreground"
+              >
                 <TableIcon className="h-4 w-4" />
                 Table
               </TabsTrigger>
-              <TabsTrigger value="overview" className="gap-2 data-[state=active]:bg-primary/20">
-                <ListTodo className="h-4 w-4" />
-                Overview
+              <TabsTrigger
+                value="settings"
+                className="gap-2 rounded-none border-b-2 border-transparent px-3 pt-1 pb-4 text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none hover:text-foreground"
+              >
+                <Settings className="h-4 w-4" />
+                Settings
               </TabsTrigger>
-              <TabsTrigger value="dashboard" className="gap-2 data-[state=active]:bg-primary/20">
+              <TabsTrigger
+                value="dashboard"
+                className="gap-2 rounded-none border-b-2 border-transparent px-3 pt-1 pb-4 text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none hover:text-foreground"
+              >
                 <LayoutDashboard className="h-4 w-4" />
                 Dashboard
               </TabsTrigger>
             </TabsList>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pb-4">
               <Can permission="project.view_members">
                 <MembersModal />
               </Can>
@@ -88,9 +100,9 @@ export default function ProjectShow() {
             <KanbanBoard />
           </TabsContent>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6 px-6 py-6 focus-visible:outline-none overflow-y-auto">
-            <ProjectOverview project={project} />
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6 px-6 py-6 focus-visible:outline-none overflow-y-auto">
+            <ProjectSettings project={project} />
           </TabsContent>
 
           {/* Dashboard Tab */}

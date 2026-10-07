@@ -13,6 +13,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { Checkbox } from '@/components/ui/checkbox'
 import InputError from '@/components/input-error'
 import AppAvatar from '@/components/app-avatar'
+import ActivityFeed from '@/components/activity-feed'
 import {
   Plus, CalendarPlus, CalendarDays, Pencil, ChevronDownIcon,
   Loader2, AlertCircle, Clock, Users, Video, Building2, Globe, Trash2,
@@ -487,6 +488,12 @@ export function EventViewModal({ event, isPast, onClose, onEdit, onDelete, onTog
               <p className="text-muted-foreground leading-relaxed">{event.description}</p>
             </>
           )}
+
+          <Separator />
+          <div>
+            <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Activity</h4>
+            <ActivityFeed subjectType="event" subjectId={event.id} />
+          </div>
         </div>
       </div>
     </BaseModal>

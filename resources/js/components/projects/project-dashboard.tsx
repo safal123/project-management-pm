@@ -87,7 +87,7 @@ export default function ProjectDashboard({ project, tasks }: ProjectDashboardPro
           value={stats.teamCount}
           description="Active contributors"
           icon={UsersIcon}
-          iconClassName="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+          iconClassName="bg-primary/10 text-primary"
         />
 
         <AppStatCard

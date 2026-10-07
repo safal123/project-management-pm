@@ -8,10 +8,10 @@ const gradientVariants = cva(
     variants: {
       variant: {
         primary: "bg-gradient-to-br from-primary/10 via-background/5 to-primary/5 dark:from-primary/20 dark:via-background/5 dark:to-primary/10",
-        purple: "bg-gradient-to-br from-purple-500/15 via-pink-500/5 to-fuchsia-500/10 dark:from-purple-600/20 dark:via-pink-600/10 dark:to-fuchsia-700/20",
-        blue: "bg-gradient-to-br from-blue-500/15 via-cyan-500/5 to-sky-500/10 dark:from-blue-600/20 dark:via-cyan-600/10 dark:to-sky-700/20",
-        green: "bg-gradient-to-br from-emerald-500/15 via-teal-500/5 to-green-500/10 dark:from-emerald-600/20 dark:via-teal-600/10 dark:to-green-700/20",
-        cyan: "bg-gradient-to-br from-cyan-500/15 via-sky-500/5 to-blue-500/10 dark:from-cyan-600/20 dark:via-sky-600/10 dark:to-blue-700/20",
+        purple: "bg-gradient-to-br from-foreground/10 via-foreground/5 to-foreground/[0.03] dark:from-foreground/15 dark:via-foreground/8 dark:to-foreground/5",
+        blue: "bg-gradient-to-br from-foreground/10 via-foreground/5 to-foreground/[0.03] dark:from-foreground/15 dark:via-foreground/8 dark:to-foreground/5",
+        green: "bg-gradient-to-br from-foreground/10 via-foreground/5 to-foreground/[0.03] dark:from-foreground/15 dark:via-foreground/8 dark:to-foreground/5",
+        cyan: "bg-gradient-to-br from-foreground/10 via-foreground/5 to-foreground/[0.03] dark:from-foreground/15 dark:via-foreground/8 dark:to-foreground/5",
         radial: "bg-radial-gradient from-primary/10 via-background/5 to-transparent dark:from-primary/20 dark:via-background/5 dark:to-transparent",
         soft: "bg-gradient-to-b from-background via-background/90 to-background/80 dark:from-background dark:via-background/90 dark:to-background/80",
       },

@@ -15,6 +15,7 @@ import { ArrowRight, BarChart, ListTodo } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import AppEmpty from '@/components/app-empty';
+import { STATUS_BADGE_COLORS } from '@/utils/app-utils';
 
 interface RecentTask {
   id: string;
@@ -26,12 +27,6 @@ interface RecentTask {
   assigned_to: { id: string; name: string; avatar?: string } | null;
   updated_at: string;
 }
-
-const STATUS_COLORS: Record<string, string> = {
-  todo: 'bg-slate-500/15 text-slate-600 dark:text-slate-400',
-  in_progress: 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
-  done: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
-};
 
 interface RecentActivityTableProps {
   tasks: RecentTask[];
@@ -98,7 +93,7 @@ export function RecentActivityTable({ tasks }: RecentActivityTableProps) {
                       variant="secondary"
                       className={cn(
                         'capitalize',
-                        STATUS_COLORS[task.status || 'todo']
+                        STATUS_BADGE_COLORS[task.status || 'todo']
                       )}
                     >
                       {(task.status || 'todo').replace('_', ' ')}

@@ -156,8 +156,8 @@ export const STATUS_BADGE_COLORS: Record<string, string> = {
 
 export const PRIORITY_BADGE_COLORS: Record<string, string> = {
   low: 'bg-green-500/10 text-green-700 dark:text-green-400',
-  medium: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400',
-  high: 'bg-red-500/10 text-red-700 dark:text-red-400',
+  medium: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+  high: 'bg-destructive/10 text-destructive dark:bg-destructive/20',
 };
 
 export const STATUS_LABELS: Record<string, string> = {

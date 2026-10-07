@@ -26,7 +26,7 @@
 
             <p style="margin: 20px 0;">
                 <a href="{{ $signedUrl }}"
-                    style="color: #ffffff; background-color: #667eea; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
+                    style="color: #ffffff; background-color: #111111; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
                     Accept Invitation
                 </a>
             </p>
@@ -38,7 +38,7 @@
             <p style="font-size: 14px; color: #555;">
                 If the button doesn’t work, copy and paste this link into your browser:
             </p>
-            <p style="font-size: 14px; word-break: break-all; color: #667eea;">
+            <p style="font-size: 14px; word-break: break-all; color: #111111;">
                 {{ $signedUrl }}
             </p>
 

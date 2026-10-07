@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasActivities;
 use App\Models\Concerns\HasLikes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Project extends Model
 {
     /** @use HasFactory<\Database\Factories\ProjectFactory> */
-    use HasFactory, HasLikes, HasUlids;
+    use HasActivities, HasFactory, HasLikes, HasUlids;
 
     public $fillable = [
         'name',
@@ -73,5 +75,10 @@ class Project extends Model
     public function invitations()
     {
         return $this->hasMany(Invitation::class);
+    }
+
+    public function gitIntegration(): HasOne
+    {
+        return $this->hasOne(ProjectIntegration::class);
     }
 }

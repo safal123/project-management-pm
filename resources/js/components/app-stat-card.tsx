@@ -71,7 +71,7 @@ export function AppStatCard({
                     trendPositive === true &&
                       'bg-emerald-500/12 text-emerald-700 ring-1 ring-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-400 dark:ring-emerald-500/25',
                     trendPositive === false &&
-                      'bg-red-500/12 text-red-700 ring-1 ring-red-500/20 dark:bg-red-500/15 dark:text-red-400 dark:ring-red-500/25',
+                      'bg-destructive/12 text-destructive ring-1 ring-destructive/20 dark:bg-destructive/15 dark:ring-destructive/25',
                     trendPositive == null &&
                       'bg-muted/80 text-muted-foreground ring-1 ring-border/60'
                   )}

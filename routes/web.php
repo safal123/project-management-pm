@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\GitIntegrationController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\MediaController;
@@ -11,6 +13,7 @@ use App\Http\Controllers\MoveTaskColumnController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReorderTasksController;
 use App\Http\Controllers\S3UploadController;
+use App\Http\Controllers\TaskBranchController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\WorkspaceSwitcherController;
@@ -56,6 +59,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('tasks/move', MoveTaskColumnController::class)
         ->name('tasks.move');
 
+    Route::post('tasks/{task}/branch', TaskBranchController::class)
+        ->name('tasks.branch.store');
+
     Route::resource('events', EventController::class)
         ->only(['store', 'update', 'destroy'])
         ->names('events');
@@ -87,6 +93,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('comments.update');
     Route::delete('comments/{comment}', [CommentController::class, 'destroy'])
         ->name('comments.destroy');
+
+    Route::get('activities', [ActivityController::class, 'index'])
+        ->name('activities.index');
+
+    Route::post('projects/{project}/git-integration', [GitIntegrationController::class, 'store'])
+        ->name('git-integrations.store');
+    Route::delete('projects/{project}/git-integration', [GitIntegrationController::class, 'destroy'])
+        ->name('git-integrations.destroy');
 
     Route::post('invitations', [InvitationController::class, 'store'])
         ->name('invitations.store');

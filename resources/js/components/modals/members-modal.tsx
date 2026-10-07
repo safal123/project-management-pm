@@ -170,7 +170,7 @@ export const MembersModal = () => {
                     <div
                       key={invitation.id}
                       className={cn(
-                        'flex items-center justify-between p-3 rounded-lg border bg-white dark:bg-background',
+                        'flex items-center justify-between p-3 rounded-lg border bg-card',
                         isExpired && 'opacity-60 border-destructive/30'
                       )}
                     >
@@ -179,7 +179,7 @@ export const MembersModal = () => {
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-medium">{invitation.email}</p>
                             {isExpired ? (
-                              <Badge className="text-xs bg-red-500 text-red-900">
+                              <Badge variant="destructive" className="text-xs">
                                 <X className="h-3 w-3" />
                                 Expired
                               </Badge>
@@ -271,7 +271,7 @@ export const MembersModal = () => {
                                     variant="outline"
                                     onClick={() => handleApproveMember(invitation.id)}
                                     disabled={approvingInvitationId === invitation.id}
-                                    className="text-emerald-600 hover:text-emerald-700 border-emerald-200 hover:border-emerald-300"
+                                    className="text-emerald-600 hover:text-emerald-700 border-emerald-200 hover:border-emerald-300 dark:text-emerald-400 dark:hover:text-emerald-300 dark:border-emerald-800 dark:hover:border-emerald-700"
                                   >
                                     {approvingInvitationId === invitation.id ? (
                                       <Loader2 className="h-4 w-4 animate-spin" />
