@@ -54,6 +54,10 @@ export interface Workspace {
   created_at: string;
   updated_at: string;
   logo: string;
+  description?: string | null;
+  users?: User[];
+  created_by?: User | null;
+  can_rename?: boolean;
 }
 
 export interface Project {
@@ -81,7 +85,7 @@ export interface GitIntegration {
 
 export interface Invitation {
   id: string;
-  email: string;
+  email: string | null;
   status: 'pending' | 'accepted' | 'rejected';
   token: string;
   expires_at: string;
@@ -152,11 +156,20 @@ export interface Comment {
   is_liked_by_user?: boolean;
 }
 
+export interface ActivitySubject {
+  id: string;
+  type: 'task' | 'project' | 'event' | 'item';
+  name: string | null;
+  url: string | null;
+  project?: { id: string; name: string; slug: string } | null;
+}
+
 export interface Activity {
   id: string;
   type: string;
   properties: Record<string, unknown> | null;
   user: User | null;
+  subject?: ActivitySubject | null;
   description: string;
   created_at: string;
 }

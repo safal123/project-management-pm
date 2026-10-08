@@ -223,6 +223,19 @@ export const EVENT_TYPE_LABELS: Record<EventType, string> = {
   call: 'Call',
 };
 
+export function formatFileSize(bytes?: number | string | null): string {
+  const size = Number(bytes)
+  if (!size || Number.isNaN(size)) return ''
+  if (size < 1024) return `${size} B`
+  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`
+}
+
+export function isImageFile(filetype?: string | null, filename?: string | null): boolean {
+  if (filetype?.startsWith('image/')) return true
+  return /\.(png|jpe?g|gif|webp|svg|bmp|avif)$/i.test(filename ?? '')
+}
+
 export const EVENT_LOCATION_LABELS: Record<string, string> = {
   office: 'Office',
   online: 'Online',

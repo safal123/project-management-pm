@@ -105,9 +105,12 @@ class CalendarController extends Controller
                 ]),
             ]);
 
-        $members = $project
-            ? $project->users()->select(['users.id', 'users.name', 'users.email'])->get()
-            : Workspace::find($workspaceId)?->users()->select(['users.id', 'users.name', 'users.email'])->get();
+        $members = Workspace::query()
+            ->find($workspaceId)
+            ?->users()
+            ->with('media')
+            ->orderBy('users.name')
+            ->get(['users.id', 'users.name', 'users.email']);
 
         return [
             'calendarEvents' => $calendarEvents,

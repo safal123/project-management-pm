@@ -1,91 +1,81 @@
-import { GradientBackground } from '@/components/ui/gradient-background';
-import { Button } from '@/components/ui/button';
-import { Link } from '@inertiajs/react';
-import { CheckSquare, Users, BarChart3, Clock, Workflow, PackagePlus } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button'
+import { Link } from '@inertiajs/react'
+import { BarChart3, CheckSquare, Clock, PackagePlus, Users, Workflow } from 'lucide-react'
+
+const features = [
+  {
+    title: 'Task management',
+    description: 'Create, assign, and track work with priorities, due dates, and dependencies.',
+    icon: CheckSquare,
+  },
+  {
+    title: 'Collaboration',
+    description: 'Comment, share files, and keep everyone on the same card without extra tools.',
+    icon: Users,
+  },
+  {
+    title: 'Analytics',
+    description: 'See progress, bottlenecks, and workload across projects in a compact dashboard.',
+    icon: BarChart3,
+  },
+  {
+    title: 'Scheduling',
+    description: 'Month, week, and agenda views for events and due dates in one calendar.',
+    icon: Clock,
+  },
+  {
+    title: 'Custom workflows',
+    description: 'Shape boards and statuses around how your team already works.',
+    icon: Workflow,
+  },
+  {
+    title: 'Integrations',
+    description: 'Connect GitHub and keep branches linked to the tasks they belong to.',
+    icon: PackagePlus,
+  },
+]
 
 export function FeatureSection() {
-  const features = [
-    {
-      title: "Task Management",
-      description: "Easily create, assign, and track tasks with our intuitive interface. Set priorities, deadlines, and dependencies.",
-      icon: <CheckSquare className="h-6 w-6 text-primary" />,
-      bgColor: "bg-primary/10",
-    },
-    {
-      title: "Real-time Collaboration",
-      description: "Work together effortlessly with team members. Comment, share files, and update progress in real-time.",
-      icon: <Users className="h-6 w-6 text-primary" />,
-      bgColor: "bg-primary/10",
-    },
-    {
-      title: "Analytics Dashboard",
-      description: "Gain insights with powerful analytics. Track progress, identify bottlenecks, and measure team performance.",
-      icon: <BarChart3 className="h-6 w-6 text-primary" />,
-      bgColor: "bg-primary/10",
-    },
-    {
-      title: "Resource Management",
-      description: "Allocate and optimize resources efficiently. Track availability, workload, and utilization rates.",
-      icon: <Clock className="h-6 w-6 text-primary" />,
-      bgColor: "bg-primary/10",
-    },
-    {
-      title: "Custom Workflows",
-      description: "Create workflows that match your team's process. Adapt and evolve as your needs change.",
-      icon: <Workflow className="h-6 w-6 text-primary" />,
-      bgColor: "bg-primary/10",
-    },
-    {
-      title: "Integrations",
-      description: "Connect with the tools you already use. Seamlessly integrate with popular services and platforms.",
-      icon: <PackagePlus className="h-6 w-6 text-primary" />,
-      bgColor: "bg-primary/10",
-    },
-  ];
-
   return (
-    <section id="features" className="relative w-full py-12 md:py-24 lg:py-32">
-      <GradientBackground variant="primary" intensity="light" />
-
-      <div className="container relative z-10 mx-auto px-4 md:px-6">
-        <div className="flex flex-col items-center justify-center w-full max-w-3xl mx-auto text-center space-y-6">
-          <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm border border-primary/20">
-            <span className="font-semibold text-primary">
-              Features
-            </span>
-          </div>
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-            Everything you need to manage your projects
+    <section id="features" className="border-b border-border">
+      <div className="mx-auto max-w-6xl px-4 py-14 lg:px-6 lg:py-16">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="inline-flex rounded-md border border-border bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+            Features
+          </p>
+          <h2 className="mt-3 text-xl font-semibold tracking-tight md:text-2xl">
+            Everything you need to run a project
           </h2>
-          <p className="text-muted-foreground md:text-xl">
-            Our platform offers a comprehensive set of tools designed to streamline your project management workflow.
+          <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
+            Boards, tables, calendars, and workspace tools with the same dense, professional UI.
           </p>
         </div>
 
-        <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature, index) => (
-            <div key={index} className="flex flex-col space-y-2 rounded-lg border p-6 bg-background/50 backdrop-blur-sm hover:border-primary/50 transition-colors group">
-              <div className={cn("flex h-12 w-12 items-center justify-center rounded-lg mb-2", feature.bgColor)}>
-                {feature.icon}
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature) => (
+            <div
+              key={feature.title}
+              className="rounded-md border border-border bg-card p-4 shadow-sm"
+            >
+              <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-md border border-border bg-muted/40">
+                <feature.icon className="h-3.5 w-3.5" />
               </div>
-              <h3 className="text-lg font-bold group-hover:text-primary transition-colors">{feature.title}</h3>
-              <p className="text-muted-foreground">{feature.description}</p>
+              <h3 className="text-[13px] font-medium">{feature.title}</h3>
+              <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                {feature.description}
+              </p>
             </div>
           ))}
         </div>
 
-        <div className="mt-16 flex justify-center">
+        <div className="mt-8 flex justify-center">
           <Link href="/register">
-            <Button
-              size="lg"
-              className="w-full sm:w-auto"
-            >
-              Explore All Features
+            <Button size="sm" className="h-8 px-3 text-[13px]">
+              Explore the product
             </Button>
           </Link>
         </div>
       </div>
     </section>
-  );
+  )
 }

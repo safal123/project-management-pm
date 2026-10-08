@@ -8,14 +8,15 @@ use App\Exceptions\CannotRemoveMemberException;
 use App\Exceptions\ProjectCreationException;
 use App\Http\Requests\ProjectCreateRequest;
 use App\Http\Requests\ProjectUpdateRequest;
+use App\Http\Resources\ProjectResource;
+use App\Http\Resources\TaskResource;
+use App\Models\Invitation;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-use App\Http\Resources\ProjectResource;
-use App\Http\Resources\TaskResource;
 
 class ProjectController extends Controller
 {
@@ -51,43 +52,59 @@ class ProjectController extends Controller
 
     public function show(Project $project, Request $request)
     {
-        $userId = Auth::id();
+        /** @var User $user */
+        $user = Auth::user();
+        abort_unless(
+            $user->workspaces()->where('workspaces.id', $project->workspace_id)->exists(),
+            403,
+        );
+
+        $userId = $user->id;
 
         $project->load([
-            'users',
             'createdBy',
-            'invitations' => fn($q) => $q
+            'invitations' => fn ($q) => $q
+                ->whereNotNull('email')
                 ->where('expires_at', '>=', now())
                 ->with([
                     'invitedBy',
                     'invitedTo',
                 ]),
             'gitIntegration.connectedBy',
+            'workspace.users' => fn ($q) => $q
+                ->with('media')
+                ->orderBy('users.name'),
         ]);
 
-        $tasks = Task::query()
+        $project->setRelation('users', $project->workspace?->users ?? collect());
+
+        $taskQuery = Task::query()
             ->where('project_id', $project->id)
             ->with([
                 'assignedTo',
                 'assignedTo.media',
                 'media',
-                'parentTask:id,title',
+                'parentTask:id,title,parent_task_id',
                 'dependsOn:id,title',
             ])
             ->withCount([
                 'likes',
-                'likes as is_liked_by_user' => fn($q) => $q->where('user_id', $userId),
+                'likes as is_liked_by_user' => fn ($q) => $q->where('user_id', $userId),
                 'comments',
             ])
             ->orderBy('order');
 
         $paginatedTasks = $request->get('tab') === 'table'
-            ? $tasks->paginate(10)->withQueryString()
+            ? (clone $taskQuery)
+                ->whereHas('parentTask', fn ($query) => $query->whereNull('parent_task_id'))
+                ->paginate(10)
+                ->withQueryString()
             : null;
 
         $payload = [
             'project' => ProjectResource::make($project),
-            'tasks' => TaskResource::collection($tasks->get()),
+            'invite_link' => Invitation::shareableLinkFor($project, $user),
+            'tasks' => TaskResource::collection((clone $taskQuery)->get()),
             'paginatedTasks' => $paginatedTasks
                 ? TaskResource::collection($paginatedTasks)
                 : null,

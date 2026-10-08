@@ -16,7 +16,7 @@ export const DATA_TABLE_SURFACE_CLASS =
   'bg-muted/40 shadow-sm rounded-md dark:bg-primary/5';
 
 /** Outer chrome: border + radius around the scroll area */
-export const DATA_TABLE_CONTAINER_CLASS = 'rounded-md border';
+export const DATA_TABLE_CONTAINER_CLASS = 'rounded-md border border-border bg-card shadow-sm';
 
 type DataTableProps = {
   children: React.ReactNode;

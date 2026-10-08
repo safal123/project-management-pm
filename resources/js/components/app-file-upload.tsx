@@ -15,12 +15,14 @@ import {
   Upload,
   LoaderCircle,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AppFileUploadProps {
   workspaceId: string;
   mediableId: string;
   mediableType?: string;
   showPlaceholder?: boolean;
+  variant?: 'icon' | 'tile';
   accept?: string;
   className?: string;
 }
@@ -30,6 +32,7 @@ export default function AppFileUpload({
   mediableId,
   mediableType = 'task',
   showPlaceholder = false,
+  variant = 'icon',
   accept = 'image/*',
   className,
 }: AppFileUploadProps) {
@@ -117,6 +120,38 @@ export default function AppFileUpload({
     }
   };
 
+  if (variant === 'tile') {
+    return (
+      <>
+        <button
+          type="button"
+          disabled={isUploading}
+          onClick={openFilePicker}
+          className={cn(
+            'flex min-h-[132px] w-full flex-col items-center justify-center gap-1.5 rounded-md border border-dashed border-border bg-muted/20 text-muted-foreground transition-colors hover:border-neutral-400 hover:bg-muted/40 hover:text-foreground disabled:opacity-60',
+            className
+          )}
+        >
+          {isUploading ? (
+            <LoaderCircle className="h-4 w-4 animate-spin" />
+          ) : (
+            <PlusIcon className="h-4 w-4" />
+          )}
+          <span className="text-[12px] font-medium">
+            {isUploading ? `Uploading ${progress}%` : 'Add file'}
+          </span>
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          accept={accept}
+          onChange={handleFileChange}
+        />
+      </>
+    )
+  }
+
   return (
     <>
       <DropdownMenu>
@@ -137,30 +172,30 @@ export default function AppFileUpload({
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="end" className="w-64">
+        <DropdownMenuContent align="end" className="w-56 p-1">
           <DropdownMenuItem
             onSelect={(e) => {
               e.preventDefault();
               openFilePicker();
             }}
             disabled={isUploading}
-            className="gap-3 py-3"
+            className="gap-2.5 rounded-md px-2 py-2 text-[13px]"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-muted/40">
               {isUploading ? (
-                <LoaderCircle className="h-5 w-5 animate-spin" />
+                <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Upload className="h-5 w-5" />
+                <Upload className="h-3.5 w-3.5" />
               )}
             </div>
             <div className="flex-1">
               <p className="font-medium">
-                {isUploading ? 'Uploading...' : 'Computer'}
+                {isUploading ? 'Uploading…' : 'Upload file'}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[11px] text-muted-foreground">
                 {isUploading
-                  ? `Uploading ${progress}%`
-                  : 'Upload from your device'}
+                  ? `${progress}% complete`
+                  : 'From your computer'}
               </p>
             </div>
           </DropdownMenuItem>

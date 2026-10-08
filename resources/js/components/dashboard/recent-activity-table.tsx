@@ -46,7 +46,7 @@ export function RecentActivityTable({ tasks }: RecentActivityTableProps) {
             </CardDescription>
           </div>
           <Button variant="ghost" size="sm" className="h-7 px-2 text-[12px]" asChild>
-            <Link href="/projects">
+            <Link href="/activity">
               View all
               <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Link>

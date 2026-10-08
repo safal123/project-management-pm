@@ -30,7 +30,7 @@ export function AppStatCard({
   return (
     <Card
       className={cn(
-        'group relative gap-0 overflow-hidden border-border/70 bg-card py-0 shadow-sm',
+        'group relative gap-0 overflow-hidden py-0',
         className
       )}
     >

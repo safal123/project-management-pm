@@ -8,6 +8,7 @@ import { Check, ChevronsUpDown } from 'lucide-react'
 import { DropdownMenuLabel } from './ui/dropdown-menu'
 import { Separator } from './ui/separator'
 import { AddNewWorkspace } from './modals/add-new-workspace'
+import { RenameWorkspaceModal } from './modals/rename-workspace-modal'
 import { router, usePage } from '@inertiajs/react'
 
 const WorkspaceSelector = ({ workspaces }: WorkspaceSelectorProps) => {
@@ -72,6 +73,11 @@ const WorkspaceSelector = ({ workspaces }: WorkspaceSelectorProps) => {
                 </div>
               </DropdownMenuItem>
             ))}
+            {currentWorkspace.can_rename && (
+              <div className="mt-0.5 p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md">
+                <RenameWorkspaceModal workspace={currentWorkspace} />
+              </div>
+            )}
             <div className="mt-0.5 p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md">
               <AddNewWorkspace />
             </div>

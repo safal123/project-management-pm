@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use App\Mail\ProjectInvitationMail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\ProjectInvitationMail;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class Invitation extends Model
 {
@@ -92,15 +92,82 @@ class Invitation extends Model
         return $query->where('project_id', $project->id);
     }
 
-    public function sendEmail()
+    public function isLinkInvite(): bool
     {
-        $signedUrl = URL::temporarySignedRoute(
+        return blank($this->email);
+    }
+
+    public function signedUrl(): string
+    {
+        return URL::temporarySignedRoute(
             'invitations.show',
-            now()->addHours(24),
+            $this->expires_at ?? now()->addHours(24),
             ['token' => $this->token]
         );
+    }
+
+    public static function shareableLinkFor(Project $project, User $user): string
+    {
+        $invitation = static::query()
+            ->where('project_id', $project->id)
+            ->whereNull('email')
+            ->pending()
+            ->where('expires_at', '>', now())
+            ->latest()
+            ->first();
+
+        if (! $invitation) {
+            $invitation = static::create([
+                'workspace_id' => $project->workspace_id,
+                'project_id' => $project->id,
+                'invited_by' => $user->id,
+                'email' => null,
+            ]);
+
+            $invitation->forceFill([
+                'expires_at' => now()->addDays(7),
+                'last_sent_at' => null,
+            ])->save();
+        }
+
+        return $invitation->signedUrl();
+    }
+
+    public static function shareableWorkspaceLinkFor(Workspace $workspace, User $user): string
+    {
+        $invitation = static::query()
+            ->where('workspace_id', $workspace->id)
+            ->whereNull('project_id')
+            ->whereNull('email')
+            ->pending()
+            ->where('expires_at', '>', now())
+            ->latest()
+            ->first();
+
+        if (! $invitation) {
+            $invitation = static::create([
+                'workspace_id' => $workspace->id,
+                'project_id' => null,
+                'invited_by' => $user->id,
+                'email' => null,
+            ]);
+
+            $invitation->forceFill([
+                'expires_at' => now()->addDays(7),
+                'last_sent_at' => null,
+            ])->save();
+        }
+
+        return $invitation->signedUrl();
+    }
+
+    public function sendEmail()
+    {
+        if (blank($this->email)) {
+            return;
+        }
 
         Mail::to($this->email)
-            ->send(new ProjectInvitationMail($this, $signedUrl));
+            ->send(new ProjectInvitationMail($this, $this->signedUrl()));
     }
 }

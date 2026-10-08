@@ -10,7 +10,7 @@ import {
 
 export default function Welcome() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background font-sans text-foreground">
       <Head title="Project Management" />
       <Header />
       <main className="flex-1">

@@ -25,7 +25,9 @@ trait CreatesTestData
             ->count($workspaceCount)
             ->create(['created_by' => $user->id]);
 
-        $workspaces->each(fn (Workspace $ws) => $user->workspaces()->attach($ws->id));
+        $workspaces->each(fn (Workspace $ws) => $user->workspaces()->attach($ws->id, [
+            'role' => Workspace::ROLE_OWNER,
+        ]));
 
         $user->current_workspace_id = $workspaces->first()->id;
         $user->saveQuietly();

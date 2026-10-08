@@ -25,6 +25,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'google_id',
+        'avatar',
     ];
 
     /**
@@ -56,7 +58,16 @@ class User extends Authenticatable
 
     public function workspaces()
     {
-        return $this->belongsToMany(Workspace::class, 'user_workspaces', 'user_id', 'workspace_id');
+        return $this->belongsToMany(Workspace::class, 'user_workspaces', 'user_id', 'workspace_id')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class, 'project_user')
+            ->withPivot('role', 'joined_at')
+            ->withTimestamps();
     }
 
     public function currentWorkspace()

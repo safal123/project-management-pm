@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +29,17 @@ class Activity extends Model
 
     public const TYPE_BRANCH_CREATED = 'branch_created';
 
+    public const TYPES = [
+        self::TYPE_CREATED,
+        self::TYPE_STATUS_CHANGED,
+        self::TYPE_ASSIGNED,
+        self::TYPE_MOVED,
+        self::TYPE_COMPLETED,
+        self::TYPE_COMMENTED,
+        self::TYPE_LIKED,
+        self::TYPE_BRANCH_CREATED,
+    ];
+
     public $fillable = [
         'user_id',
         'subject_id',
@@ -49,6 +61,41 @@ class Activity extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeForWorkspace(Builder $query, string $workspaceId): Builder
+    {
+        return $query->where('workspace_id', $workspaceId);
+    }
+
+    public function scopeRelatedToProject(Builder $query, Project $project): Builder
+    {
+        $taskIds = Task::query()->where('project_id', $project->id)->pluck('id');
+        $eventIds = Event::query()->where('project_id', $project->id)->pluck('id');
+
+        return $query->where(function (Builder $activityQuery) use ($project, $taskIds, $eventIds) {
+            $activityQuery->where(function (Builder $projectQuery) use ($project) {
+                $projectQuery
+                    ->where('subject_type', Project::class)
+                    ->where('subject_id', $project->id);
+            });
+
+            if ($taskIds->isNotEmpty()) {
+                $activityQuery->orWhere(function (Builder $taskQuery) use ($taskIds) {
+                    $taskQuery
+                        ->where('subject_type', Task::class)
+                        ->whereIn('subject_id', $taskIds);
+                });
+            }
+
+            if ($eventIds->isNotEmpty()) {
+                $activityQuery->orWhere(function (Builder $eventQuery) use ($eventIds) {
+                    $eventQuery
+                        ->where('subject_type', Event::class)
+                        ->whereIn('subject_id', $eventIds);
+                });
+            }
+        });
     }
 
     /**

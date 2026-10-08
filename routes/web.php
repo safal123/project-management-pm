@@ -11,6 +11,7 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MoveTaskColumnController;
+use App\Http\Controllers\PeopleController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReorderTasksController;
 use App\Http\Controllers\S3UploadController;
@@ -29,14 +30,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
-    Route::get('people', [ComingSoonController::class, 'people'])->name('people.index');
-    Route::get('activity', [ComingSoonController::class, 'activity'])->name('activity.index');
+    Route::get('people', [PeopleController::class, 'index'])->name('people.index');
+    Route::post('people', [PeopleController::class, 'store'])->name('people.store');
+    Route::get('people/{person}/activities', [PeopleController::class, 'activities'])->name('people.activities');
+    Route::patch('people/{person}', [PeopleController::class, 'update'])->name('people.update');
+    Route::get('people/{person}', [PeopleController::class, 'show'])->name('people.show');
+    Route::get('activity', [ActivityController::class, 'workspace'])->name('activity.index');
     Route::get('emails', [ComingSoonController::class, 'emails'])->name('emails.index');
     Route::get('billing', [ComingSoonController::class, 'billing'])->name('billing.index');
     Route::get('archive', [ComingSoonController::class, 'archive'])->name('archive.index');
 
     Route::resource('workspaces', WorkspaceController::class)
-        ->only(['store']);
+        ->only(['store', 'update']);
 
     Route::resource('projects', ProjectController::class)
         ->only(['index', 'store', 'show', 'update', 'destroy']);

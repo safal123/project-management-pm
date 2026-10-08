@@ -60,6 +60,52 @@ test('workspace member can fetch an event activity feed', function () {
         ->assertJsonCount(1, 'data');
 });
 
+test('workspace member can fetch the workspace activity timeline', function () {
+    ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
+    $project = $this->createProjectsForUser($user, $workspaces->first(), 1)->first();
+    $task = $this->createTaskForProject($user, $project);
+
+    Activity::record($task, Activity::TYPE_CREATED, $task->workspace_id, $user);
+
+    actingAs($user)
+        ->getJson(route('activities.index', ['scope' => 'workspace']))
+        ->assertOk()
+        ->assertJsonCount(1, 'data');
+});
+
+test('project member can fetch a project activity timeline including related tasks', function () {
+    ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
+    $project = $this->createProjectsForUser($user, $workspaces->first(), 1)->first();
+    $task = $this->createTaskForProject($user, $project);
+
+    Activity::record($project, Activity::TYPE_CREATED, $project->workspace_id, $user);
+    Activity::record($task, Activity::TYPE_COMMENTED, $task->workspace_id, $user, ['excerpt' => 'hi']);
+
+    actingAs($user)
+        ->getJson(route('activities.index', [
+            'scope' => 'project',
+            'project_id' => $project->id,
+        ]))
+        ->assertOk()
+        ->assertJsonCount(2, 'data');
+});
+
+test('non project member cannot fetch a project activity timeline', function () {
+    ['user' => $owner, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
+    $project = $this->createProjectsForUser($owner, $workspaces->first(), 1)->first();
+
+    ['user' => $stranger] = $this->createUserWithWorkspace();
+    $stranger->update(['current_workspace_id' => $workspaces->first()->id]);
+    $stranger->workspaces()->syncWithoutDetaching([$workspaces->first()->id]);
+
+    actingAs($stranger)
+        ->getJson(route('activities.index', [
+            'scope' => 'project',
+            'project_id' => $project->id,
+        ]))
+        ->assertForbidden();
+});
+
 test('user outside the workspace cannot fetch an event activity feed', function () {
     ['user' => $owner, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
     $event = $this->createEventForWorkspace($owner, $workspaces->first());

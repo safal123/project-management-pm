@@ -28,6 +28,26 @@ test('project member can create a task', function () {
     expect(Task::query()->where('project_id', $project->id)->where('title', 'New task')->exists())->toBeTrue();
 });
 
+test('subtasks are parented to the task and not to the kanban column', function () {
+    ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
+    $project = $this->createProjectsForUser($user, $workspaces->first(), 1)->first();
+    $column = $this->createTaskForProject($user, $project, ['parent_task_id' => null, 'title' => 'To do']);
+    $card = $this->createTaskForProject($user, $project, ['parent_task_id' => $column->id, 'title' => 'Parent card']);
+
+    actingAs($user)
+        ->post(route('tasks.store'), taskStorePayload($project, [
+            'title' => 'Nested subtask',
+            'parent_task_id' => $card->id,
+        ]))
+        ->assertRedirect();
+
+    $subtask = Task::query()->where('title', 'Nested subtask')->first();
+
+    expect($subtask)->not->toBeNull()
+        ->and($subtask->parent_task_id)->toBe($card->id)
+        ->and($subtask->parent_task_id)->not->toBe($column->id);
+});
+
 test('user who is not a project member cannot create a task', function () {
     ['user' => $owner, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
     $project = $this->createProjectsForUser($owner, $workspaces->first(), 1)->first();

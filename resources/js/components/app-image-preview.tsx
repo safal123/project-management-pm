@@ -1,222 +1,254 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState } from 'react'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
 import {
   Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogTitle,
   DialogClose,
-} from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import {
-  DownloadIcon,
-  XIcon,
-  PlusIcon,
-  MinusIcon,
-  TrashIcon,
+  Download,
+  X,
+  Plus,
+  Minus,
+  Trash2,
   LoaderCircle,
-  RefreshCcwIcon
-} from "lucide-react";
-import { getDueDateDisplay } from "@/utils/app-utils";
-import axios from "axios";
-import { Badge } from "./ui/badge";
-import { router } from "@inertiajs/react";
-import { toast } from "sonner";
+  FileText,
+} from 'lucide-react'
+import { formatFileSize, formatShortDate, isImageFile } from '@/utils/app-utils'
+import axios from 'axios'
+import { router } from '@inertiajs/react'
+import { toast } from 'sonner'
 
 interface AppImagePreviewProps {
-  url: string;
-  alt?: string;
-  filename?: string;
-  className?: string;
-  createdAt?: string;
-  mediaId?: string;
+  url: string
+  alt?: string
+  filename?: string
+  className?: string
+  createdAt?: string
+  mediaId?: string
+  filesize?: number | string
+  filetype?: string
 }
 
-const ZOOM_STEP = 0.25;
-const MIN_ZOOM = 0.5;
-const MAX_ZOOM = 3;
+const ZOOM_STEP = 0.25
+const MIN_ZOOM = 0.5
+const MAX_ZOOM = 3
 
 const AppImagePreview = ({
   url,
-  alt = "Image preview",
+  alt = 'Attachment preview',
   className,
   filename,
   createdAt,
   mediaId,
+  filesize,
+  filetype,
 }: AppImagePreviewProps) => {
-  const [imageUrl, setImageUrl] = useState(url);
-  const [zoom, setZoom] = useState(0.75);
-  const [refreshing, setRefreshing] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [imageUrl, setImageUrl] = useState(url)
+  const [zoom, setZoom] = useState(1)
+  const [refreshing, setRefreshing] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const image = isImageFile(filetype, filename)
+  const sizeLabel = formatFileSize(filesize)
+  const dateLabel = createdAt ? formatShortDate(createdAt) : ''
 
   const imageStyle = useMemo(
     () => ({
       transform: `scale(${zoom})`,
-      transformOrigin: "center center",
+      transformOrigin: 'center center',
     }),
     [zoom]
-  );
+  )
 
   const refreshImageUrl = async () => {
-    if (!mediaId || refreshing) return;
+    if (!mediaId || refreshing) return
 
     try {
-      setRefreshing(true);
-      const { data } = await axios.get(
-        route("media.get-url", { media: mediaId })
-      );
-
+      setRefreshing(true)
+      const { data } = await axios.get(route('media.get-url', { media: mediaId }))
       if (data?.media?.url) {
-        setImageUrl(data.media.url);
+        setImageUrl(data.media.url)
       }
     } catch (error) {
-      console.error("Failed to refresh image URL", error);
+      console.error('Failed to refresh image URL', error)
     } finally {
-      setRefreshing(false);
+      setRefreshing(false)
     }
-  };
+  }
 
-  const deleteImage = ({ mediaId }: { mediaId: string }) => {
-    if (!mediaId) return;
-    router.delete(route("media.delete", { media: mediaId }), {
+  const deleteImage = () => {
+    if (!mediaId) return
+    router.delete(route('media.delete', { media: mediaId }), {
       preserveScroll: true,
-      onStart: () => {
-        setDeleting(true);
-      },
-      onSuccess: () => {
-        setDeleting(false);
-        toast.success("Image deleted successfully");
-        refreshImageUrl();
-      },
-      onError: () => {
-        setDeleting(false);
-        toast.error("Failed to delete image");
-      },
-      onFinish: () => {
-        setDeleting(false);
-      },
-    });
-  };
-
-  const zoomIn = () =>
-    setZoom((value) => Math.min(value + ZOOM_STEP, MAX_ZOOM));
-
-  const zoomOut = () =>
-    setZoom((value) => Math.max(value - ZOOM_STEP, MIN_ZOOM));
+      onStart: () => setDeleting(true),
+      onSuccess: () => toast.success('Attachment removed'),
+      onError: () => toast.error('Failed to remove attachment'),
+      onFinish: () => setDeleting(false),
+    })
+  }
 
   const download = () => {
-    const link = document.createElement("a");
-    link.href = imageUrl;
-    link.download = filename ?? "image";
-    link.rel = "noopener noreferrer";
-    link.click();
-  };
+    const link = document.createElement('a')
+    link.href = imageUrl
+    link.download = filename ?? 'attachment'
+    link.rel = 'noopener noreferrer'
+    link.click()
+  }
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <img
-          src={imageUrl}
-          alt={alt}
-          onError={refreshImageUrl}
+        <div
+          role="button"
+          tabIndex={0}
           className={cn(
-            className,
-            "w-12 h-12 rounded-md object-cover cursor-pointer border border-border"
+            'group flex w-full cursor-pointer flex-col overflow-hidden rounded-md border border-border bg-background text-left shadow-sm transition-colors hover:border-neutral-300 dark:hover:border-white/20',
+            className
           )}
-        />
+        >
+          <div className="relative flex h-28 items-center justify-center bg-muted/50">
+            {image ? (
+              <img
+                src={imageUrl}
+                alt={alt}
+                onError={refreshImageUrl}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <FileText className="h-7 w-7 text-muted-foreground" />
+            )}
+            <div className="absolute inset-0 flex items-start justify-end gap-0.5 bg-black/0 p-1 opacity-0 transition-opacity group-hover:bg-black/25 group-hover:opacity-100">
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                className="h-6 w-6"
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  download()
+                }}
+              >
+                <Download className="h-3 w-3" />
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                className="h-6 w-6"
+                disabled={deleting}
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  deleteImage()
+                }}
+              >
+                {deleting ? <LoaderCircle className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+              </Button>
+            </div>
+          </div>
+          <div className="border-t border-border px-2 py-1.5">
+            <p className="truncate text-[12px] font-medium">{filename ?? 'Attachment'}</p>
+            <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+              {[sizeLabel, dateLabel].filter(Boolean).join(' · ') || 'File'}
+            </p>
+          </div>
+        </div>
       </DialogTrigger>
 
-      <DialogTitle className="sr-only">{alt}</DialogTitle>
-
-      <DialogContent className="p-0 gap-0 min-w-screen h-[100vh] bg-background [&>button]:hidden z-[9999]">
-        <div className="border-b bg-background min-h-[50px] max-h-fit py-2">
-          <div className="grid grid-cols-2 md:grid-cols-3 items-center h-14 px-4">
-            <div className="hidden w-[400px] text-sm text-muted-foreground break-all leading-tight md:flex flex-col gap-1">
-              {filename}
-              <Badge variant="default" className="text-xs">
-                Uploaded at: {getDueDateDisplay(createdAt)?.text}
-              </Badge>
+      <DialogPortal>
+        <DialogOverlay className="z-[9998] bg-neutral-950/80" />
+        <DialogPrimitive.Content
+          className="fixed inset-0 z-[9999] flex flex-col bg-neutral-950 p-0 text-neutral-100 outline-none"
+          onOpenAutoFocus={(event) => event.preventDefault()}
+        >
+          <DialogTitle className="sr-only">{filename ?? alt}</DialogTitle>
+          <div className="flex h-11 shrink-0 items-center justify-between gap-3 border-b border-white/10 px-3">
+            <div className="min-w-0">
+              <p className="truncate text-[13px] font-medium">{filename ?? 'Attachment'}</p>
+              <p className="truncate text-[11px] text-neutral-400">
+                {[sizeLabel, dateLabel].filter(Boolean).join(' · ')}
+              </p>
             </div>
-
-            <div className="ml-0 md:ml-auto flex items-center justify-center border w-fit mx-auto rounded-md">
+            <div className="flex items-center gap-1">
+              {image && (
+                <div className="mr-1 flex items-center overflow-hidden rounded-md border border-white/15">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 rounded-none text-neutral-200 hover:bg-white/10"
+                    onClick={() => setZoom((value) => Math.max(value - ZOOM_STEP, MIN_ZOOM))}
+                    disabled={zoom <= MIN_ZOOM}
+                  >
+                    <Minus className="h-3.5 w-3.5" />
+                  </Button>
+                  <span className="w-10 text-center text-[11px] text-neutral-300">
+                    {Math.round(zoom * 100)}%
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 rounded-none text-neutral-200 hover:bg-white/10"
+                    onClick={() => setZoom((value) => Math.min(value + ZOOM_STEP, MAX_ZOOM))}
+                    disabled={zoom >= MAX_ZOOM}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              )}
               <Button
                 variant="ghost"
-                onClick={zoomIn}
-                disabled={zoom >= MAX_ZOOM}
-                className="border-r rounded-none"
-              >
-                <PlusIcon className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                className="border-r rounded-none ml-0"
-                disabled
-              >
-                {/* In Percentage */}
-                {zoom * 100}%
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={zoomOut}
-                disabled={zoom <= MIN_ZOOM}
-                className="border-r rounded-none ml-0"
-              >
-                <MinusIcon className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-[13px] text-neutral-200 hover:bg-white/10"
                 onClick={download}
-                className="rounded-none"
               >
-                <DownloadIcon className="h-4 w-4" />
+                <Download className="h-3.5 w-3.5" />
                 Download
               </Button>
-              {/* Delete */}
               <Button
                 variant="ghost"
-                onClick={() => deleteImage({ mediaId: mediaId ?? '' })}
-                className="rounded-none cursor-pointer"
+                size="icon"
+                className="h-7 w-7 text-neutral-200 hover:bg-white/10"
                 disabled={deleting}
+                onClick={deleteImage}
               >
-                {
-                  deleting ?
-                    <LoaderCircle className="h-4 w-4 animate-spin" /> :
-                    <TrashIcon className="h-4 w-4" />
-                }
+                {deleting ? <LoaderCircle className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
               </Button>
-              {/* Refresh */}
-              <Button
-                variant="ghost"
-                onClick={refreshImageUrl}
-                className="rounded-none cursor-pointer"
-              >
-                <RefreshCcwIcon className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="flex justify-end">
               <DialogClose asChild>
-                <Button variant="default" size="sm">
-                  <XIcon className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-neutral-200 hover:bg-white/10">
+                  <X className="h-3.5 w-3.5" />
                 </Button>
               </DialogClose>
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center md:justify-center max-w-full mx-auto overflow-y-auto">
-          <img
-            src={imageUrl}
-            alt={alt}
-            onError={refreshImageUrl}
-            className="max-h-[90vh] max-w-full object-contain transition-transform duration-200 ease-out border-2 border-primary/70 rounded-md"
-            style={imageStyle}
-          />
-        </div>
-      </DialogContent>
+          <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-6">
+            {image ? (
+              <img
+                src={imageUrl}
+                alt={alt}
+                onError={refreshImageUrl}
+                className="max-h-full max-w-full object-contain transition-transform duration-200 ease-out"
+                style={imageStyle}
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-3 text-neutral-300">
+                <FileText className="h-10 w-10" />
+                <p className="text-[13px]">{filename ?? 'This file cannot be previewed'}</p>
+                <Button size="sm" className="h-8 px-3 text-[13px]" onClick={download}>
+                  Download file
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPortal>
     </Dialog>
-  );
-};
+  )
+}
 
-export default AppImagePreview;
+export default AppImagePreview

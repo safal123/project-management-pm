@@ -29,16 +29,18 @@ export default function TaskDependencies({ task, className = '' }: TaskDependenc
   const { tasks } = usePage<SharedData & { tasks?: Task[] | { data?: Task[] } }>().props
   const [search, setSearch] = useState('')
 
-  const candidates = useMemo(
-    () =>
-      unwrapTasks(tasks).filter(
-        (item) =>
-          item.id !== task.id &&
-          item.parent_task_id !== null &&
-          item.title.toLowerCase().includes(search.toLowerCase())
-      ),
-    [tasks, task.id, search]
-  )
+  const candidates = useMemo(() => {
+    const all = unwrapTasks(tasks)
+    const columnIds = new Set(all.filter((item) => item.parent_task_id === null).map((item) => item.id))
+
+    return all.filter(
+      (item) =>
+        item.id !== task.id &&
+        item.parent_task_id !== null &&
+        columnIds.has(item.parent_task_id) &&
+        item.title.toLowerCase().includes(search.toLowerCase())
+    )
+  }, [tasks, task.id, search])
 
   const selected = task.depends_on ?? candidates.find((item) => item.id === task.depends_on_task_id)
 

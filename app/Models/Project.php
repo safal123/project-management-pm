@@ -48,8 +48,14 @@ class Project extends Model
 
     public function scopeForUser(Builder $query, User $user)
     {
-        return $query->whereHas('users', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
+        return $query->where(function (Builder $query) use ($user) {
+            $query
+                ->whereHas('users', function ($memberQuery) use ($user) {
+                    $memberQuery->where('user_id', $user->id);
+                })
+                ->orWhereHas('workspace.users', function ($memberQuery) use ($user) {
+                    $memberQuery->where('user_id', $user->id);
+                });
         });
     }
 
@@ -62,8 +68,8 @@ class Project extends Model
     {
         return $query
             ->where('workspace_id', $workspace->id)
-            ->whereHas('users', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
+            ->whereHas('workspace.users', function ($memberQuery) use ($user) {
+                $memberQuery->where('user_id', $user->id);
             });
     }
 

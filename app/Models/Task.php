@@ -88,6 +88,11 @@ class Task extends Model
         return $this->belongsTo(Task::class, 'parent_task_id');
     }
 
+    public function subtasks()
+    {
+        return $this->hasMany(Task::class, 'parent_task_id')->orderBy('order');
+    }
+
     public function dependsOn()
     {
         return $this->belongsTo(Task::class, 'depends_on_task_id');

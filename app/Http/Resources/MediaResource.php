@@ -19,7 +19,10 @@ class MediaResource extends JsonResource
         return [
             'id' => $this->id,
             'url' => $this->url,
+            'filename' => $this->filename,
             'original_filename' => $this->original_filename,
+            'filesize' => $this->filesize,
+            'filetype' => $this->filetype,
             'workspace_id' => $this->workspace_id,
             'created_at' => $this->created_at,
             'mediable_type' => $this->mediable_type,

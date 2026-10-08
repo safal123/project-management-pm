@@ -23,6 +23,7 @@ class WorkspaceResource extends JsonResource
             'created_at' => $this->created_at,
             'created_by' => new UserResource($this->whenLoaded('createdBy')),
             'users' => UserResource::collection($this->whenLoaded('users')),
+            'can_rename' => $request->user() !== null && $this->canManageRoles($request->user()),
         ];
     }
 }

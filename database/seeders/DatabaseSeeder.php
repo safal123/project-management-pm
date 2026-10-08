@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
 
         // Attach the user to all created workspaces
         foreach ($workspaces as $workspace) {
-            $workspace->users()->attach($user->id);
+            $workspace->users()->attach($user->id, ['role' => Workspace::ROLE_OWNER]);
         }
 
         // Set one workspace as Safal’s current active workspace

@@ -299,20 +299,18 @@ export function CalendarPage() {
       </header>
 
       <div className="flex min-h-0 flex-1">
-        <aside className="hidden w-[260px] shrink-0 flex-col overflow-y-auto border-r bg-muted/20 px-3 py-3 lg:flex">
-          <Calendar
-            mode="single"
-            selected={anchorDate}
-            month={anchorDate}
-            onMonthChange={goToDate}
-            onSelect={(date) => date && goToDate(date)}
-            weekStartsOn={WEEK_STARTS_ON}
-            className="w-full p-0 [--cell-size:1.85rem]"
-            classNames={{
-              month_caption: 'text-[13px] font-medium',
-              weekday: 'text-[10px] uppercase text-muted-foreground',
-            }}
-          />
+        <aside className="hidden w-[280px] shrink-0 flex-col overflow-y-auto border-r px-3 py-3 lg:flex">
+          <div className="rounded-md border border-border p-3">
+            <Calendar
+              mode="single"
+              selected={anchorDate}
+              month={anchorDate}
+              onMonthChange={goToDate}
+              onSelect={(date) => date && goToDate(date)}
+              weekStartsOn={WEEK_STARTS_ON}
+              className="w-full bg-transparent p-0"
+            />
+          </div>
 
           <section className="mt-6 space-y-2">
             <h3 className="text-[11px] font-medium text-muted-foreground">On this calendar</h3>
