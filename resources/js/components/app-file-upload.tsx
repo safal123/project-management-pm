@@ -22,7 +22,7 @@ interface AppFileUploadProps {
   mediableId: string;
   mediableType?: string;
   showPlaceholder?: boolean;
-  variant?: 'icon' | 'tile';
+  variant?: 'icon' | 'tile' | 'thumbnail';
   accept?: string;
   className?: string;
 }
@@ -119,6 +119,39 @@ export default function AppFileUpload({
       e.target.value = '';
     }
   };
+
+  if (variant === 'thumbnail') {
+    return (
+      <>
+        <button
+          type="button"
+          disabled={isUploading}
+          onClick={openFilePicker}
+          title="Add file"
+          className={cn(
+            'flex size-16 flex-col items-center justify-center gap-0.5 rounded-md border border-dashed border-border bg-muted/20 text-muted-foreground transition-colors hover:border-neutral-400 hover:bg-muted/40 hover:text-foreground disabled:opacity-60',
+            className
+          )}
+        >
+          {isUploading ? (
+            <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <PlusIcon className="h-3.5 w-3.5" />
+          )}
+          <span className="text-[9px] font-medium">
+            {isUploading ? `${progress}%` : 'Add'}
+          </span>
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          accept={accept}
+          onChange={handleFileChange}
+        />
+      </>
+    )
+  }
 
   if (variant === 'tile') {
     return (

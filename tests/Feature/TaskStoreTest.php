@@ -48,13 +48,25 @@ test('subtasks are parented to the task and not to the kanban column', function 
         ->and($subtask->parent_task_id)->not->toBe($column->id);
 });
 
-test('user who is not a project member cannot create a task', function () {
+test('a workspace member can create a task', function () {
+    ['user' => $owner, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
+    $workspace = $workspaces->first();
+    $project = $this->createProjectsForUser($owner, $workspace, 1)->first();
+    $member = $this->createUser();
+    $workspace->users()->attach($member->id, ['role' => 'member']);
+    $member->currentWorkspace()->associate($workspace)->saveQuietly();
+
+    actingAs($member)
+        ->post(route('tasks.store'), taskStorePayload($project))
+        ->assertRedirect();
+
+    expect(Task::query()->where('project_id', $project->id)->where('title', 'New task')->exists())->toBeTrue();
+});
+
+test('a user outside the workspace cannot create a task', function () {
     ['user' => $owner, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
     $project = $this->createProjectsForUser($owner, $workspaces->first(), 1)->first();
-
     ['user' => $stranger] = $this->createUserWithWorkspace();
-    $stranger->update(['current_workspace_id' => $workspaces->first()->id]);
-    $stranger->workspaces()->syncWithoutDetaching([$workspaces->first()->id]);
 
     actingAs($stranger)
         ->post(route('tasks.store'), taskStorePayload($project))

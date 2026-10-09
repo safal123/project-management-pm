@@ -16,6 +16,7 @@ import { SharedData, Workspace } from '@/types'
 import { Archive, Clock, CreditCard, Folder, LayoutDashboard, Mail, Plus, Settings, Users } from 'lucide-react'
 import WorkspaceSelector from './workspace-switcher'
 import { NavUser } from '@/components/nav-user'
+import Can from '@/components/can'
 
 const mainNav = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
@@ -71,12 +72,14 @@ export function AppSidebar() {
 
         <SidebarGroup>
           <SidebarGroupLabel>Projects</SidebarGroupLabel>
-          <SidebarGroupAction asChild title="New project" className="top-1.5 right-2 [&>svg]:size-3.5">
-            <Link href="/projects?create=1" prefetch>
-              <Plus />
-              <span className="sr-only">New project</span>
-            </Link>
-          </SidebarGroupAction>
+          <Can permission="project.create">
+            <SidebarGroupAction asChild title="New project" className="top-1.5 right-2 [&>svg]:size-3.5">
+              <Link href="/projects?create=1" prefetch>
+                <Plus />
+                <span className="sr-only">New project</span>
+              </Link>
+            </SidebarGroupAction>
+          </Can>
           <SidebarGroupContent>
             <SidebarMenu>
               {projects.map((project) => (

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\Media;
+use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -69,6 +71,12 @@ class MediaController extends Controller
             'created_by' => auth()->user()->id,
             'disk' => 's3',
         ]);
+
+        if ($mediable instanceof Task) {
+            Activity::record($mediable, Activity::TYPE_FILE_UPLOADED, $mediable->workspace_id, $request->user(), [
+                'filename' => $request->original_filename,
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Media uploaded successfully');
     }

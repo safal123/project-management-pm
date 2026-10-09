@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
+import { router } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
 import { ActivityTimeline } from '@/components/activity/activity-timeline';
@@ -10,14 +11,19 @@ interface ActivityFeedProps {
   subjectType: 'task' | 'project' | 'event';
   subjectId: string;
   className?: string;
+  active?: boolean;
 }
 
-export default function ActivityFeed({ subjectType, subjectId, className = '' }: ActivityFeedProps) {
+export default function ActivityFeed({
+  subjectType,
+  subjectId,
+  className = '',
+  active = true,
+}: ActivityFeedProps) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchActivities = useCallback(async () => {
-    setIsLoading(true);
     try {
       const { data } = await axios.get<{ data: Activity[] }>(route('activities.index'), {
         params: {
@@ -34,10 +40,23 @@ export default function ActivityFeed({ subjectType, subjectId, className = '' }:
   }, [subjectType, subjectId]);
 
   useEffect(() => {
+    setIsLoading(true);
+    setActivities([]);
     fetchActivities();
   }, [fetchActivities]);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!active) return;
+    fetchActivities();
+  }, [active, fetchActivities]);
+
+  useEffect(() => {
+    return router.on('success', () => {
+      fetchActivities();
+    });
+  }, [fetchActivities]);
+
+  if (isLoading && activities.length === 0) {
     return (
       <div className={`flex h-full items-center justify-center text-muted-foreground ${className}`}>
         <LoaderCircle className="h-3.5 w-3.5 animate-spin" />

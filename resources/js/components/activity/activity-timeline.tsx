@@ -1,6 +1,25 @@
 import { Link } from '@inertiajs/react'
 import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns'
-import { Calendar, Clock, Folder, History, ListTodo } from 'lucide-react'
+import {
+  ArrowRightLeft,
+  Calendar,
+  CalendarClock,
+  Check,
+  Clock,
+  Folder,
+  GitBranch,
+  Heart,
+  History,
+  Link2,
+  ListTodo,
+  ListTree,
+  MessageSquare,
+  Paperclip,
+  Pencil,
+  Plus,
+  RefreshCw,
+  UserPlus,
+} from 'lucide-react'
 
 import AppAvatar from '@/components/app-avatar'
 import { cn } from '@/lib/utils'
@@ -11,6 +30,22 @@ const subjectIcons = {
   project: Folder,
   event: Calendar,
   item: Clock,
+}
+
+const typeMeta: Record<string, { icon: typeof Plus; className: string }> = {
+  created: { icon: Plus, className: 'border-sky-200 bg-sky-50 text-sky-600 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-400' },
+  status_changed: { icon: RefreshCw, className: 'border-amber-200 bg-amber-50 text-amber-600 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-400' },
+  assigned: { icon: UserPlus, className: 'border-violet-200 bg-violet-50 text-violet-600 dark:border-violet-800 dark:bg-violet-950 dark:text-violet-400' },
+  moved: { icon: ArrowRightLeft, className: 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300' },
+  completed: { icon: Check, className: 'border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-400' },
+  commented: { icon: MessageSquare, className: 'border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-400' },
+  liked: { icon: Heart, className: 'border-rose-200 bg-rose-50 text-rose-600 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-400' },
+  branch_created: { icon: GitBranch, className: 'border-teal-200 bg-teal-50 text-teal-600 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-400' },
+  title_changed: { icon: Pencil, className: 'border-indigo-200 bg-indigo-50 text-indigo-600 dark:border-indigo-800 dark:bg-indigo-950 dark:text-indigo-400' },
+  due_date_changed: { icon: CalendarClock, className: 'border-orange-200 bg-orange-50 text-orange-600 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-400' },
+  file_uploaded: { icon: Paperclip, className: 'border-cyan-200 bg-cyan-50 text-cyan-600 dark:border-cyan-800 dark:bg-cyan-950 dark:text-cyan-400' },
+  dependency_changed: { icon: Link2, className: 'border-purple-200 bg-purple-50 text-purple-600 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-400' },
+  subtask_added: { icon: ListTree, className: 'border-fuchsia-200 bg-fuchsia-50 text-fuchsia-600 dark:border-fuchsia-800 dark:bg-fuchsia-950 dark:text-fuchsia-400' },
 }
 
 function dayLabel(date: Date) {
@@ -70,20 +105,28 @@ export function ActivityTimeline({
       {groups.map((group) => (
         <section key={group.key} className="mb-3 last:mb-0">
           <p className="mb-2 text-[11px] font-medium text-muted-foreground">{group.label}</p>
-          <ol className="relative ml-2 space-y-2.5 border-l border-border pl-4">
+          <ol className="relative ml-2.5 space-y-2.5 border-l border-border pl-5">
             {group.items.map((activity) => {
               const subjectType = activity.subject?.type ?? 'item'
               const SubjectIcon = subjectIcons[subjectType] ?? Clock
+              const type = typeMeta[activity.type] ?? {
+                icon: Pencil,
+                className: 'border-zinc-200 bg-zinc-50 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300',
+              }
+              const TypeIcon = type.icon
               const isHighlighted = highlightedId === activity.id
 
               return (
                 <li key={activity.id} className="relative">
                   <span
                     className={cn(
-                      'absolute top-3.5 -left-[21px] size-2 rounded-full border border-background',
-                      isHighlighted ? 'bg-foreground' : 'bg-muted-foreground/50'
+                      'absolute top-2.5 -left-[28px] flex size-4 items-center justify-center rounded-full border',
+                      type.className,
+                      isHighlighted && 'ring-2 ring-current'
                     )}
-                  />
+                  >
+                    <TypeIcon className="size-2.5" />
+                  </span>
                   <div
                     className={cn(
                       'rounded-md border border-border bg-card p-2.5 shadow-sm',

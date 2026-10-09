@@ -15,6 +15,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   XAxis,
   YAxis,
 } from 'recharts';
@@ -31,10 +32,12 @@ interface TasksByProjectChartProps {
   data: TasksByProject[];
 }
 
+const PROJECT_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ec4899', '#06b6d4', '#8b5cf6']
+
 const barChartConfig = {
   total: {
     label: 'Tasks',
-    color: 'var(--chart-1)',
+    color: PROJECT_COLORS[0],
   },
 } satisfies ChartConfig;
 
@@ -87,11 +90,14 @@ export function TasksByProjectChart({ data }: TasksByProjectChartProps) {
                     <ChartTooltipContent formatter={(value) => [`${value} Tasks`]} />
                   }
                 />
-                <Bar
-                  dataKey="total"
-                  fill="var(--color-total)"
-                  radius={[4, 4, 0, 0]}
-                />
+                <Bar dataKey="total" radius={[4, 4, 0, 0]}>
+                  {normalizedData.map((entry, index) => (
+                    <Cell
+                      key={entry.slug || entry.name}
+                      fill={PROJECT_COLORS[index % PROJECT_COLORS.length]}
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ChartContainer>
           </div>

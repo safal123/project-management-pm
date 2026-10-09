@@ -52,9 +52,44 @@ class ActivityResource extends JsonResource
                 $properties['from'] ?? 'unknown',
                 $properties['to'] ?? 'unknown',
             ),
-            Activity::TYPE_ASSIGNED => ($properties['to'] ?? null)
-                ? "updated the assignee on {$label}"
+            Activity::TYPE_ASSIGNED => ($properties['to_name'] ?? $properties['to'] ?? null)
+                ? sprintf(
+                    'assigned %s to %s',
+                    $label,
+                    $properties['to_name'] ?? 'someone',
+                )
                 : "removed the assignee from {$label}",
+            Activity::TYPE_TITLE_CHANGED => sprintf(
+                'renamed %s from "%s" to "%s"',
+                $label,
+                $properties['from'] ?? 'untitled',
+                $properties['to'] ?? 'untitled',
+            ),
+            Activity::TYPE_DUE_DATE_CHANGED => ($properties['to'] ?? null)
+                ? sprintf(
+                    'changed the due date of %s%s to %s',
+                    $label,
+                    ($properties['from'] ?? null) ? ' from '.$properties['from'] : '',
+                    $properties['to'],
+                )
+                : "removed the due date from {$label}",
+            Activity::TYPE_FILE_UPLOADED => sprintf(
+                'uploaded "%s" to %s',
+                $properties['filename'] ?? 'a file',
+                $label,
+            ),
+            Activity::TYPE_DEPENDENCY_CHANGED => ($properties['to'] ?? null)
+                ? sprintf(
+                    'added a dependency on "%s" for %s',
+                    $properties['to_title'] ?? 'another task',
+                    $label,
+                )
+                : "removed the dependency from {$label}",
+            Activity::TYPE_SUBTASK_ADDED => sprintf(
+                'added subtask "%s" to %s',
+                $properties['title'] ?? 'Untitled',
+                $label,
+            ),
             Activity::TYPE_MOVED => $noun === 'event'
                 ? "rescheduled {$label}"
                 : sprintf(

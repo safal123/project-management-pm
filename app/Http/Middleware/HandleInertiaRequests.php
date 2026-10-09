@@ -59,7 +59,7 @@ class HandleInertiaRequests extends Middleware
                         ->load('workspaces', 'currentWorkspace', 'media')))
                     : null,
                 'permissions' => [
-                    'can' => [
+                    'can' => array_values(array_filter([
                         'workspace.create',
                         'workspace.update',
                         'workspace.delete',
@@ -69,7 +69,7 @@ class HandleInertiaRequests extends Middleware
                         'workspace.view_tasks',
                         'workspace.view_members',
                         'workspace.view_invitations',
-                        'project.create',
+                        $user && $workspace && $workspace->isOwnedBy($user) ? 'project.create' : null,
                         'project.update',
                         'project.delete',
                         'project.view',
@@ -87,7 +87,7 @@ class HandleInertiaRequests extends Middleware
                         'task.view_tasks',
                         'task.view_members',
                         'task.view_invitations',
-                    ]
+                    ])),
                 ],
             ],
         ];

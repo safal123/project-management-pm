@@ -33,6 +33,7 @@ interface AppImagePreviewProps {
   mediaId?: string
   filesize?: number | string
   filetype?: string
+  variant?: 'card' | 'thumbnail'
 }
 
 const ZOOM_STEP = 0.25
@@ -48,6 +49,7 @@ const AppImagePreview = ({
   mediaId,
   filesize,
   filetype,
+  variant = 'card',
 }: AppImagePreviewProps) => {
   const [imageUrl, setImageUrl] = useState(url)
   const [zoom, setZoom] = useState(1)
@@ -103,15 +105,15 @@ const AppImagePreview = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <div
-          role="button"
-          tabIndex={0}
-          className={cn(
-            'group flex w-full cursor-pointer flex-col overflow-hidden rounded-md border border-border bg-background text-left shadow-sm transition-colors hover:border-neutral-300 dark:hover:border-white/20',
-            className
-          )}
-        >
-          <div className="relative flex h-28 items-center justify-center bg-muted/50">
+        {variant === 'thumbnail' ? (
+          <button
+            type="button"
+            title={filename ?? 'Attachment'}
+            className={cn(
+              'group relative size-16 overflow-hidden rounded-md border border-border bg-muted/40 shadow-sm transition-colors hover:border-neutral-300 dark:hover:border-white/20',
+              className
+            )}
+          >
             {image ? (
               <img
                 src={imageUrl}
@@ -120,45 +122,73 @@ const AppImagePreview = ({
                 className="h-full w-full object-cover"
               />
             ) : (
-              <FileText className="h-7 w-7 text-muted-foreground" />
+              <span className="flex h-full w-full flex-col items-center justify-center gap-0.5 px-1">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="w-full truncate text-[9px] text-muted-foreground">
+                  {filename ?? 'File'}
+                </span>
+              </span>
             )}
-            <div className="absolute inset-0 flex items-start justify-end gap-0.5 bg-black/0 p-1 opacity-0 transition-opacity group-hover:bg-black/25 group-hover:opacity-100">
-              <Button
-                type="button"
-                variant="secondary"
-                size="icon"
-                className="h-6 w-6"
-                onClick={(event) => {
-                  event.preventDefault()
-                  event.stopPropagation()
-                  download()
-                }}
-              >
-                <Download className="h-3 w-3" />
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="icon"
-                className="h-6 w-6"
-                disabled={deleting}
-                onClick={(event) => {
-                  event.preventDefault()
-                  event.stopPropagation()
-                  deleteImage()
-                }}
-              >
-                {deleting ? <LoaderCircle className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
-              </Button>
+            <span className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
+          </button>
+        ) : (
+          <div
+            role="button"
+            tabIndex={0}
+            className={cn(
+              'group flex w-full cursor-pointer flex-col overflow-hidden rounded-md border border-border bg-background text-left shadow-sm transition-colors hover:border-neutral-300 dark:hover:border-white/20',
+              className
+            )}
+          >
+            <div className="relative flex h-28 items-center justify-center bg-muted/50">
+              {image ? (
+                <img
+                  src={imageUrl}
+                  alt={alt}
+                  onError={refreshImageUrl}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <FileText className="h-7 w-7 text-muted-foreground" />
+              )}
+              <div className="absolute inset-0 flex items-start justify-end gap-0.5 bg-black/0 p-1 opacity-0 transition-opacity group-hover:bg-black/25 group-hover:opacity-100">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    download()
+                  }}
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  className="h-6 w-6"
+                  disabled={deleting}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    deleteImage()
+                  }}
+                >
+                  {deleting ? <LoaderCircle className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+                </Button>
+              </div>
+            </div>
+            <div className="border-t border-border px-2 py-1.5">
+              <p className="truncate text-[12px] font-medium">{filename ?? 'Attachment'}</p>
+              <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                {[sizeLabel, dateLabel].filter(Boolean).join(' · ') || 'File'}
+              </p>
             </div>
           </div>
-          <div className="border-t border-border px-2 py-1.5">
-            <p className="truncate text-[12px] font-medium">{filename ?? 'Attachment'}</p>
-            <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-              {[sizeLabel, dateLabel].filter(Boolean).join(' · ') || 'File'}
-            </p>
-          </div>
-        </div>
+        )}
       </DialogTrigger>
 
       <DialogPortal>

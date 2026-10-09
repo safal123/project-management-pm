@@ -19,12 +19,16 @@ interface TaskStatusChartProps {
   tasksByStatus: TasksByStatus;
 }
 
-const CHART_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)'];
+const STATUS_COLORS = {
+  todo: '#64748b',
+  in_progress: '#0ea5e9',
+  done: '#10b981',
+}
 
 const chartConfig = {
-  todo: { label: 'To Do', color: 'var(--chart-1)' },
-  in_progress: { label: 'In Progress', color: 'var(--chart-2)' },
-  done: { label: 'Done', color: 'var(--chart-3)' },
+  todo: { label: 'To Do', color: STATUS_COLORS.todo },
+  in_progress: { label: 'In Progress', color: STATUS_COLORS.in_progress },
+  done: { label: 'Done', color: STATUS_COLORS.done },
 } satisfies ChartConfig;
 
 function toNumber(val: unknown): number {
@@ -35,9 +39,9 @@ function toNumber(val: unknown): number {
 
 export function TaskStatusChart({ tasksByStatus }: TaskStatusChartProps) {
   const data = [
-    { name: 'To Do', value: toNumber(tasksByStatus?.todo), fill: CHART_COLORS[0] },
-    { name: 'In Progress', value: toNumber(tasksByStatus?.in_progress), fill: CHART_COLORS[1] },
-    { name: 'Done', value: toNumber(tasksByStatus?.done), fill: CHART_COLORS[2] },
+    { name: 'To Do', value: toNumber(tasksByStatus?.todo), fill: STATUS_COLORS.todo },
+    { name: 'In Progress', value: toNumber(tasksByStatus?.in_progress), fill: STATUS_COLORS.in_progress },
+    { name: 'Done', value: toNumber(tasksByStatus?.done), fill: STATUS_COLORS.done },
   ];
 
   const chartData = data.filter((d) => d.value > 0);

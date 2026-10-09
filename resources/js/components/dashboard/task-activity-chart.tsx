@@ -23,14 +23,19 @@ interface TaskActivityChartProps {
   data: TaskActivityPoint[];
 }
 
+const ACTIVITY_COLORS = {
+  created: '#0ea5e9',
+  completed: '#10b981',
+}
+
 const chartConfig = {
   created: {
     label: 'Created',
-    color: 'var(--foreground)',
+    color: ACTIVITY_COLORS.created,
   },
   completed: {
     label: 'Completed',
-    color: 'var(--muted-foreground)',
+    color: ACTIVITY_COLORS.completed,
   },
 } satisfies ChartConfig;
 
@@ -54,11 +59,11 @@ export function TaskActivityChart({ data }: TaskActivityChartProps) {
           </div>
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-foreground" />
+              <span className="size-1.5 rounded-full" style={{ backgroundColor: ACTIVITY_COLORS.created }} />
               Created
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-muted-foreground" />
+              <span className="size-1.5 rounded-full" style={{ backgroundColor: ACTIVITY_COLORS.completed }} />
               Completed
             </span>
           </div>

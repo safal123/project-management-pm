@@ -114,7 +114,11 @@ const Projects = () => {
             title="No projects yet."
             description="Get started by creating your first project to organize your work and collaborate with your team."
             icon={<FolderCodeIcon className="text-primary" />}
-            action={<ProjectModal />}
+            action={
+              <Can permission="project.create">
+                <ProjectModal />
+              </Can>
+            }
           />
         )}
       </div>

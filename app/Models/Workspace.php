@@ -61,6 +61,11 @@ class Workspace extends Pivot
         return in_array($this->roleFor($user), [self::ROLE_OWNER, self::ROLE_ADMIN], true);
     }
 
+    public function isOwnedBy(User $user): bool
+    {
+        return $this->roleFor($user) === self::ROLE_OWNER;
+    }
+
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');

@@ -55,10 +55,10 @@ const MarkTaskAsComplete = ({ task, type = 'button' }: MarkTaskAsCompleteProps) 
       variant={isCompleted ? "default" : "outline"}
       size="sm"
       onClick={handleToggleComplete}
-      className="h-8 gap-1.5 px-3 text-[13px]"
+      className="h-6 gap-1 px-2 !text-[11px]"
     >
-      {isLoading && <LoaderCircle className="h-4 w-4 animate-spin" />}
-      {isCompleted ? <Check className="h-4 w-4" /> : <CircleX className="h-4 w-4" />}
+      {isLoading && <LoaderCircle className="h-3 w-3 animate-spin" />}
+      {isCompleted ? <Check className="h-3 w-3" /> : <CircleX className="h-3 w-3" />}
       {isCompleted ? 'Completed' : 'Mark complete'}
     </Button>
   )

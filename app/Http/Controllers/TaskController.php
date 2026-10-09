@@ -6,6 +6,8 @@ use App\Http\Requests\TaskCreateRequest;
 use App\Http\Requests\TaskUpdateRequest;
 use App\Models\Activity;
 use App\Models\Task;
+use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class TaskController extends Controller
@@ -29,6 +31,17 @@ class TaskController extends Controller
 
         Activity::record($task, Activity::TYPE_CREATED, $task->workspace_id, $user);
 
+        if (! empty($validated['parent_task_id'])) {
+            $parent = Task::query()->find($validated['parent_task_id']);
+
+            if ($parent?->parent_task_id) {
+                Activity::record($parent, Activity::TYPE_SUBTASK_ADDED, $parent->workspace_id, $user, [
+                    'title' => $task->title,
+                    'subtask_id' => $task->id,
+                ]);
+            }
+        }
+
         return back()->with('success', 'Task created successfully');
     }
 
@@ -39,6 +52,9 @@ class TaskController extends Controller
 
         $originalStatus = $task->status;
         $originalAssignedTo = $task->assigned_to;
+        $originalTitle = $task->title;
+        $originalDueDate = $task->due_date?->toDateString();
+        $originalDependsOn = $task->depends_on_task_id;
 
         $task->update($validated);
 
@@ -53,6 +69,37 @@ class TaskController extends Controller
             Activity::record($task, Activity::TYPE_ASSIGNED, $task->workspace_id, $user, [
                 'from' => $originalAssignedTo,
                 'to' => $validated['assigned_to'],
+                'from_name' => $originalAssignedTo ? User::query()->find($originalAssignedTo)?->name : null,
+                'to_name' => $validated['assigned_to'] ? User::query()->find($validated['assigned_to'])?->name : null,
+            ]);
+        }
+
+        if (array_key_exists('title', $validated) && $validated['title'] !== $originalTitle) {
+            Activity::record($task, Activity::TYPE_TITLE_CHANGED, $task->workspace_id, $user, [
+                'from' => $originalTitle,
+                'to' => $validated['title'],
+            ]);
+        }
+
+        if (array_key_exists('due_date', $validated)) {
+            $newDueDate = $validated['due_date']
+                ? Carbon::parse($validated['due_date'])->toDateString()
+                : null;
+
+            if ($newDueDate !== $originalDueDate) {
+                Activity::record($task, Activity::TYPE_DUE_DATE_CHANGED, $task->workspace_id, $user, [
+                    'from' => $originalDueDate,
+                    'to' => $newDueDate,
+                ]);
+            }
+        }
+
+        if (array_key_exists('depends_on_task_id', $validated) && $validated['depends_on_task_id'] !== $originalDependsOn) {
+            Activity::record($task, Activity::TYPE_DEPENDENCY_CHANGED, $task->workspace_id, $user, [
+                'from' => $originalDependsOn,
+                'to' => $validated['depends_on_task_id'],
+                'from_title' => $originalDependsOn ? Task::query()->find($originalDependsOn)?->title : null,
+                'to_title' => $validated['depends_on_task_id'] ? Task::query()->find($validated['depends_on_task_id'])?->title : null,
             ]);
         }
 

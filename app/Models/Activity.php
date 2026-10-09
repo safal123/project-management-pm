@@ -29,6 +29,16 @@ class Activity extends Model
 
     public const TYPE_BRANCH_CREATED = 'branch_created';
 
+    public const TYPE_TITLE_CHANGED = 'title_changed';
+
+    public const TYPE_DUE_DATE_CHANGED = 'due_date_changed';
+
+    public const TYPE_FILE_UPLOADED = 'file_uploaded';
+
+    public const TYPE_DEPENDENCY_CHANGED = 'dependency_changed';
+
+    public const TYPE_SUBTASK_ADDED = 'subtask_added';
+
     public const TYPES = [
         self::TYPE_CREATED,
         self::TYPE_STATUS_CHANGED,
@@ -38,6 +48,11 @@ class Activity extends Model
         self::TYPE_COMMENTED,
         self::TYPE_LIKED,
         self::TYPE_BRANCH_CREATED,
+        self::TYPE_TITLE_CHANGED,
+        self::TYPE_DUE_DATE_CHANGED,
+        self::TYPE_FILE_UPLOADED,
+        self::TYPE_DEPENDENCY_CHANGED,
+        self::TYPE_SUBTASK_ADDED,
     ];
 
     public $fillable = [

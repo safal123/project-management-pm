@@ -184,6 +184,113 @@ test('rescheduling an event records a moved activity', function () {
         ->exists())->toBeTrue();
 });
 
+test('renaming a task records a title_changed activity', function () {
+    ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
+    $project = $this->createProjectsForUser($user, $workspaces->first(), 1)->first();
+    $task = $this->createTaskForProject($user, $project, ['title' => 'Old title']);
+
+    actingAs($user)
+        ->patch(route('tasks.update', $task), ['title' => 'New title'])
+        ->assertRedirect();
+
+    $activity = Activity::query()
+        ->where('subject_type', Task::class)
+        ->where('subject_id', $task->id)
+        ->where('type', Activity::TYPE_TITLE_CHANGED)
+        ->first();
+
+    expect($activity)->not->toBeNull()
+        ->and($activity->properties)->toBe(['from' => 'Old title', 'to' => 'New title']);
+});
+
+test('changing a due date records a due_date_changed activity', function () {
+    ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
+    $project = $this->createProjectsForUser($user, $workspaces->first(), 1)->first();
+    $task = $this->createTaskForProject($user, $project, ['due_date' => '2026-10-01']);
+
+    actingAs($user)
+        ->patch(route('tasks.update', $task), ['due_date' => '2026-10-15'])
+        ->assertRedirect();
+
+    $activity = Activity::query()
+        ->where('subject_type', Task::class)
+        ->where('subject_id', $task->id)
+        ->where('type', Activity::TYPE_DUE_DATE_CHANGED)
+        ->first();
+
+    expect($activity)->not->toBeNull()
+        ->and($activity->properties)->toBe(['from' => '2026-10-01', 'to' => '2026-10-15']);
+});
+
+test('adding a dependency records a dependency_changed activity', function () {
+    ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
+    $project = $this->createProjectsForUser($user, $workspaces->first(), 1)->first();
+    $blocker = $this->createTaskForProject($user, $project, ['title' => 'Blocker']);
+    $task = $this->createTaskForProject($user, $project, ['title' => 'Blocked']);
+
+    actingAs($user)
+        ->patch(route('tasks.update', $task), ['depends_on_task_id' => $blocker->id])
+        ->assertRedirect();
+
+    $activity = Activity::query()
+        ->where('subject_type', Task::class)
+        ->where('subject_id', $task->id)
+        ->where('type', Activity::TYPE_DEPENDENCY_CHANGED)
+        ->first();
+
+    expect($activity)->not->toBeNull()
+        ->and($activity->properties['to'])->toBe($blocker->id)
+        ->and($activity->properties['to_title'])->toBe('Blocker');
+});
+
+test('adding a subtask records a subtask_added activity on the parent', function () {
+    ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
+    $project = $this->createProjectsForUser($user, $workspaces->first(), 1)->first();
+    $column = $this->createTaskForProject($user, $project, ['parent_task_id' => null, 'title' => 'To do']);
+    $card = $this->createTaskForProject($user, $project, ['parent_task_id' => $column->id, 'title' => 'Parent card']);
+
+    actingAs($user)->post(route('tasks.store'), [
+        'title' => 'Child work',
+        'project_id' => $project->id,
+        'workspace_id' => $project->workspace_id,
+        'parent_task_id' => $card->id,
+    ])->assertRedirect();
+
+    expect(Activity::query()
+        ->where('subject_type', Task::class)
+        ->where('subject_id', $card->id)
+        ->where('type', Activity::TYPE_SUBTASK_ADDED)
+        ->exists())->toBeTrue();
+});
+
+test('uploading a file to a task records a file_uploaded activity', function () {
+    ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
+    $project = $this->createProjectsForUser($user, $workspaces->first(), 1)->first();
+    $task = $this->createTaskForProject($user, $project);
+
+    Illuminate\Support\Facades\Storage::fake('s3');
+    Illuminate\Support\Facades\Storage::disk('s3')->put('uploads/brief.pdf', 'pdf');
+
+    actingAs($user)
+        ->post(route('media.upload'), [
+            'path' => 'uploads/brief.pdf',
+            'filename' => 'brief.pdf',
+            'original_filename' => 'brief.pdf',
+            'filetype' => 'application/pdf',
+            'filesize' => 3,
+            'workspace_id' => $task->workspace_id,
+            'mediable_id' => $task->id,
+            'mediable_type' => 'task',
+        ])
+        ->assertRedirect();
+
+    expect(Activity::query()
+        ->where('subject_type', Task::class)
+        ->where('subject_id', $task->id)
+        ->where('type', Activity::TYPE_FILE_UPLOADED)
+        ->exists())->toBeTrue();
+});
+
 test('toggling event completion records a completed activity', function () {
     ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
     $event = $this->createEventForWorkspace($user, $workspaces->first());

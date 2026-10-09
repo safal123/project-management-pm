@@ -76,18 +76,18 @@ export default function TaskSubtask({ task, className = '', onOpenSubtask }: Tas
   return (
     <div className={className}>
       <div className="mb-1.5 flex items-center justify-between gap-2">
-        <Label className={FIELD_LABEL}>Subtasks</Label>
-        <span className="text-[11px] text-muted-foreground">
+        <Label className={cn(FIELD_LABEL, 'text-fuchsia-600 dark:text-fuchsia-400')}>Subtasks</Label>
+        <span className="text-[11px] text-fuchsia-600/70 dark:text-fuchsia-400/70">
           {subtasks.length ? `${subtasks.filter((item) => item.status === 'done').length}/${subtasks.length}` : 'None'}
         </span>
       </div>
 
       {subtasks.length > 0 && (
-        <div className="mb-2 overflow-hidden rounded-md border border-border">
+        <div className="mb-2 overflow-hidden rounded-md border border-fuchsia-200 dark:border-fuchsia-900">
           {subtasks.map((subtask) => (
             <div
               key={subtask.id}
-              className="flex items-center gap-1.5 border-b border-border last:border-b-0"
+              className="flex items-center gap-1.5 border-b border-fuchsia-100 last:border-b-0 dark:border-fuchsia-900/60"
             >
               <button
                 type="button"
@@ -100,7 +100,9 @@ export default function TaskSubtask({ task, className = '', onOpenSubtask }: Tas
                   <Check
                     className={cn(
                       'h-3.5 w-3.5 rounded-full p-0.5',
-                      subtask.status === 'done' ? 'bg-muted text-foreground' : 'bg-muted/70 text-muted-foreground'
+                      subtask.status === 'done'
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-fuchsia-100 text-fuchsia-500 dark:bg-fuchsia-950 dark:text-fuchsia-400'
                     )}
                   />
                 )}
@@ -113,12 +115,14 @@ export default function TaskSubtask({ task, className = '', onOpenSubtask }: Tas
                 <span
                   className={cn(
                     'truncate text-[13px]',
-                    subtask.status === 'done' && 'text-muted-foreground line-through'
+                    subtask.status === 'done'
+                      ? 'text-muted-foreground line-through'
+                      : 'text-fuchsia-950 dark:text-fuchsia-100'
                   )}
                 >
                   {subtask.title}
                 </span>
-                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-fuchsia-400" />
               </button>
             </div>
           ))}
@@ -160,7 +164,7 @@ export default function TaskSubtask({ task, className = '', onOpenSubtask }: Tas
         <Button
           variant="outline"
           size="sm"
-          className="h-8 gap-1.5 px-2.5 text-[13px]"
+          className="h-8 gap-1.5 border-fuchsia-200 px-2.5 text-[13px] text-fuchsia-700 hover:bg-fuchsia-50 dark:border-fuchsia-900 dark:text-fuchsia-300 dark:hover:bg-fuchsia-950"
           onClick={() => setAdding(true)}
         >
           <Plus className="h-3.5 w-3.5" />

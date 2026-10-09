@@ -24,6 +24,11 @@ const TYPE_LABELS: Record<string, string> = {
   commented: 'Commented',
   liked: 'Liked',
   branch_created: 'Branch created',
+  title_changed: 'Title changed',
+  due_date_changed: 'Due date changed',
+  file_uploaded: 'File uploaded',
+  dependency_changed: 'Dependency changed',
+  subtask_added: 'Subtask added',
 }
 
 const SUBJECT_LABELS: Record<string, string> = {
