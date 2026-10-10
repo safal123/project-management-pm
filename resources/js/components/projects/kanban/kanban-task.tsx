@@ -33,7 +33,6 @@ import MarkTaskAsComplete from '@/components/tasks/mark-as-complete'
 import AppAvatar from '@/components/app-avatar'
 import AppFileUpload from '@/components/app-file-upload'
 import { useSortable } from '@dnd-kit/react/sortable'
-import { TaskCardDragPreview } from './task-card-drag-preview'
 
 interface KanbanTaskProps {
   task: Task
@@ -55,14 +54,6 @@ const KanbanTask = memo(({ task, columns, index, columnId }: KanbanTaskProps) =>
   })
   const { deleteTask, moveTaskToColumn, getAvailableColumns } = useKanban(columns)
   const availableColumns = getAvailableColumns(task)
-
-  if (isDragging) {
-    return (
-      <div ref={setElement}>
-        <TaskCardDragPreview task={task} className="opacity-60" />
-      </div>
-    )
-  }
 
   return (
     <div ref={setElement}>
@@ -90,20 +81,22 @@ export const TaskCard = memo(({
   availableColumns,
   moveTaskToColumn,
   deleteTask,
-  setIsTaskDetailOpen
-}: { task: Task, isDragging: boolean, isTaskDetailOpen: boolean, openTaskDetailSheet: () => void, availableColumns: Task[], moveTaskToColumn: (columnId: string) => void, deleteTask: () => void, setIsTaskDetailOpen: (isOpen: boolean) => void }) => {
+  setIsTaskDetailOpen,
+  className,
+}: { task: Task, isDragging: boolean, isTaskDetailOpen: boolean, openTaskDetailSheet: () => void, availableColumns: Task[], moveTaskToColumn: (columnId: string) => void, deleteTask: () => void, setIsTaskDetailOpen: (isOpen: boolean) => void, className?: string }) => {
   const due = getDueDateDisplay(task.due_date)
 
   return (
     <>
       <div
         className={cn(
-          'group relative rounded-md border border-neutral-200/90 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors dark:border-white/10 dark:bg-neutral-800',
-          'hover:border-neutral-300 hover:shadow-sm dark:hover:border-white/20',
-          task.priority === 'high' && 'border-l-2 border-l-neutral-800 dark:border-l-neutral-200',
-          isTaskDetailOpen && 'border-neutral-400 ring-1 ring-neutral-300 dark:border-white/30 dark:ring-white/10',
+          'group relative rounded-md border border-border bg-card text-card-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors',
+          'hover:border-foreground/20 hover:shadow-sm',
+          task.priority === 'high' && 'border-l-2 border-l-foreground',
+          isTaskDetailOpen && 'border-foreground/30 ring-1 ring-foreground/10',
           isDragging && 'opacity-50',
-          task.status === 'done' && 'opacity-70'
+          task.status === 'done' && 'opacity-70',
+          className
         )}
       >
         <div className="flex items-start justify-between gap-1 px-2.5 pt-2">

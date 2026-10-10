@@ -53,7 +53,7 @@ test('google sign in creates a new user', function () {
     mockGoogleDriver(mockGoogleUser());
 
     get(route('auth.google.callback'))
-        ->assertRedirect(route('dashboard', absolute: false));
+        ->assertRedirect(wsRoute('dashboard', absolute: false));
 
     assertAuthenticated();
     Event::assertDispatched(Registered::class);
@@ -75,7 +75,7 @@ test('google sign in logs in an existing user by google id', function () {
     mockGoogleDriver(mockGoogleUser());
 
     get(route('auth.google.callback'))
-        ->assertRedirect(route('dashboard', absolute: false));
+        ->assertRedirect(wsRoute('dashboard', absolute: false));
 
     assertAuthenticated();
     expect(auth()->id())->toBe($user->id);
@@ -91,7 +91,7 @@ test('google sign in links an existing account by email', function () {
     mockGoogleDriver(mockGoogleUser());
 
     get(route('auth.google.callback'))
-        ->assertRedirect(route('dashboard', absolute: false));
+        ->assertRedirect(wsRoute('dashboard', absolute: false));
 
     assertAuthenticated();
     expect($user->fresh()->google_id)->toBe('google-123');

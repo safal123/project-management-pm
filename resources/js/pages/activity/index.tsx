@@ -6,6 +6,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown, Clock, Search, X } from 'lucide-react'
 import AppAvatar from '@/components/app-avatar'
 import AppEmpty from '@/components/app-empty'
 import AppLayout from '@/layouts/app-layout'
+import { ActivityDescription, typeMeta } from '@/components/activity/activity-timeline'
 import { ActivityDetailModal } from '@/components/modals/activity-detail-modal'
 import { AppTable, DataTablePaginationRow, DataTableToolbar, type AppTableColumn } from '@/components/app-table'
 import { Button } from '@/components/ui/button'
@@ -13,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { type Activity, type BreadcrumbItem, type PaginatedData, type SharedData } from '@/types'
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Activities', href: '/activity' }]
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Activities', href: route('activity.index') }]
 
 const TYPE_LABELS: Record<string, string> = {
   created: 'Created',
@@ -173,7 +174,12 @@ export default function ActivityIndex() {
         id: 'activity',
         header: <SortableHeader label="Activity" column="type" filters={filters} />,
         render: (activity) => (
-          <span className="line-clamp-2 text-muted-foreground">{activity.description}</span>
+          <span className="line-clamp-2">
+            <ActivityDescription
+              activity={activity}
+              typeClassName={typeMeta[activity.type]?.className ?? 'border-border bg-muted text-foreground'}
+            />
+          </span>
         ),
       },
       {
@@ -236,7 +242,7 @@ export default function ActivityIndex() {
             <Input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search person or type"
+              placeholder="Search person, card, or project"
               className="h-8 pl-8 text-[13px]"
             />
           </div>

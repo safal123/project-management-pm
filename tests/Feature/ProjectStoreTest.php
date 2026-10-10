@@ -10,7 +10,7 @@ test('a workspace owner can create a project', function () {
     ['user' => $user] = $this->createUserWithWorkspace();
 
     actingAs($user)
-        ->post(route('projects.store'), [
+        ->post(wsRoute('projects.store'), [
             'name' => 'Owner project',
             'description' => 'Created by the owner',
         ])
@@ -27,7 +27,7 @@ test('a workspace member cannot create a project', function () {
     $member->currentWorkspace()->associate($workspace)->saveQuietly();
 
     actingAs($member)
-        ->post(route('projects.store'), [
+        ->post(wsRoute('projects.store'), [
             'name' => 'Member project',
         ])
         ->assertForbidden();

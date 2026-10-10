@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\EventCreateRequest;
 use App\Models\Activity;
 use App\Models\Event;
+use App\Models\Workspace;
 use Illuminate\Http\RedirectResponse;
 
 class EventController extends Controller
 {
-    public function store(EventCreateRequest $request)
+    public function store(Workspace $workspace, EventCreateRequest $request)
     {
         $validated = $request->validated();
 
@@ -27,7 +28,7 @@ class EventController extends Controller
         return $this->redirectToProjectCalendar($event);
     }
 
-    public function update(EventCreateRequest $request, Event $event)
+    public function update(Workspace $workspace, EventCreateRequest $request, Event $event)
     {
         $validated = $request->validated();
 
@@ -58,7 +59,7 @@ class EventController extends Controller
         return $this->redirectToProjectCalendar($event);
     }
 
-    public function toggleComplete(Event $event)
+    public function toggleComplete(Workspace $workspace, Event $event)
     {
         $event->update([
             'completed_at' => $event->completed_at ? null : now(),
@@ -73,7 +74,7 @@ class EventController extends Controller
         );
     }
 
-    public function destroy(Event $event)
+    public function destroy(Workspace $workspace, Event $event)
     {
         $project = $event->project;
         $event->attendees()->detach();
@@ -81,11 +82,11 @@ class EventController extends Controller
 
         if ($project) {
             return redirect()
-                ->route('projects.show', ['project' => $project->slug, 'tab' => 'calendar'])
+                ->route('projects.show', ['workspace' => $project->workspace_id, 'project' => $project->slug, 'tab' => 'calendar'])
                 ->with('success', 'Event deleted successfully');
         }
 
-        return redirect()->route('projects.index')->with('success', 'Event deleted successfully');
+        return redirect()->route('dashboard', $event->workspace_id)->with('success', 'Event deleted successfully');
     }
 
     private function redirectToProjectCalendar(Event $event): RedirectResponse
@@ -94,10 +95,10 @@ class EventController extends Controller
 
         if ($project) {
             return redirect()
-                ->route('projects.show', ['project' => $project->slug, 'tab' => 'calendar'])
+                ->route('projects.show', ['workspace' => $project->workspace_id, 'project' => $project->slug, 'tab' => 'calendar'])
                 ->with('success', 'Event saved successfully');
         }
 
-        return redirect()->route('projects.index')->with('success', 'Event saved successfully');
+        return redirect()->route('dashboard', $event->workspace_id)->with('success', 'Event saved successfully');
     }
 }

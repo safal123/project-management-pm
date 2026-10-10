@@ -22,7 +22,7 @@ test('project member can create a task', function () {
     $project = $this->createProjectsForUser($user, $workspaces->first(), 1)->first();
 
     actingAs($user)
-        ->post(route('tasks.store'), taskStorePayload($project))
+        ->post(wsRoute('tasks.store'), taskStorePayload($project))
         ->assertRedirect();
 
     expect(Task::query()->where('project_id', $project->id)->where('title', 'New task')->exists())->toBeTrue();
@@ -35,7 +35,7 @@ test('subtasks are parented to the task and not to the kanban column', function 
     $card = $this->createTaskForProject($user, $project, ['parent_task_id' => $column->id, 'title' => 'Parent card']);
 
     actingAs($user)
-        ->post(route('tasks.store'), taskStorePayload($project, [
+        ->post(wsRoute('tasks.store'), taskStorePayload($project, [
             'title' => 'Nested subtask',
             'parent_task_id' => $card->id,
         ]))
@@ -57,7 +57,7 @@ test('a workspace member can create a task', function () {
     $member->currentWorkspace()->associate($workspace)->saveQuietly();
 
     actingAs($member)
-        ->post(route('tasks.store'), taskStorePayload($project))
+        ->post(wsRoute('tasks.store'), taskStorePayload($project))
         ->assertRedirect();
 
     expect(Task::query()->where('project_id', $project->id)->where('title', 'New task')->exists())->toBeTrue();
@@ -69,7 +69,7 @@ test('a user outside the workspace cannot create a task', function () {
     ['user' => $stranger] = $this->createUserWithWorkspace();
 
     actingAs($stranger)
-        ->post(route('tasks.store'), taskStorePayload($project))
+        ->post(wsRoute('tasks.store'), taskStorePayload($project))
         ->assertForbidden();
 
     expect(Task::query()->where('project_id', $project->id)->where('title', 'New task')->exists())->toBeFalse();

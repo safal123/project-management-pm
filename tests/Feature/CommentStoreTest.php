@@ -13,7 +13,7 @@ test('project member can comment on a task', function () {
     $task = $this->createTaskForProject($user, $project);
 
     actingAs($user)
-        ->postJson(route('comments.store'), [
+        ->postJson(wsRoute('comments.store'), [
             'commentable_type' => 'task',
             'commentable_id' => $task->id,
             'body' => 'This is a comment',
@@ -40,7 +40,7 @@ test('user who is not a project member cannot comment on a task', function () {
     $stranger->workspaces()->syncWithoutDetaching([$workspaces->first()->id]);
 
     actingAs($stranger)
-        ->postJson(route('comments.store'), [
+        ->postJson(wsRoute('comments.store'), [
             'commentable_type' => 'task',
             'commentable_id' => $task->id,
             'body' => 'This is a comment',
@@ -57,7 +57,7 @@ test('reply nests under the parent comment', function () {
     $parent = $this->createCommentForTask($user, $task, ['body' => 'Parent comment']);
 
     actingAs($user)
-        ->postJson(route('comments.store'), [
+        ->postJson(wsRoute('comments.store'), [
             'commentable_type' => 'task',
             'commentable_id' => $task->id,
             'parent_comment_id' => $parent->id,
@@ -72,7 +72,7 @@ test('reply nests under the parent comment', function () {
         ->exists())->toBeTrue();
 
     actingAs($user)
-        ->getJson(route('comments.index', [
+        ->getJson(wsRoute('comments.index', [
             'commentable_type' => 'task',
             'commentable_id' => $task->id,
         ]))

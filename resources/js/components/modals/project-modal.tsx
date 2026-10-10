@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { useForm, usePage } from '@inertiajs/react'
 import { Project, SharedData } from '@/types'
 import { BaseModal } from './base-modal'
@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 
 interface ProjectModalProps {
   project?: Project
+  trigger?: ReactNode
   triggerClassName?: string
   triggerVariant?: 'default' | 'outline' | 'ghost' | 'link' | 'destructive' | 'secondary'
   /** Controlled mode: when provided, modal can be opened programmatically (e.g. from URL param) */
@@ -21,6 +22,7 @@ interface ProjectModalProps {
 
 export function ProjectModal({
   project,
+  trigger,
   triggerClassName,
   triggerVariant = 'default',
   open: controlledOpen,
@@ -92,7 +94,7 @@ export function ProjectModal({
     <BaseModal
       open={open}
       onOpenChange={setOpen}
-      trigger={triggerButton}
+      trigger={trigger ?? triggerButton}
       icon={
         isEditMode
           ? <Pencil className="h-5 w-5 text-primary" />

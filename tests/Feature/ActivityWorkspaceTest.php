@@ -8,7 +8,7 @@ use function Pest\Laravel\actingAs;
 uses(Tests\Traits\CreatesTestData::class);
 
 test('guests cannot view workspace activity', function () {
-    $this->get(route('activity.index'))->assertRedirect(route('login'));
+    $this->get(wsRoute('activity.index'))->assertRedirect(route('login'));
 });
 
 test('workspace activity page lists activities in a table newest first', function () {
@@ -29,7 +29,7 @@ test('workspace activity page lists activities in a table newest first', functio
     Activity::record($otherTask, Activity::TYPE_CREATED, $otherWorkspaces->first()->id, $otherUser);
 
     actingAs($user)
-        ->get(route('activity.index'))
+        ->get(wsRoute('activity.index'))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->component('activity/index')
@@ -54,7 +54,7 @@ test('workspace activity can be filtered by type and sorted oldest first', funct
     $commented = Activity::record($task, Activity::TYPE_COMMENTED, $workspace->id, $user, ['excerpt' => 'Looks good']);
 
     actingAs($user)
-        ->get(route('activity.index', ['type' => Activity::TYPE_COMMENTED]))
+        ->get(wsRoute('activity.index', ['type' => Activity::TYPE_COMMENTED]))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->has('activities.data', 1)
@@ -63,7 +63,7 @@ test('workspace activity can be filtered by type and sorted oldest first', funct
         );
 
     actingAs($user)
-        ->get(route('activity.index', ['sort' => 'created_at', 'direction' => 'asc']))
+        ->get(wsRoute('activity.index', ['sort' => 'created_at', 'direction' => 'asc']))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->has('activities.data', 2)
@@ -71,6 +71,45 @@ test('workspace activity can be filtered by type and sorted oldest first', funct
             ->where('activities.data.1.id', $commented->id)
             ->where('filters.sort', 'created_at')
             ->where('filters.direction', 'asc')
+        );
+});
+
+test('workspace activity search matches person, card title, and properties', function () {
+    ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
+    $user->update(['name' => 'Safal Pokharel']);
+    $workspace = $workspaces->first();
+    $teammate = $this->createUser(['name' => 'Alex Member']);
+    $workspace->users()->attach($teammate->id);
+    $project = $this->createProjectsForUser($user, $workspace)->first();
+    $task = $this->createTaskForProject($user, $project, ['title' => 'Ship search']);
+    $otherTask = $this->createTaskForProject($user, $project, ['title' => 'Unrelated']);
+
+    $named = Activity::record($task, Activity::TYPE_CREATED, $workspace->id, $user);
+    $commented = Activity::record($otherTask, Activity::TYPE_COMMENTED, $workspace->id, $teammate, ['excerpt' => 'Looks good']);
+
+    actingAs($user)
+        ->get(wsRoute('activity.index', ['q' => 'sa']))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('activities.data', 1)
+            ->where('activities.data.0.id', $named->id)
+            ->where('filters.q', 'sa')
+        );
+
+    actingAs($user)
+        ->get(wsRoute('activity.index', ['q' => 'ship']))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('activities.data', 1)
+            ->where('activities.data.0.id', $named->id)
+        );
+
+    actingAs($user)
+        ->get(wsRoute('activity.index', ['q' => 'looks']))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('activities.data', 1)
+            ->where('activities.data.0.id', $commented->id)
         );
 });
 
@@ -88,7 +127,7 @@ test('workspace activity can be filtered by project and person', function () {
     Activity::record($otherTask, Activity::TYPE_CREATED, $workspace->id, $otherUser);
 
     actingAs($user)
-        ->get(route('activity.index', ['project_id' => $project->id, 'user_id' => $user->id]))
+        ->get(wsRoute('activity.index', ['project_id' => $project->id, 'user_id' => $user->id]))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->has('activities.data', 1)
@@ -102,7 +141,7 @@ test('workspace activity page shows an empty table when nothing has happened', f
     ['user' => $user] = $this->createUserWithWorkspace();
 
     actingAs($user)
-        ->get(route('activity.index'))
+        ->get(wsRoute('activity.index'))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->component('activity/index')

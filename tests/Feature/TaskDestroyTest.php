@@ -12,7 +12,7 @@ test('project member can delete a task', function () {
     $task = $this->createTaskForProject($user, $project);
 
     actingAs($user)
-        ->delete(route('tasks.destroy', $task))
+        ->delete(wsRoute('tasks.destroy', $task))
         ->assertRedirect();
 
     expect(Task::query()->find($task->id))->toBeNull();
@@ -28,7 +28,7 @@ test('user who is not a project member cannot delete a task', function () {
     $stranger->workspaces()->syncWithoutDetaching([$workspaces->first()->id]);
 
     actingAs($stranger)
-        ->delete(route('tasks.destroy', $task))
+        ->delete(wsRoute('tasks.destroy', $task))
         ->assertForbidden();
 
     expect(Task::query()->find($task->id))->not->toBeNull();

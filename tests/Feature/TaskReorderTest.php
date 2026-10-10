@@ -13,7 +13,7 @@ test('project member can reorder tasks', function () {
     $taskTwo = $this->createTaskForProject($user, $project, ['parent_task_id' => $column->id, 'order' => 2]);
 
     actingAs($user)
-        ->post(route('tasks.reorder'), [
+        ->post(wsRoute('tasks.reorder'), [
             'taskIds' => [$taskTwo->id, $taskOne->id],
         ])
         ->assertRedirect();
@@ -35,7 +35,7 @@ test('user who is not a project member cannot reorder tasks', function () {
     $stranger->workspaces()->syncWithoutDetaching([$workspaces->first()->id]);
 
     actingAs($stranger)
-        ->post(route('tasks.reorder'), [
+        ->post(wsRoute('tasks.reorder'), [
             'taskIds' => [$taskTwo->id, $taskOne->id],
         ])
         ->assertForbidden();

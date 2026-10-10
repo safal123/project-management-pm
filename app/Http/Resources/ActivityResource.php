@@ -6,6 +6,7 @@ use App\Models\Activity;
 use App\Models\Event;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,22 +15,29 @@ class ActivityResource extends JsonResource
     public static $wrap = null;
 
     /**
+     * @var array<string, string|null>
+     */
+    protected static array $userNames = [];
+
+    /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
+        $properties = $this->resolvedProperties();
+
         return [
             'id' => $this->id,
             'type' => $this->type,
-            'properties' => $this->properties,
+            'properties' => $properties,
             'user' => new UserResource($this->whenLoaded('user')),
             'subject' => $this->when(
                 $this->relationLoaded('subject'),
                 fn () => $this->subjectPayload(),
             ),
-            'description' => $this->description(),
+            'description' => $this->description($properties),
             'created_at' => $this->created_at,
         ];
     }
@@ -38,11 +46,13 @@ class ActivityResource extends JsonResource
      * Build a human-readable description for the activity, so the frontend
      * doesn't need any per-type rendering logic.
      */
-    protected function description(): string
+    /**
+     * @param  array<string, mixed>  $properties
+     */
+    protected function description(array $properties): string
     {
         $noun = $this->subjectNoun();
         $label = $this->subjectLabel();
-        $properties = $this->properties ?? [];
 
         return match ($this->type) {
             Activity::TYPE_CREATED => "created {$label}",
@@ -175,20 +185,57 @@ class ActivityResource extends JsonResource
         $subject = $this->subject;
 
         if ($subject instanceof Task && $subject->relationLoaded('project') && $subject->project) {
-            return route('projects.show', $subject->project->slug, false);
+            return route('projects.show', [
+                'workspace' => $subject->project->workspace_id,
+                'project' => $subject->project->slug,
+            ], false);
         }
 
         if ($subject instanceof Project) {
-            return route('projects.show', $subject->slug, false);
+            return route('projects.show', [
+                'workspace' => $subject->workspace_id,
+                'project' => $subject->slug,
+            ], false);
         }
 
         if ($subject instanceof Event && $subject->relationLoaded('project') && $subject->project) {
             return route('projects.show', [
+                'workspace' => $subject->project->workspace_id,
                 'project' => $subject->project->slug,
                 'tab' => 'calendar',
             ], false);
         }
 
         return null;
+    }
+
+    /**
+     * Fill assignee names when older records only stored user ids.
+     *
+     * @return array<string, mixed>
+     */
+    protected function resolvedProperties(): array
+    {
+        $properties = $this->properties ?? [];
+
+        if ($this->type !== Activity::TYPE_ASSIGNED) {
+            return $properties;
+        }
+
+        foreach (['from' => 'from_name', 'to' => 'to_name'] as $idKey => $nameKey) {
+            if (! empty($properties[$nameKey]) || empty($properties[$idKey])) {
+                continue;
+            }
+
+            $userId = (string) $properties[$idKey];
+
+            if (! array_key_exists($userId, self::$userNames)) {
+                self::$userNames[$userId] = User::query()->whereKey($userId)->value('name');
+            }
+
+            $properties[$nameKey] = self::$userNames[$userId];
+        }
+
+        return $properties;
     }
 }

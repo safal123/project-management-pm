@@ -7,6 +7,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { DropdownMenuLabel } from './ui/dropdown-menu'
 import { Separator } from './ui/separator'
+import Can from '@/components/can'
 import { AddNewWorkspace } from './modals/add-new-workspace'
 import { RenameWorkspaceModal } from './modals/rename-workspace-modal'
 import { router, usePage } from '@inertiajs/react'
@@ -59,7 +60,14 @@ const WorkspaceSelector = ({ workspaces }: WorkspaceSelectorProps) => {
             <Separator />
             {workspaces.map((workspace) => (
               <DropdownMenuItem
-                onClick={() => router.visit(route('workspace.switcher', { workspace: workspace.id }), { method: 'post' })}
+                onSelect={(event) => {
+                  event.preventDefault()
+                  if (workspace.id === auth.user.current_workspace_id) {
+                    return
+                  }
+
+                  router.visit(route('dashboard', { workspace: workspace.id }))
+                }}
                 key={workspace.id}
                 className="mt-0.5 cursor-pointer px-2 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md outline-none"
               >
@@ -73,14 +81,16 @@ const WorkspaceSelector = ({ workspaces }: WorkspaceSelectorProps) => {
                 </div>
               </DropdownMenuItem>
             ))}
-            {currentWorkspace.can_rename && (
+            <Can permission="workspace.update">
               <div className="mt-0.5 p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md">
                 <RenameWorkspaceModal workspace={currentWorkspace} />
               </div>
-            )}
-            <div className="mt-0.5 p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md">
-              <AddNewWorkspace />
-            </div>
+            </Can>
+            <Can permission="workspace.create">
+              <div className="mt-0.5 p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md">
+                <AddNewWorkspace />
+              </div>
+            </Can>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

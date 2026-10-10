@@ -54,7 +54,7 @@ class GoogleAuthController extends Controller
 
         Auth::login($user, remember: true);
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(workspace_route('dashboard', [], $user->current_workspace_id, false));
     }
 
     protected function findOrCreateUser(SocialiteUser $googleUser, string $email): User

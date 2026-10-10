@@ -6,7 +6,7 @@ use function Pest\Laravel\get;
 uses(Tests\Traits\CreatesTestData::class);
 
 test('guests cannot access workspace coming soon pages', function (string $route) {
-    get(route($route))->assertRedirect(route('login'));
+    get(wsRoute($route))->assertRedirect(route('login'));
 })->with([
     'emails.index',
     'billing.index',
@@ -17,7 +17,7 @@ test('authenticated users can view workspace coming soon pages', function (strin
     ['user' => $user] = $this->createUserWithWorkspace();
 
     actingAs($user)
-        ->get(route($route))
+        ->get(wsRoute($route, [], $user))
         ->assertOk()
         ->assertInertia(fn (\Inertia\Testing\AssertableInertia $page) => $page
             ->component('coming-soon')

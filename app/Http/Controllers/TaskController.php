@@ -7,12 +7,13 @@ use App\Http\Requests\TaskUpdateRequest;
 use App\Models\Activity;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class TaskController extends Controller
 {
-    public function store(TaskCreateRequest $request)
+    public function store(Workspace $workspace, TaskCreateRequest $request)
     {
         $validated = $request->validated();
         $user = $request->user();
@@ -45,7 +46,7 @@ class TaskController extends Controller
         return back()->with('success', 'Task created successfully');
     }
 
-    public function update(Task $task, TaskUpdateRequest $request)
+    public function update(Workspace $workspace, Task $task, TaskUpdateRequest $request)
     {
         $validated = $request->validated();
         $user = $request->user();
@@ -106,7 +107,7 @@ class TaskController extends Controller
         return redirect()->back()->with('success', 'Task updated successfully');
     }
 
-    public function destroy(Task $task)
+    public function destroy(Workspace $workspace, Task $task)
     {
         $this->authorize('delete', $task);
 

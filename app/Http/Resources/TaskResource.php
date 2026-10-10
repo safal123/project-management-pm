@@ -31,7 +31,7 @@ class TaskResource extends JsonResource
             'order'            => $this->when(! is_null($this->order), $this->order),
             'due_date'         => $this->when(! is_null($this->due_date), $this->due_date),
             'progress'         => $this->when(! is_null($this->progress), $this->progress),
-            'color'            => $this->when(! is_null($this->color), $this->color),
+            'color'            => $this->color ?? 'gray',
             'branch_name'      => $this->when(! is_null($this->branch_name), $this->branch_name),
             'branch_url'       => $this->when(! is_null($this->branch_url), $this->branch_url),
 

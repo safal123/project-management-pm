@@ -5,6 +5,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { Check, Copy, Folder, LoaderCircle, Mail, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { ActivityDescription, typeMeta } from '@/components/activity/activity-timeline'
 import AppAvatar from '@/components/app-avatar'
 import AppEmpty from '@/components/app-empty'
 import AppLayout from '@/layouts/app-layout'
@@ -120,7 +121,12 @@ export default function PeopleShow() {
         id: 'activity',
         header: 'Activity',
         render: (activity) => (
-          <span className="line-clamp-2 text-muted-foreground">{activity.description}</span>
+          <span className="line-clamp-2">
+            <ActivityDescription
+              activity={activity}
+              typeClassName={typeMeta[activity.type]?.className ?? 'border-border bg-muted text-foreground'}
+            />
+          </span>
         ),
       },
       {
@@ -188,7 +194,7 @@ export default function PeopleShow() {
   )
 
   const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'People', href: '/people' },
+    { title: 'People', href: route('people.index') },
     { title: person.name, href: route('people.show', person.id) },
   ]
 
@@ -278,7 +284,7 @@ export default function PeopleShow() {
             <AppTable
               items={projects}
               columns={projectColumns}
-              onRowClick={(project) => router.visit(`/projects/${project.slug}`)}
+              onRowClick={(project) => router.visit(route('projects.show', project.slug))}
               tableClassName="bg-background/10 shadow-sm rounded-md"
             />
           )}

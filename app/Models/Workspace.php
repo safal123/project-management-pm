@@ -66,9 +66,32 @@ class Workspace extends Pivot
         return $this->roleFor($user) === self::ROLE_OWNER;
     }
 
+    /**
+     * UI abilities for the current workspace. Resolve role once per request.
+     *
+     * @return list<string>
+     */
+    public function abilitiesFor(User $user): array
+    {
+        $isOwner = $this->isOwnedBy($user);
+
+        return array_keys(array_filter([
+            'workspace.create' => true,
+            'workspace.update' => $isOwner,
+            'project.create' => $isOwner,
+            'project.view_members' => true,
+            'project.invite_members' => true,
+        ]));
+    }
+
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function projects()
+    {
+        return $this->hasMany(Project::class, 'workspace_id', 'id');
     }
 
     public function scopeForUser(Builder $query, User $user): Builder

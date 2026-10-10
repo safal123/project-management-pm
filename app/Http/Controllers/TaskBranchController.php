@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\TaskBranchCreateRequest;
 use App\Models\Activity;
 use App\Models\Task;
+use App\Models\Workspace;
 use App\Services\Git\GitProviderException;
 use App\Services\Git\GitProviderManager;
 
 class TaskBranchController extends Controller
 {
-    public function __invoke(TaskBranchCreateRequest $request, Task $task, GitProviderManager $manager)
+    public function __invoke(Workspace $workspace, TaskBranchCreateRequest $request, Task $task, GitProviderManager $manager)
     {
         $project = $task->project;
         $integration = $project->gitIntegration;

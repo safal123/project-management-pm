@@ -15,6 +15,15 @@ class Comment extends Model
 {
     use HasFactory, HasLikes, HasUlids;
 
+    /**
+     * Polymorphic model map — extend this when adding comments to new entities.
+     *
+     * @var array<string, class-string<Model>>
+     */
+    public const COMMENTABLE_MODELS = [
+        'task' => Task::class,
+    ];
+
     public $fillable = [
         'user_id',
         'commentable_id',
@@ -47,5 +56,20 @@ class Comment extends Model
     public function scopeTopLevel(Builder $query): Builder
     {
         return $query->whereNull('parent_comment_id');
+    }
+
+    public static function findCommentable(?string $type, ?string $id): ?Model
+    {
+        if (! $type || ! $id) {
+            return null;
+        }
+
+        $modelClass = self::COMMENTABLE_MODELS[$type] ?? null;
+
+        if ($modelClass === null) {
+            return null;
+        }
+
+        return $modelClass::query()->find($id);
     }
 }

@@ -18,7 +18,7 @@ const MarkTaskAsComplete = ({ task, type = 'button' }: MarkTaskAsCompleteProps) 
 
   const handleToggleComplete = () => {
     setIsLoading(true);
-    router.patch(`/tasks/${task.id}`,
+    router.patch(route('tasks.update', { task: task.id }),
       { status: isCompleted ? 'todo' : 'done' },
       {
         only: ['tasks'],

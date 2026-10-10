@@ -69,6 +69,7 @@ export default function ActivityFeed({
       <ActivityTimeline
         activities={activities}
         emptyDescription="Creates, moves, and comments show up here."
+        showSubject={false}
       />
     </ScrollArea>
   );

@@ -4,7 +4,7 @@ import { Link } from '@inertiajs/react'
 import { format, formatDistanceToNow } from 'date-fns'
 import { ArrowUpRight, Clock, LoaderCircle } from 'lucide-react'
 
-import { ActivityTimeline } from '@/components/activity/activity-timeline'
+import { ActivityDescription, ActivityTimeline, typeMeta } from '@/components/activity/activity-timeline'
 import AppAvatar from '@/components/app-avatar'
 import { BaseModal } from '@/components/modals/base-modal'
 import { Button } from '@/components/ui/button'
@@ -99,8 +99,11 @@ export function ActivityDetailModal({ open, onOpenChange, activity }: ActivityDe
               />
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-medium">{activity.user?.name ?? 'Someone'}</p>
-                <p className="mt-0.5 text-[13px] leading-5 text-muted-foreground">
-                  {activity.description}
+                <p className="mt-0.5 text-[13px] leading-5">
+                  <ActivityDescription
+                    activity={activity}
+                    typeClassName={typeMeta[activity.type]?.className ?? 'border-border bg-muted text-foreground'}
+                  />
                 </p>
                 <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
                   {activity.subject?.name && <span className="capitalize">{activity.subject.type}: {activity.subject.name}</span>}

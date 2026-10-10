@@ -57,7 +57,6 @@ export interface Workspace {
   description?: string | null;
   users?: User[];
   created_by?: User | null;
-  can_rename?: boolean;
 }
 
 export interface Project {

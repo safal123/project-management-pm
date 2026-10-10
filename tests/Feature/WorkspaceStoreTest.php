@@ -72,6 +72,22 @@ test('renaming keeps a unique slug', function () {
     expect($workspace->fresh()->slug)->toBe('taken-name-1');
 });
 
+test('a workspace admin cannot rename the workspace', function () {
+    ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
+    $workspace = $workspaces->first();
+    $admin = $this->createUser();
+    $workspace->users()->attach($admin->id, ['role' => Workspace::ROLE_ADMIN]);
+    $admin->currentWorkspace()->associate($workspace)->saveQuietly();
+
+    actingAs($admin)
+        ->patch(route('workspaces.update', $workspace), [
+            'name' => 'Admin rename',
+        ])
+        ->assertForbidden();
+
+    expect($workspace->fresh()->name)->not->toBe('Admin rename');
+});
+
 test('a regular member cannot rename the workspace', function () {
     ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
     $workspace = $workspaces->first();

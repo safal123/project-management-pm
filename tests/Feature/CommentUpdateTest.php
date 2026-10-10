@@ -11,7 +11,7 @@ test('author can edit their own comment', function () {
     $comment = $this->createCommentForTask($user, $task, ['body' => 'Original body']);
 
     actingAs($user)
-        ->patchJson(route('comments.update', $comment), ['body' => 'Updated body'])
+        ->patchJson(wsRoute('comments.update', $comment), ['body' => 'Updated body'])
         ->assertOk()
         ->assertJsonPath('body', 'Updated body');
 
@@ -30,7 +30,7 @@ test('non-author cannot edit another user comment', function () {
     $project->users()->syncWithoutDetaching([$otherMember->id => ['role' => 'member', 'joined_at' => now()]]);
 
     actingAs($otherMember)
-        ->patchJson(route('comments.update', $comment), ['body' => 'Hijacked body'])
+        ->patchJson(wsRoute('comments.update', $comment), ['body' => 'Hijacked body'])
         ->assertForbidden();
 
     expect($comment->fresh()->body)->toBe('Original body');

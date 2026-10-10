@@ -20,19 +20,13 @@ class WorkspaceController extends Controller
 
         $workspace->users()->attach(auth()->user()->id, ['role' => Workspace::ROLE_OWNER]);
 
-        return redirect()->back()->with('success', 'Workspace created successfully');
+        $request->user()->currentWorkspace()->associate($workspace)->save();
+
+        return redirect()->route('dashboard', $workspace)->with('success', 'Workspace created successfully');
     }
 
     public function update(WorkspaceUpdateRequest $request, Workspace $workspace): RedirectResponse
     {
-        $user = $request->user();
-
-        abort_unless(
-            $workspace->users()->where('users.id', $user->id)->exists(),
-            403
-        );
-        abort_unless($workspace->canManageRoles($user), 403);
-
         $name = $request->validated('name');
 
         $workspace->update([

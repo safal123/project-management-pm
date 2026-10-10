@@ -8,6 +8,7 @@ const applyTheme = (appearance: Appearance) => {
     const isDark = appearance === 'dark' || (appearance === 'system' && prefersDark());
 
     document.documentElement.classList.toggle('dark', isDark);
+    document.documentElement.classList.toggle('light', !isDark);
 };
 
 const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');

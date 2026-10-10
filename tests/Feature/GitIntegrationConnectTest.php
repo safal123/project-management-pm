@@ -21,7 +21,7 @@ test('project member can connect a repository with a valid token', function () {
     $project = $this->createProjectsForUser($user, $workspaces->first(), 1)->first();
 
     actingAs($user)
-        ->post(route('git-integrations.store', $project), [
+        ->post(wsRoute('git-integrations.store', ['project' => $project]), [
             'provider' => 'github',
             'token' => 'ghp_validtoken1234567890',
             'repo_full_name' => 'acme/widgets',
@@ -46,7 +46,7 @@ test('connecting with an invalid token is rejected', function () {
     $project = $this->createProjectsForUser($user, $workspaces->first(), 1)->first();
 
     actingAs($user)
-        ->post(route('git-integrations.store', $project), [
+        ->post(wsRoute('git-integrations.store', ['project' => $project]), [
             'provider' => 'github',
             'token' => 'ghp_badtoken',
             'repo_full_name' => 'acme/widgets',
@@ -65,7 +65,7 @@ test('connecting to a repository that does not exist is rejected', function () {
     $project = $this->createProjectsForUser($user, $workspaces->first(), 1)->first();
 
     actingAs($user)
-        ->post(route('git-integrations.store', $project), [
+        ->post(wsRoute('git-integrations.store', ['project' => $project]), [
             'provider' => 'github',
             'token' => 'ghp_validtoken1234567890',
             'repo_full_name' => 'acme/missing',
@@ -82,11 +82,9 @@ test('user who is not a project member cannot connect a repository', function ()
     $project = $this->createProjectsForUser($owner, $workspaces->first(), 1)->first();
 
     ['user' => $stranger] = $this->createUserWithWorkspace();
-    $stranger->update(['current_workspace_id' => $workspaces->first()->id]);
-    $stranger->workspaces()->syncWithoutDetaching([$workspaces->first()->id]);
 
     actingAs($stranger)
-        ->post(route('git-integrations.store', $project), [
+        ->post(wsRoute('git-integrations.store', ['project' => $project], $workspaces->first()), [
             'provider' => 'github',
             'token' => 'ghp_validtoken1234567890',
             'repo_full_name' => 'acme/widgets',

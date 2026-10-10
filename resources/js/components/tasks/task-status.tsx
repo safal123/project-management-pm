@@ -26,7 +26,7 @@ export default function TaskStatus({ task, variant = 'compact' }: TaskStatusProp
   const handleStatusChange = (status: TaskStatus) => {
     setIsUpdating(true)
     router.patch(
-      `/tasks/${task.id}`,
+      route('tasks.update', { task: task.id }),
       { status },
       {
         preserveScroll: true,

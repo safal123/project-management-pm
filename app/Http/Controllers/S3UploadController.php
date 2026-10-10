@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -13,7 +14,7 @@ class S3UploadController extends Controller
     * @param string $filename
     * @return string
     */
-    public function generateSignedUrl(Request $request)
+    public function generateSignedUrl(Workspace $workspace, Request $request)
     {
         $request->validate([
             'filename' => 'required|string|max:255',

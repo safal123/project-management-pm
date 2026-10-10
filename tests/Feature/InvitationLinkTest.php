@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Invitation\GetShareableInviteLink;
 use App\Models\Invitation;
 use Inertia\Testing\AssertableInertia;
 
@@ -12,7 +13,7 @@ test('project page shares a reusable invite link', function () {
     $project = $this->createProjectsForUser($user, $workspaces->first())->first();
 
     actingAs($user)
-        ->get(route('projects.show', $project->slug))
+        ->get(wsRoute('projects.show', ['project' => $project->slug]))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->component('projects/project/index')
@@ -20,7 +21,7 @@ test('project page shares a reusable invite link', function () {
             ->where('invite_link', fn (string $link) => str_contains($link, '/invitations/'))
         );
 
-    actingAs($user)->get(route('projects.show', $project->slug))->assertOk();
+    actingAs($user)->get(wsRoute('projects.show', ['project' => $project->slug]))->assertOk();
 
     expect(
         Invitation::query()
@@ -36,7 +37,7 @@ test('a logged in user can join a project through the invite link without consum
     $invitee = $this->createUser();
     $secondInvitee = $this->createUser();
 
-    $link = Invitation::shareableLinkFor($project, $owner);
+    $link = app(GetShareableInviteLink::class)->execute($owner, $workspaces->first(), $project);
     $invitation = Invitation::query()->whereNull('email')->where('project_id', $project->id)->firstOrFail();
 
     actingAs($invitee)
@@ -49,11 +50,11 @@ test('a logged in user can join a project through the invite link without consum
 
     actingAs($invitee)
         ->post(route('invitations.update', $invitation->token), ['status' => 'accepted'])
-        ->assertRedirect(route('projects.show', $project->slug));
+        ->assertRedirect(wsRoute('projects.show', ['project' => $project->slug]));
 
     actingAs($secondInvitee)
         ->post(route('invitations.update', $invitation->token), ['status' => 'accepted'])
-        ->assertRedirect(route('projects.show', $project->slug));
+        ->assertRedirect(wsRoute('projects.show', ['project' => $project->slug]));
 
     expect($invitation->fresh()->status)->toBe('pending');
     expect($project->users()->where('users.id', $invitee->id)->exists())->toBeTrue();

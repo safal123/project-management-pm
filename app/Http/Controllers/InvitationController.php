@@ -6,6 +6,7 @@ use App\Http\Requests\InvitationRequest;
 use App\Http\Resources\InvitationResource;
 use App\Models\Invitation;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,7 @@ use Inertia\Inertia;
 
 class InvitationController extends Controller
 {
-    public function store(InvitationRequest $request)
+    public function store(Workspace $workspace, InvitationRequest $request)
     {
         $validated = $request->validated();
 
@@ -83,8 +84,8 @@ class InvitationController extends Controller
 
             if ($alreadyMember) {
                 return $invitation->project
-                    ? redirect()->route('projects.show', $invitation->project->slug)
-                    : redirect()->route('people.index');
+                    ? redirect()->route('projects.show', ['workspace' => $invitation->project->workspace_id, 'project' => $invitation->project->slug])
+                    : redirect()->route('people.index', $invitation->workspace_id);
             }
         }
 
@@ -98,7 +99,7 @@ class InvitationController extends Controller
     }
 
     // resend invitation email
-    public function resend(Invitation $invitation)
+    public function resend(Workspace $workspace, Invitation $invitation)
     {
         if ($invitation->status !== 'pending') {
             return redirect()
@@ -128,7 +129,7 @@ class InvitationController extends Controller
     }
 
     // approve invitation (admin only)
-    public function approve(Invitation $invitation)
+    public function approve(Workspace $workspace, Invitation $invitation)
     {
         // Authorization check
         if ($invitation->project->created_by !== auth()->id()) {
@@ -262,12 +263,12 @@ class InvitationController extends Controller
         });
 
         if ($invitation->isLinkInvite() && $request->status === 'rejected') {
-            return redirect()->route('dashboard');
+            return redirect()->route('dashboard', $invitation->workspace_id);
         }
 
         if ($invitation->project) {
             return redirect()
-                ->route('projects.show', $invitation->project->slug)
+                ->route('projects.show', ['workspace' => $invitation->project->workspace_id, 'project' => $invitation->project->slug])
                 ->withSuccess(
                     $request->status === 'accepted'
                         ? 'Invitation accepted successfully.'
@@ -276,7 +277,10 @@ class InvitationController extends Controller
         }
 
         return redirect()
-            ->route($request->status === 'accepted' ? 'people.index' : 'dashboard')
+            ->route(
+                $request->status === 'accepted' ? 'people.index' : 'dashboard',
+                $invitation->workspace_id,
+            )
             ->withSuccess(
                 $request->status === 'accepted'
                     ? 'Invitation accepted successfully.'
@@ -284,7 +288,7 @@ class InvitationController extends Controller
             );
     }
 
-    public function destroy(Invitation $invitation)
+    public function destroy(Workspace $workspace, Invitation $invitation)
     {
         // Only allow the person who sent the invitation or project owner to cancel
         if ($invitation->invited_by !== auth()->id() && $invitation->project?->created_by !== auth()->id()) {

@@ -27,7 +27,7 @@ export default function TaskPriority({ task, variant = 'compact' }: TaskPriority
     if (task.priority === priority) return
     setIsUpdating(true)
     router.patch(
-      `/tasks/${task.id}`,
+      route('tasks.update', { task: task.id }),
       { priority },
       {
         preserveScroll: true,

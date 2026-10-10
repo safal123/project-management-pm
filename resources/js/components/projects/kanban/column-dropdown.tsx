@@ -1,11 +1,13 @@
 import React from 'react'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Trash2 } from 'lucide-react'
 import { router } from '@inertiajs/react'
 import { Task } from '@/types'
 import { Separator } from '@/components/ui/separator'
 import { AddKanbanItem } from './add-kanban-item'
+import { KANBAN_COLUMN_COLORS } from '@/constants/kanban'
+import { cn } from '@/lib/utils'
 
 interface ColumnDropdownProps {
   column: Task
@@ -42,6 +44,15 @@ const ColumnDropwn = ({ column, columns }: ColumnDropdownProps) => {
     return columns.findIndex((c) => c.id === columnId) === columns.length - 1;
   };
 
+  const handleColorChange = (color: string) => {
+    if (column.color === color) return
+
+    router.patch(route('tasks.update', { task: column.id }), { color }, {
+      preserveScroll: true,
+      only: ['tasks'],
+    })
+  }
+
   return (
     <div className="flex items-center gap-1">
       <DropdownMenu>
@@ -57,6 +68,25 @@ const ColumnDropwn = ({ column, columns }: ColumnDropdownProps) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           <AddKanbanItem type="task" column={column} variant="dropdown" />
+          <Separator />
+          <DropdownMenuLabel className="px-2 py-1.5 text-[11px] font-medium text-muted-foreground">
+            Column color
+          </DropdownMenuLabel>
+          <div className="grid grid-cols-5 gap-1.5 px-2 pb-2">
+            {KANBAN_COLUMN_COLORS.map((color) => (
+              <button
+                key={color.value}
+                type="button"
+                title={color.label}
+                onClick={() => handleColorChange(color.value)}
+                className={cn(
+                  'size-5 rounded-full border border-black/10 dark:border-white/15',
+                  color.swatch,
+                  (column.color ?? 'gray') === color.value && 'ring-2 ring-foreground ring-offset-1 ring-offset-popover'
+                )}
+              />
+            ))}
+          </div>
           <Separator />
           <DropdownMenuItem
             onClick={() => handleMoveColumn(column.id, 'left')}

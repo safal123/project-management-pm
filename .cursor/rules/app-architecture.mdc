@@ -1,0 +1,42 @@
+---
+description: How we design Laravel features — controllers, actions, models, and UI permissions
+alwaysApply: true
+---
+
+# App architecture
+
+## Layers
+
+- **Controllers** are HTTP only: validate, call one action, return Inertia/JSON/redirect. No queries, no mail, no multi-step writes.
+- **Never call a controller from another controller** (`app(OtherController::class)->method()`, `$this->other()`, redirects-as-API). Shared work belongs in an action.
+- **FormRequests** own validation and authorize. Use `$user->can()` / policies when they exist.
+- **Actions** (`app/Actions/{Domain}/`, `execute()` or a named method) own a use-case: find-or-create, attach + notify, filtered listing, etc. Inject them into the controller method.
+- **Models** stay thin: relations, casts, scopes, simple predicates (`isExpired()`, `isOwnedBy()`). No shareable-link builders, no mail, no “do this workflow” statics.
+
+## When to add an action
+
+Use an action when the work has multiple steps, side effects, or is called from more than one place.
+
+```php
+// ✅ GOOD
+$project = $createProject->execute($request->user(), $request->validated());
+$payload = array_merge($payload, $getProjectCalendar->execute($project, $date, $view));
+
+// ❌ BAD — workflow on the model
+Invitation::shareableLinkFor($project, $user);
+
+// ❌ BAD — controller calling another controller
+app(CalendarController::class)->payload($request, $project);
+```
+
+Do **not** wrap a single `$model->update($validated)` or `isExpired()` in an action.
+
+## UI vs security
+
+- Share a **small** `auth.permissions.can` list from `Workspace::abilitiesFor()` for `<Can>`.
+- `<Can>` only hides buttons. Every write still authorizes in a FormRequest or policy.
+
+## Naming
+
+- Domain folders: `App\Actions\Activity`, `Invitation`, `Project`.
+- Name the use-case: `CreateProject`, `GetShareableInviteLink`, `ListWorkspaceActivities`.

@@ -46,7 +46,7 @@ export default function TaskDependencies({ task, className = '' }: TaskDependenc
 
   const save = (depends_on_task_id: string | null) => {
     router.patch(
-      `/tasks/${task.id}`,
+      route('tasks.update', { task: task.id }),
       { depends_on_task_id },
       {
         preserveScroll: true,

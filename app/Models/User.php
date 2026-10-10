@@ -90,6 +90,6 @@ class User extends Authenticatable
 
     public function currentWorkspaceId()
     {
-        return $this->currentWorkspace?->id;
+        return $this->current_workspace_id;
     }
 }

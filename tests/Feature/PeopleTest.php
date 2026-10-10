@@ -8,7 +8,7 @@ use function Pest\Laravel\actingAs;
 uses(Tests\Traits\CreatesTestData::class);
 
 test('guests cannot view people', function () {
-    $this->get(route('people.index'))->assertRedirect(route('login'));
+    $this->get(wsRoute('people.index'))->assertRedirect(route('login'));
 });
 
 test('workspace members are listed on the people page', function () {
@@ -21,7 +21,7 @@ test('workspace members are listed on the people page', function () {
     $project->users()->attach($teammate->id, ['joined_at' => now()]);
 
     actingAs($user)
-        ->get(route('people.index'))
+        ->get(wsRoute('people.index'))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->component('people/index')
@@ -38,7 +38,7 @@ test('people can be searched by name', function () {
     $workspaces->first()->users()->attach($teammate->id);
 
     actingAs($user)
-        ->get(route('people.index', ['q' => 'Jordan']))
+        ->get(wsRoute('people.index', ['q' => 'Jordan']))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->has('people', 1)
@@ -57,7 +57,7 @@ test('a workspace member can view another member profile', function () {
     Activity::record($task, Activity::TYPE_CREATED, $workspace->id, $teammate);
 
     actingAs($user)
-        ->get(route('people.show', $teammate))
+        ->get(wsRoute('people.show', $teammate))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->component('people/show')
@@ -82,16 +82,15 @@ test('a workspace member can see workspace projects without joining each one', f
     $member->currentWorkspace()->associate($workspace)->saveQuietly();
 
     actingAs($member)
-        ->get(route('projects.index'))
+        ->get(wsRoute('dashboard'))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('projects/index')
-            ->has('projects', 1)
-            ->where('projects.0.id', $project->id)
+            ->has('sidebar_projects', 1)
+            ->where('sidebar_projects.0.id', $project->id)
         );
 
     actingAs($member)
-        ->get(route('projects.show', $project->slug))
+        ->get(wsRoute('projects.show', ['project' => $project->slug]))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->has('project.users', 2)
@@ -103,7 +102,7 @@ test('an existing user can be added to the workspace', function () {
     $member = $this->createUser(['email' => 'new-member@example.com']);
 
     actingAs($user)
-        ->post(route('people.store'), ['email' => 'new-member@example.com'])
+        ->post(wsRoute('people.store'), ['email' => 'new-member@example.com'])
         ->assertRedirect();
 
     expect($member->workspaces()->where('workspaces.id', $workspaces->first()->id)->exists())->toBeTrue();
@@ -113,7 +112,7 @@ test('adding an unknown email fails', function () {
     ['user' => $user] = $this->createUserWithWorkspace();
 
     actingAs($user)
-        ->post(route('people.store'), ['email' => 'missing@example.com'])
+        ->post(wsRoute('people.store'), ['email' => 'missing@example.com'])
         ->assertRedirect()
         ->assertSessionHasErrors('email');
 });
@@ -131,7 +130,7 @@ test('profile activities can be loaded a page at a time', function () {
     }
 
     actingAs($user)
-        ->get(route('people.show', $user))
+        ->get(wsRoute('people.show', $user))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->has('activities.data', 8)
@@ -139,7 +138,7 @@ test('profile activities can be loaded a page at a time', function () {
         );
 
     actingAs($user)
-        ->getJson(route('people.activities', ['person' => $user->id, 'page' => 2]))
+        ->getJson(wsRoute('people.activities', ['person' => $user->id, 'page' => 2]))
         ->assertOk()
         ->assertJsonPath('meta.has_more', false)
         ->assertJsonCount(1, 'data');
@@ -150,7 +149,7 @@ test('a user outside the workspace cannot be viewed', function () {
     ['user' => $outsider] = $this->createUserWithWorkspace();
 
     actingAs($user)
-        ->get(route('people.show', $outsider))
+        ->get(wsRoute('people.show', $outsider))
         ->assertForbidden();
 });
 
@@ -161,7 +160,7 @@ test('a workspace owner can promote a member to admin', function () {
     $workspace->users()->attach($teammate->id, ['role' => 'member']);
 
     actingAs($user)
-        ->patch(route('people.update', $teammate), ['role' => 'admin'])
+        ->patch(wsRoute('people.update', $teammate), ['role' => 'admin'])
         ->assertRedirect();
 
     expect($workspace->roleFor($teammate->fresh()))->toBe('admin');
@@ -175,7 +174,7 @@ test('a regular member cannot update roles', function () {
     $teammate->currentWorkspace()->associate($workspace)->saveQuietly();
 
     actingAs($teammate)
-        ->patch(route('people.update', $user), ['role' => 'admin'])
+        ->patch(wsRoute('people.update', $user), ['role' => 'admin'])
         ->assertForbidden();
 });
 
@@ -187,6 +186,6 @@ test('the workspace owner role cannot be changed', function () {
     $admin->currentWorkspace()->associate($workspace)->saveQuietly();
 
     actingAs($admin)
-        ->patch(route('people.update', $user), ['role' => 'member'])
+        ->patch(wsRoute('people.update', $user), ['role' => 'member'])
         ->assertForbidden();
 });

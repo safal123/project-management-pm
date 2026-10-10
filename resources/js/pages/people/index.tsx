@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { formatShortDate } from '@/utils/app-utils'
 import { type BreadcrumbItem, type SharedData } from '@/types'
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'People', href: '/people' }]
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'People', href: route('people.index') }]
 
 interface PersonRow {
   id: string

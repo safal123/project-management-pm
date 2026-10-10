@@ -106,61 +106,6 @@ class Invitation extends Model
         );
     }
 
-    public static function shareableLinkFor(Project $project, User $user): string
-    {
-        $invitation = static::query()
-            ->where('project_id', $project->id)
-            ->whereNull('email')
-            ->pending()
-            ->where('expires_at', '>', now())
-            ->latest()
-            ->first();
-
-        if (! $invitation) {
-            $invitation = static::create([
-                'workspace_id' => $project->workspace_id,
-                'project_id' => $project->id,
-                'invited_by' => $user->id,
-                'email' => null,
-            ]);
-
-            $invitation->forceFill([
-                'expires_at' => now()->addDays(7),
-                'last_sent_at' => null,
-            ])->save();
-        }
-
-        return $invitation->signedUrl();
-    }
-
-    public static function shareableWorkspaceLinkFor(Workspace $workspace, User $user): string
-    {
-        $invitation = static::query()
-            ->where('workspace_id', $workspace->id)
-            ->whereNull('project_id')
-            ->whereNull('email')
-            ->pending()
-            ->where('expires_at', '>', now())
-            ->latest()
-            ->first();
-
-        if (! $invitation) {
-            $invitation = static::create([
-                'workspace_id' => $workspace->id,
-                'project_id' => null,
-                'invited_by' => $user->id,
-                'email' => null,
-            ]);
-
-            $invitation->forceFill([
-                'expires_at' => now()->addDays(7),
-                'last_sent_at' => null,
-            ])->save();
-        }
-
-        return $invitation->signedUrl();
-    }
-
     public function sendEmail()
     {
         if (blank($this->email)) {

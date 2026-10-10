@@ -26,7 +26,7 @@ export default function TaskDescription({ task, className = '' }: TaskDescriptio
     }
     if (description !== task.description) {
       saveTimeoutRef.current = setTimeout(() => {
-        router.patch(`/tasks/${task.id}`, { description }, { preserveScroll: true });
+        router.patch(route('tasks.update', { task: task.id }), { description }, { preserveScroll: true });
       }, 1000);
     }
 

@@ -36,6 +36,7 @@ class TaskUpdateRequest extends FormRequest
             'parent_task_id' => ['sometimes', 'nullable', 'exists:tasks,id'],
             'depends_on_task_id' => ['sometimes', 'nullable', 'exists:tasks,id'],
             'order' => ['sometimes', 'integer', 'min:1'],
+            'color' => ['sometimes', 'string', Rule::in(Task::getColorOptions())],
         ];
     }
 }

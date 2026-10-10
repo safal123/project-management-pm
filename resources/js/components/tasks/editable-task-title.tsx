@@ -57,7 +57,7 @@ export default function EditableTaskTitle({
     setIsSubmitting(true);
 
     router.patch(
-      `/tasks/${task.id}`,
+      route('tasks.update', { task: task.id }),
       { title: nextTitle },
       {
         preserveScroll: true,

@@ -63,7 +63,7 @@ export default function TaskSubtask({ task, className = '', onOpenSubtask }: Tas
   const toggleComplete = (subtask: Task) => {
     setCompletingId(subtask.id)
     router.patch(
-      `/tasks/${subtask.id}`,
+      route('tasks.update', { task: subtask.id }),
       { status: subtask.status === 'done' ? 'todo' : 'done' },
       {
         preserveScroll: true,

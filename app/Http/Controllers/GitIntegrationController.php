@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\GitIntegrationConnectRequest;
 use App\Models\Project;
+use App\Models\Workspace;
 use App\Policies\GitIntegrationPolicy;
 use App\Services\Git\GitProviderException;
 use App\Services\Git\GitProviderManager;
@@ -14,7 +15,7 @@ class GitIntegrationController extends Controller
     /**
      * Connect a project to a git repository, verifying access before saving.
      */
-    public function store(GitIntegrationConnectRequest $request, Project $project, GitProviderManager $manager)
+    public function store(Workspace $workspace, GitIntegrationConnectRequest $request, Project $project, GitProviderManager $manager)
     {
         $validated = $request->validated();
 
@@ -42,7 +43,7 @@ class GitIntegrationController extends Controller
     /**
      * Disconnect the project's git integration.
      */
-    public function destroy(Request $request, Project $project)
+    public function destroy(Workspace $workspace, Request $request, Project $project)
     {
         abort_unless(app(GitIntegrationPolicy::class)->manage($request->user(), $project), 403);
 

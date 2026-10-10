@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Http\Controllers\CommentController;
 use App\Models\Comment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
@@ -34,7 +33,7 @@ class CommentCreateRequest extends FormRequest
     {
         return [
             'body' => ['required', 'string', 'max:5000'],
-            'commentable_type' => ['required', 'string', Rule::in(array_keys(CommentController::COMMENTABLE_MODELS))],
+            'commentable_type' => ['required', 'string', Rule::in(array_keys(Comment::COMMENTABLE_MODELS))],
             'commentable_id' => ['required', 'string', function (string $attribute, mixed $value, \Closure $fail) {
                 if ($this->resolveCommentable() === null) {
                     $fail('The selected commentable item does not exist.');
@@ -66,19 +65,9 @@ class CommentCreateRequest extends FormRequest
      */
     public function resolveCommentable(): ?Model
     {
-        $type = $this->input('commentable_type');
-        $id = $this->input('commentable_id');
-
-        if (! $type || ! $id) {
-            return null;
-        }
-
-        $modelClass = CommentController::COMMENTABLE_MODELS[$type] ?? null;
-
-        if ($modelClass === null) {
-            return null;
-        }
-
-        return $modelClass::query()->find($id);
+        return Comment::findCommentable(
+            $this->input('commentable_type'),
+            $this->input('commentable_id'),
+        );
     }
 }

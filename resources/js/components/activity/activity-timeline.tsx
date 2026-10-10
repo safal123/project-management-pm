@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react'
 import { Link } from '@inertiajs/react'
 import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns'
 import {
@@ -24,6 +25,7 @@ import {
 import AppAvatar from '@/components/app-avatar'
 import { cn } from '@/lib/utils'
 import { Activity } from '@/types'
+import { formatHumanLabel, formatShortDate, STATUS_LABELS } from '@/utils/app-utils'
 
 const subjectIcons = {
   task: ListTodo,
@@ -32,7 +34,7 @@ const subjectIcons = {
   item: Clock,
 }
 
-const typeMeta: Record<string, { icon: typeof Plus; className: string }> = {
+export const typeMeta: Record<string, { icon: typeof Plus; className: string }> = {
   created: { icon: Plus, className: 'border-sky-200 bg-sky-50 text-sky-600 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-400' },
   status_changed: { icon: RefreshCw, className: 'border-amber-200 bg-amber-50 text-amber-600 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-400' },
   assigned: { icon: UserPlus, className: 'border-violet-200 bg-violet-50 text-violet-600 dark:border-violet-800 dark:bg-violet-950 dark:text-violet-400' },
@@ -73,12 +75,166 @@ export function groupActivities(activities: Activity[]) {
   return groups
 }
 
+function asText(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() !== '' ? value : null
+}
+
+function formatStatusValue(value: string | null): string | null {
+  if (!value) return null
+  return STATUS_LABELS[value] ?? formatHumanLabel(value)
+}
+
+function formatDateValue(value: string | null): string | null {
+  if (!value) return null
+  return formatShortDate(value)
+}
+
+function ChangeChip({ value, className }: { value: string; className?: string }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex max-w-[180px] truncate rounded-md border px-1.5 py-px align-middle text-[11px] font-medium',
+        className
+      )}
+    >
+      {value}
+    </span>
+  )
+}
+
+function ChangeHighlight({
+  from,
+  to,
+  toClassName,
+}: {
+  from?: string | null
+  to?: string | null
+  toClassName: string
+}) {
+  if (!from && !to) return null
+
+  return (
+    <span className="inline-flex flex-wrap items-center gap-1 align-middle">
+      {from && (
+        <ChangeChip
+          value={from}
+          className="border-border bg-muted/60 text-muted-foreground line-through decoration-muted-foreground/50"
+        />
+      )}
+      {from && to && <span className="text-[11px] text-muted-foreground">→</span>}
+      {to && <ChangeChip value={to} className={toClassName} />}
+    </span>
+  )
+}
+
+export function ActivityDescription({
+  activity,
+  typeClassName,
+}: {
+  activity: Activity
+  typeClassName: string
+}) {
+  const properties = activity.properties ?? {}
+  const from = asText(properties.from)
+  const to = asText(properties.to)
+  const fromName = asText(properties.from_name)
+  const toName = asText(properties.to_name)
+  const fromTitle = asText(properties.from_title)
+  const toTitle = asText(properties.to_title)
+
+  let verb = activity.description
+  let highlight: ReactNode = null
+
+  switch (activity.type) {
+    case 'created':
+      verb = `created this ${activity.subject?.type ?? 'item'}`
+      break
+    case 'status_changed':
+      verb = 'changed status'
+      highlight = <ChangeHighlight from={formatStatusValue(from)} to={formatStatusValue(to)} toClassName={typeClassName} />
+      break
+    case 'title_changed':
+      verb = 'renamed'
+      highlight = <ChangeHighlight from={from} to={to} toClassName={typeClassName} />
+      break
+    case 'assigned':
+      if (toName || to) {
+        verb = 'assigned to'
+        highlight = <ChangeHighlight to={toName ?? 'someone'} toClassName={typeClassName} />
+      } else {
+        verb = 'removed the assignee'
+        highlight = fromName ? <ChangeHighlight from={fromName} toClassName={typeClassName} /> : null
+      }
+      break
+    case 'due_date_changed':
+      if (to) {
+        verb = 'changed due date'
+        highlight = <ChangeHighlight from={formatDateValue(from)} to={formatDateValue(to)} toClassName={typeClassName} />
+      } else {
+        verb = 'removed the due date'
+        highlight = from ? <ChangeHighlight from={formatDateValue(from)} toClassName={typeClassName} /> : null
+      }
+      break
+    case 'moved':
+      if (activity.subject?.type === 'event') {
+        verb = 'rescheduled'
+      } else {
+        verb = 'moved'
+        highlight = <ChangeHighlight from={from} to={to} toClassName={typeClassName} />
+      }
+      break
+    case 'file_uploaded':
+      verb = 'uploaded'
+      highlight = <ChangeHighlight to={asText(properties.filename) ?? 'a file'} toClassName={typeClassName} />
+      break
+    case 'dependency_changed':
+      if (to) {
+        verb = 'added a dependency'
+        highlight = <ChangeHighlight to={toTitle ?? 'another task'} toClassName={typeClassName} />
+      } else {
+        verb = 'removed the dependency'
+        highlight = fromTitle ? <ChangeHighlight from={fromTitle} toClassName={typeClassName} /> : null
+      }
+      break
+    case 'subtask_added':
+      verb = 'added subtask'
+      highlight = <ChangeHighlight to={asText(properties.title) ?? 'Untitled'} toClassName={typeClassName} />
+      break
+    case 'completed':
+      verb = properties.completed ? 'marked complete' : 'marked incomplete'
+      break
+    case 'commented':
+      verb = 'commented'
+      highlight = asText(properties.excerpt)
+        ? <ChangeHighlight to={`“${asText(properties.excerpt)}”`} toClassName={typeClassName} />
+        : null
+      break
+    case 'liked':
+      verb = 'liked'
+      break
+    case 'branch_created':
+      verb = 'created branch'
+      highlight = <ChangeHighlight to={asText(properties.branch) ?? 'unknown'} toClassName={typeClassName} />
+      break
+    default:
+      break
+  }
+
+  return (
+    <>
+      <span className="text-muted-foreground">{verb}</span>
+      {highlight ? <> {highlight}</> : null}
+    </>
+  )
+}
+
 interface ActivityTimelineProps {
   activities: Activity[]
   emptyTitle?: string
   emptyDescription?: string
   className?: string
   highlightedId?: string | null
+  showSubject?: boolean
 }
 
 export function ActivityTimeline({
@@ -87,6 +243,7 @@ export function ActivityTimeline({
   emptyDescription = 'Creates, updates, and comments show up here.',
   className = '',
   highlightedId,
+  showSubject = true,
 }: ActivityTimelineProps) {
   if (activities.length === 0) {
     return (
@@ -142,9 +299,9 @@ export function ActivityTimeline({
                       <div className="min-w-0 flex-1">
                         <p className="text-[13px] leading-5">
                           <span className="font-medium">{activity.user?.name ?? 'Someone'}</span>{' '}
-                          <span className="text-muted-foreground">{activity.description}</span>
+                          <ActivityDescription activity={activity} typeClassName={type.className} />
                         </p>
-                        {activity.subject?.name && (
+                        {showSubject && activity.subject?.name && (
                           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                             {activity.subject.url ? (
                               <Link
@@ -162,7 +319,7 @@ export function ActivityTimeline({
                             )}
                             {activity.subject.project && activity.subject.type !== 'project' && (
                               <Link
-                                href={`/projects/${activity.subject.project.slug}`}
+                                href={route('projects.show', activity.subject.project.slug)}
                                 className="text-[11px] text-muted-foreground hover:text-foreground hover:underline"
                               >
                                 {activity.subject.project.name}

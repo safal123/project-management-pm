@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Calendar\GetProjectCalendar;
+use App\Actions\Invitation\GetShareableInviteLink;
 use App\Actions\Project\CreateProject;
 use App\Actions\Project\RemoveProjectMember;
 use App\Exceptions\CannotRemoveMemberException;
@@ -10,38 +12,24 @@ use App\Http\Requests\ProjectCreateRequest;
 use App\Http\Requests\ProjectUpdateRequest;
 use App\Http\Resources\ProjectResource;
 use App\Http\Resources\TaskResource;
-use App\Models\Invitation;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ProjectController extends Controller
 {
-    public function index()
-    {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        abort_if(! $user->current_workspace_id, 403, 'Please create a workspace first.');
-        $projects = Project::query()
-            ->forUserAndWorkspace($user, $user->currentWorkspace)
-            ->get();
-
-        return Inertia::render('projects/index', [
-            'projects' => $projects,
-        ]);
-    }
-
-    public function store(ProjectCreateRequest $request, CreateProject $createProject)
+    public function store(Workspace $workspace, ProjectCreateRequest $request, CreateProject $createProject)
     {
         try {
             $validated = $request->validated();
             $project = $createProject->execute(auth()->user(), $validated);
 
             return redirect()
-                ->route('projects.show', $project->slug)
+                ->route('projects.show', ['workspace' => $project->workspace_id, 'project' => $project->slug])
                 ->withSuccess('Project created successfully');
         } catch (ProjectCreationException $e) {
             return redirect()
@@ -50,8 +38,13 @@ class ProjectController extends Controller
         }
     }
 
-    public function show(Project $project, Request $request)
-    {
+    public function show(
+        Workspace $workspace,
+        Project $project,
+        Request $request,
+        GetShareableInviteLink $shareableInviteLink,
+        GetProjectCalendar $getProjectCalendar
+    ) {
         /** @var User $user */
         $user = Auth::user();
         abort_unless(
@@ -63,7 +56,7 @@ class ProjectController extends Controller
 
         $project->load([
             'createdBy',
-            'invitations' => fn ($q) => $q
+            'invitations' => fn($q) => $q
                 ->whereNotNull('email')
                 ->where('expires_at', '>=', now())
                 ->with([
@@ -71,7 +64,7 @@ class ProjectController extends Controller
                     'invitedTo',
                 ]),
             'gitIntegration.connectedBy',
-            'workspace.users' => fn ($q) => $q
+            'workspace.users' => fn($q) => $q
                 ->with('media')
                 ->orderBy('users.name'),
         ]);
@@ -89,21 +82,21 @@ class ProjectController extends Controller
             ])
             ->withCount([
                 'likes',
-                'likes as is_liked_by_user' => fn ($q) => $q->where('user_id', $userId),
+                'likes as is_liked_by_user' => fn($q) => $q->where('user_id', $userId),
                 'comments',
             ])
             ->orderBy('order');
 
         $paginatedTasks = $request->get('tab') === 'table'
             ? (clone $taskQuery)
-                ->whereHas('parentTask', fn ($query) => $query->whereNull('parent_task_id'))
-                ->paginate(10)
-                ->withQueryString()
+            ->whereHas('parentTask', fn($query) => $query->whereNull('parent_task_id'))
+            ->paginate(10)
+            ->withQueryString()
             : null;
 
         $payload = [
             'project' => ProjectResource::make($project),
-            'invite_link' => Invitation::shareableLinkFor($project, $user),
+            'invite_link' => $shareableInviteLink->execute($user, $workspace, $project),
             'tasks' => TaskResource::collection((clone $taskQuery)->get()),
             'paginatedTasks' => $paginatedTasks
                 ? TaskResource::collection($paginatedTasks)
@@ -111,13 +104,17 @@ class ProjectController extends Controller
         ];
 
         if ($request->get('tab') === 'calendar') {
-            $payload = array_merge($payload, app(CalendarController::class)->payload($request, $project));
+            $payload = array_merge($payload, $getProjectCalendar->execute(
+                $project,
+                $request->input('date'),
+                $request->input('view'),
+            ));
         }
 
         return Inertia::render('projects/project/index', $payload);
     }
 
-    public function update(ProjectUpdateRequest $request, Project $project)
+    public function update(Workspace $workspace, ProjectUpdateRequest $request, Project $project)
     {
         $validated = $request->validated();
 
@@ -145,7 +142,7 @@ class ProjectController extends Controller
         }
     }
 
-    public function destroy(Project $project)
+    public function destroy(Workspace $workspace, Project $project)
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
@@ -153,6 +150,6 @@ class ProjectController extends Controller
 
         $project->delete();
 
-        return redirect()->route('projects.index')->with('success', 'Project deleted successfully');
+        return redirect()->route('dashboard', $project->workspace_id)->with('success', 'Project deleted successfully');
     }
 }
