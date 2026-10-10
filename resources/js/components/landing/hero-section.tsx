@@ -1,113 +1,53 @@
-import { Link } from '@inertiajs/react'
-import { Button } from '@/components/ui/button'
-import { CheckCircle2 } from 'lucide-react'
+import { Button } from '@/components/ui/button';
+import { Link } from '@inertiajs/react';
+import { ArrowRight, Check } from 'lucide-react';
 
 export function HeroSection() {
-  return (
-    <section className="border-b border-border">
-      <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 lg:grid-cols-2 lg:gap-12 lg:px-6 lg:py-16">
-        <div className="space-y-4">
-          <p className="inline-flex rounded-md border border-border bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-            Project management for teams
-          </p>
-          <h1 className="max-w-xl text-[28px] font-semibold leading-tight tracking-tight md:text-4xl">
-            Plan work, ship faster, stay aligned
-          </h1>
-          <p className="max-w-lg text-[13px] leading-relaxed text-muted-foreground">
-            Boards, tables, and calendars in one workspace. Assign owners, track due dates, and keep every project moving without the noise.
-          </p>
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <Link href="/register">
-              <Button size="sm" className="h-8 px-3 text-[13px]">
-                Get started
-              </Button>
-            </Link>
-            <a href="#features">
-              <Button variant="outline" size="sm" className="h-8 px-3 text-[13px]">
-                See features
-              </Button>
-            </a>
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-border bg-muted/40 p-2 dark:bg-neutral-950/50">
-          <div className="overflow-hidden rounded-md border border-border bg-background shadow-sm">
-            <div className="flex items-center gap-2 border-b border-border px-3 py-2">
-              <span className="size-2 rounded-full bg-neutral-300 dark:bg-neutral-600" />
-              <span className="size-2 rounded-full bg-neutral-300 dark:bg-neutral-600" />
-              <span className="size-2 rounded-full bg-neutral-300 dark:bg-neutral-600" />
-              <span className="ml-2 rounded-md bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
-                projectflow.app / board
-              </span>
+    return (
+        <section className="landing-hero border-border border-b">
+            <div className="landing-container py-12 sm:pt-16 sm:pb-16">
+                <div className="mx-auto max-w-2xl text-center">
+                    <p className="landing-eyebrow text-muted-foreground">Project management, simplified</p>
+                    <h1 className="mx-auto mt-5 max-w-lg text-[clamp(2rem,3.5vw,2.75rem)] leading-[1.15] font-semibold tracking-[-0.04em] text-balance">
+                        Good work starts with a clear plan.
+                    </h1>
+                    <p className="text-muted-foreground mx-auto mt-5 max-w-xl text-[15px] leading-7">
+                        Keep projects organized, give every task an owner, and stay on top of what’s next. One shared workspace for your team’s
+                        everyday work.
+                    </p>
+                    <div className="mt-6 flex flex-wrap justify-center gap-3">
+                        <Button asChild className="landing-button">
+                            <Link href="/register">
+                                Get started <ArrowRight />
+                            </Link>
+                        </Button>
+                        <Button asChild variant="outline" className="landing-button">
+                            <a href="#features">Explore features</a>
+                        </Button>
+                    </div>
+                    <p className="text-muted-foreground mt-4 flex items-center justify-center gap-2 text-xs">
+                        <Check className="size-3.5" /> Tasks, conversations, and deadlines in one place.
+                    </p>
+                </div>
+                <figure className="border-border bg-card mt-10 overflow-hidden rounded-lg border p-1 sm:mt-12 sm:p-2">
+                    <img
+                        src="/images/dashboard-banner.png"
+                        alt="ProjectFlow desktop dashboard showing project totals, task activity, task status, and recent updates."
+                        width={3456}
+                        height={1920}
+                        fetchPriority="high"
+                        className="block h-auto w-full rounded-sm dark:hidden"
+                    />
+                    <img
+                        src="/images/dashboard-banner-dark.png"
+                        alt="ProjectFlow desktop dashboard showing project totals, task activity, task status, and recent updates in dark mode."
+                        width={3446}
+                        height={1896}
+                        fetchPriority="high"
+                        className="hidden h-auto w-full rounded-sm dark:block"
+                    />
+                </figure>
             </div>
-            <div className="grid grid-cols-3 gap-2 bg-muted/50 p-2.5 dark:bg-neutral-950/70">
-              <MockColumn
-                title="To do"
-                count="3"
-                cards={[
-                  { title: 'Research API', meta: 'Low' },
-                  { title: 'Design system', meta: 'High', active: true },
-                  { title: 'Setup database', meta: 'Med' },
-                ]}
-              />
-              <MockColumn
-                title="In progress"
-                count="1"
-                cards={[{ title: 'Hero redesign', meta: 'High', progress: true }]}
-              />
-              <MockColumn
-                title="Done"
-                count="2"
-                cards={[
-                  { title: 'Landing page', meta: 'Done', done: true },
-                  { title: 'Auth bugfix', meta: 'Done', done: true },
-                ]}
-              />
-            </div>
-          </div>
-          <div className="mt-2 hidden items-center gap-2 rounded-md border border-border bg-background px-2.5 py-1.5 text-[12px] text-muted-foreground sm:flex">
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            Design system moved to In progress
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function MockColumn({
-  title,
-  count,
-  cards,
-}: {
-  title: string
-  count: string
-  cards: { title: string; meta: string; active?: boolean; progress?: boolean; done?: boolean }[]
-}) {
-  return (
-    <div className="rounded-md bg-neutral-100 p-1.5 dark:bg-neutral-950/80">
-      <div className="mb-1.5 flex items-center justify-between px-1">
-        <span className="text-[11px] font-medium text-foreground">{title}</span>
-        <span className="text-[11px] text-muted-foreground">{count}</span>
-      </div>
-      <div className="space-y-1.5">
-        {cards.map((card) => (
-          <div
-            key={card.title}
-            className={`rounded-md border bg-white px-2 py-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-neutral-800 ${
-              card.active
-                ? 'border-neutral-300 dark:border-white/20'
-                : 'border-neutral-200/90 dark:border-white/10'
-            } ${card.done ? 'opacity-70' : ''}`}
-          >
-            <p className="truncate text-[12px] font-medium">{card.title}</p>
-            <div className="mt-1 flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground">{card.meta}</span>
-              {card.progress && <span className="h-1 w-8 rounded-full bg-neutral-300 dark:bg-neutral-600" />}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
+        </section>
+    );
 }
