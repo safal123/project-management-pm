@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  frontend:
+    name: Frontend (${{ matrix.check }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        check: [lint, format, types, build]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Check frontend
+        env:
+          CHECK: ${{ matrix.check }}
+        run: |
+          case "$CHECK" in
+            lint) npm run lint:check ;;
+            format) npm run format:check ;;
+            types) npm run types ;;
+            build) npm run build ;;
+            *) exit 1 ;;
+          esac
+
+  php-style:
+    name: PHP formatting
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-progress --no-scripts
+      - run: vendor/bin/pint --test
+
+  tests:
+    name: Laravel tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_sqlite, sqlite3
+          tools: composer:v2
+          coverage: none
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Prepare isolated test environment
+        run: cp .env.example .env
+      - run: composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
+      - run: php artisan key:generate
+      - run: npm ci
+      - run: npm run build
+      - run: vendor/bin/pest --compact
+
+  merge-checks:
+    name: Merge checks
+    if: ${{ always() }}
+    needs: [frontend, php-style, tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require every check to pass
+        env:
+          FRONTEND: ${{ needs.frontend.result }}
+          PHP_STYLE: ${{ needs.php-style.result }}
+          TESTS: ${{ needs.tests.result }}
+        run: |
+          test "$FRONTEND" = success
+          test "$PHP_STYLE" = success
+          test "$TESTS" = success
+
+  deploy:
+    name: Request Laravel Cloud deployment
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: merge-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: production
+    concurrency:
+      group: laravel-cloud-production
+      cancel-in-progress: false
+    steps:
+      - name: Deploy the tested commit
+        env:
+          DEPLOY_HOOK: ${{ secrets.LARAVEL_CLOUD_DEPLOY_HOOK }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo '::error::Set LARAVEL_CLOUD_DEPLOY_HOOK in the production environment secrets.'
+            exit 1
+          fi
+          case "$DEPLOY_HOOK" in
+            https://*) ;;
+            *) echo '::error::The deployment hook must use HTTPS.'; exit 1 ;;
+          esac
+          separator='?'
+          case "$DEPLOY_HOOK" in *\?*) separator='&' ;; esac
+          curl --fail --silent --show-error --output /dev/null \
+            --connect-timeout 10 --max-time 60 --request POST \
+            "${DEPLOY_HOOK}${separator}commit_hash=${COMMIT_SHA}"
+          echo 'Deployment requested. Check Laravel Cloud for build and release status.' >> "$GITHUB_STEP_SUMMARY"
