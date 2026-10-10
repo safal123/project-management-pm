@@ -7,7 +7,7 @@ uses(CreatesTestData::class);
 
 test('guests cannot access the dashboard', function () {
     $this
-        ->get(route('dashboard'))
+        ->get(wsRoute('dashboard'))
         ->assertRedirect(route('login'));
 });
 
@@ -15,7 +15,7 @@ test('authenticated user can access the dashboard', function () {
     ['user' => $user] = $this->createUserWithWorkspace();
 
     actingAs($user)
-        ->get(route('dashboard'))
+        ->get(wsRoute('dashboard'))
         ->assertOk();
 });
 
@@ -24,7 +24,7 @@ test('dashboard displays the correct projects and workspaces count for the user'
 
     $this->createProjectsForUser($user, $workspaces->first(), count: 3);
     actingAs($user)
-        ->get(route('dashboard'))
+        ->get(wsRoute('dashboard'))
         ->assertOk()
         ->assertInertia(
             fn(\Inertia\Testing\AssertableInertia $page) => $page
@@ -34,6 +34,29 @@ test('dashboard displays the correct projects and workspaces count for the user'
         );
 });
 
+test('visiting another workspace dashboard switches the current workspace', function () {
+    ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace(workspaceCount: 2);
+    $current = $workspaces->first();
+    $next = $workspaces->last();
+
+    $this->createProjectsForUser($user, $current, count: 2);
+    $this->createProjectsForUser($user, $next, count: 1);
+
+    expect($user->current_workspace_id)->toBe($current->id);
+
+    actingAs($user)
+        ->get(wsRoute('dashboard', [], $next))
+        ->assertOk()
+        ->assertInertia(
+            fn (\Inertia\Testing\AssertableInertia $page) => $page
+                ->component('dashboard')
+                ->has('projects', 1)
+                ->where('auth.user.current_workspace_id', $next->id)
+        );
+
+    expect($user->fresh()->current_workspace_id)->toBe($next->id);
+});
+
 test('dashboard includes a 14-day task activity series', function () {
     ['user' => $user, 'workspaces' => $workspaces] = $this->createUserWithWorkspace();
     $project = $this->createProjectsForUser($user, $workspaces->first())->first();
@@ -41,7 +64,7 @@ test('dashboard includes a 14-day task activity series', function () {
     $this->createTaskForProject($user, $project, ['status' => 'done']);
 
     actingAs($user)
-        ->get(route('dashboard'))
+        ->get(wsRoute('dashboard'))
         ->assertOk()
         ->assertInertia(
             fn (\Inertia\Testing\AssertableInertia $page) => $page

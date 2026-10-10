@@ -2,42 +2,51 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\ActivityResource;
+use App\Actions\Activity\GetActivityFeed;
+use App\Actions\Activity\ListWorkspaceActivities;
+use App\Http\Requests\WorkspaceActivityRequest;
 use App\Models\Activity;
-use App\Models\Event;
-use App\Models\Project;
-use App\Models\Task;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class ActivityController extends Controller
 {
     /**
-     * Polymorphic model map — extend this when adding activity logging to new entities.
+     * Workspace activity timeline for the current workspace.
      */
-    public const SUBJECT_MODELS = [
-        'task' => Task::class,
-        'project' => Project::class,
-        'event' => Event::class,
-    ];
+    public function workspace(
+        Workspace $workspace,
+        WorkspaceActivityRequest $request,
+        ListWorkspaceActivities $listWorkspaceActivities,
+    ): Response {
+        return Inertia::render(
+            'activity/index',
+            $listWorkspaceActivities->execute($workspace, $request->user(), $request->validated()),
+        );
+    }
 
     /**
-     * List the activity feed for a subject, newest first.
+     * List the activity feed for a subject, project, or workspace, newest first.
      */
-    public function index(Request $request)
+    public function index(Workspace $workspace, Request $request, GetActivityFeed $feed)
     {
-        $request->validate([
-            'subject_type' => ['required', 'string', Rule::in(array_keys(self::SUBJECT_MODELS))],
-            'subject_id' => ['required', 'string'],
-        ]);
-
-        $modelClass = self::SUBJECT_MODELS[$request->string('subject_type')->toString()];
-        $subject = $modelClass::query()->findOrFail($request->input('subject_id'));
-
-        $this->authorize('view', [Activity::class, $subject]);
-
-        $activities = $subject->activities()->with('user')->get();
-
-        return ActivityResource::collection($activities);
+        return match ($request->input('scope')) {
+            'workspace' => $feed->forWorkspace($workspace),
+            'project' => $feed->forProject(
+                $workspace,
+                $request->validate([
+                    'project_id' => ['required', 'string', 'exists:projects,id'],
+                ])['project_id'],
+            ),
+            default => $feed->forSubject(
+                $request->validate([
+                    'subject_type' => ['required', 'string', Rule::in(array_keys(Activity::SUBJECT_MODELS))],
+                    'subject_id' => ['required', 'string'],
+                ]),
+            ),
+        };
     }
 }

@@ -25,12 +25,12 @@ export default function ProjectShow() {
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
-      title: 'Projects',
-      href: '/projects',
+      title: 'Dashboard',
+      href: route('dashboard'),
     },
     {
       title: project.name,
-      href: `/projects/${project.slug}`,
+      href: route('projects.show', project.slug),
     },
   ];
 

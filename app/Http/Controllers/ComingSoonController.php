@@ -7,25 +7,7 @@ use Inertia\Response;
 
 class ComingSoonController extends Controller
 {
-    public function people(): Response
-    {
-        return $this->page(
-            title: 'People',
-            description: 'Invite teammates and manage who has access to this workspace.',
-            icon: 'users',
-        );
-    }
-
-    public function activity(): Response
-    {
-        return $this->page(
-            title: 'Activities',
-            description: 'Follow workspace activity across projects, tasks, and comments.',
-            icon: 'clock',
-        );
-    }
-
-    public function emails(): Response
+    public function emails(\App\Models\Workspace $workspace): Response
     {
         return $this->page(
             title: 'Emails',
@@ -34,7 +16,7 @@ class ComingSoonController extends Controller
         );
     }
 
-    public function billing(): Response
+    public function billing(\App\Models\Workspace $workspace): Response
     {
         return $this->page(
             title: 'Billing',
@@ -43,7 +25,7 @@ class ComingSoonController extends Controller
         );
     }
 
-    public function archive(): Response
+    public function archive(\App\Models\Workspace $workspace): Response
     {
         return $this->page(
             title: 'Archive',

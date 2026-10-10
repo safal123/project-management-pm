@@ -30,6 +30,19 @@ class Task extends Model
 
     public const PRIORITY_HIGH = 'high';
 
+    public const COLORS = [
+        'gray',
+        'sky',
+        'teal',
+        'emerald',
+        'amber',
+        'orange',
+        'rose',
+        'violet',
+        'indigo',
+        'slate',
+    ];
+
     public $fillable = [
         'title',
         'description',
@@ -88,6 +101,21 @@ class Task extends Model
         return $this->belongsTo(Task::class, 'parent_task_id');
     }
 
+    public function isColumn(): bool
+    {
+        return $this->parent_task_id === null;
+    }
+
+    public function scopeColumns($query)
+    {
+        return $query->whereNull('parent_task_id');
+    }
+
+    public function subtasks()
+    {
+        return $this->hasMany(Task::class, 'parent_task_id')->orderBy('order');
+    }
+
     public function dependsOn()
     {
         return $this->belongsTo(Task::class, 'depends_on_task_id');
@@ -135,5 +163,13 @@ class Task extends Model
             self::PRIORITY_MEDIUM,
             self::PRIORITY_HIGH,
         ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function getColorOptions(): array
+    {
+        return self::COLORS;
     }
 }

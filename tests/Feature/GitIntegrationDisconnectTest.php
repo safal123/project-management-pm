@@ -20,7 +20,7 @@ test('project member can disconnect the repository', function () {
     ]);
 
     actingAs($user)
-        ->delete(route('git-integrations.destroy', $project))
+        ->delete(wsRoute('git-integrations.destroy', ['project' => $project]))
         ->assertRedirect();
 
     expect(ProjectIntegration::query()->where('project_id', $project->id)->exists())->toBeFalse();
@@ -40,11 +40,9 @@ test('user who is not a project member cannot disconnect the repository', functi
     ]);
 
     ['user' => $stranger] = $this->createUserWithWorkspace();
-    $stranger->update(['current_workspace_id' => $workspaces->first()->id]);
-    $stranger->workspaces()->syncWithoutDetaching([$workspaces->first()->id]);
 
     actingAs($stranger)
-        ->delete(route('git-integrations.destroy', $project))
+        ->delete(wsRoute('git-integrations.destroy', ['project' => $project], $workspaces->first()))
         ->assertForbidden();
 
     expect(ProjectIntegration::query()->where('project_id', $project->id)->exists())->toBeTrue();

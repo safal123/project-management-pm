@@ -16,18 +16,19 @@ import { SharedData, Workspace } from '@/types'
 import { Archive, Clock, CreditCard, Folder, LayoutDashboard, Mail, Plus, Settings, Users } from 'lucide-react'
 import WorkspaceSelector from './workspace-switcher'
 import { NavUser } from '@/components/nav-user'
+import Can from '@/components/can'
+import { ProjectModal } from '@/components/modals/project-modal'
 
 const mainNav = [
-  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Projects', url: '/projects', icon: Folder },
+  { title: 'Dashboard', route: 'dashboard', icon: LayoutDashboard },
 ]
 
 const workspaceNav = [
-  { title: 'People', url: '/people', icon: Users },
-  { title: 'Activities', url: '/activity', icon: Clock },
-  { title: 'Emails', url: '/emails', icon: Mail },
-  { title: 'Billing', url: '/billing', icon: CreditCard },
-  { title: 'Archive', url: '/archive', icon: Archive },
+  { title: 'People', route: 'people.index', icon: Users },
+  { title: 'Activities', route: 'activity.index', icon: Clock },
+  { title: 'Emails', route: 'emails.index', icon: Mail },
+  { title: 'Billing', route: 'billing.index', icon: CreditCard },
+  { title: 'Archive', route: 'archive.index', icon: Archive },
   { title: 'Settings', url: '/settings', icon: Settings },
 ]
 
@@ -50,33 +51,40 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainNav.map((item) => (
+              {mainNav.map((item) => {
+                const href = route(item.route)
+                return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     tooltip={item.title}
                     asChild
-                    isActive={path === item.url}
+                    isActive={path === new URL(href, window.location.origin).pathname}
                     className={navItemClass}
                   >
-                    <Link href={item.url} prefetch>
+                    <Link href={href} prefetch>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+                )
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup>
           <SidebarGroupLabel>Projects</SidebarGroupLabel>
-          <SidebarGroupAction asChild title="New project" className="top-1.5 right-2 [&>svg]:size-3.5">
-            <Link href="/projects?create=1" prefetch>
-              <Plus />
-              <span className="sr-only">New project</span>
-            </Link>
-          </SidebarGroupAction>
+          <Can permission="project.create">
+            <ProjectModal
+              trigger={
+                <SidebarGroupAction title="New project" className="top-1.5 right-2 [&>svg]:size-3.5">
+                  <Plus />
+                  <span className="sr-only">New project</span>
+                </SidebarGroupAction>
+              }
+            />
+          </Can>
           <SidebarGroupContent>
             <SidebarMenu>
               {projects.map((project) => (
@@ -84,10 +92,10 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     tooltip={project.name}
                     asChild
-                    isActive={path === `/projects/${project.slug}` || path.startsWith(`/projects/${project.slug}/`)}
+                    isActive={path.includes(`/projects/${project.slug}`)}
                     className={navItemClass}
                   >
-                    <Link href={`/projects/${project.slug}`} prefetch>
+                    <Link href={route('projects.show', project.slug)} prefetch>
                       <Folder />
                       <span>{project.name}</span>
                     </Link>
@@ -102,21 +110,25 @@ export function AppSidebar() {
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {workspaceNav.map((item) => (
+              {workspaceNav.map((item) => {
+                const href = 'route' in item ? route(item.route) : item.url
+                const pathname = href.startsWith('http') ? new URL(href).pathname : href
+                return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     tooltip={item.title}
                     asChild
-                    isActive={path === item.url || path.startsWith(item.url + '/')}
+                    isActive={path === pathname || path.startsWith(pathname + '/')}
                     className={navItemClass}
                   >
-                    <Link href={item.url} prefetch>
+                    <Link href={href} prefetch>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+                )
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

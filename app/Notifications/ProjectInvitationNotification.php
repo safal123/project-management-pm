@@ -40,7 +40,10 @@ class ProjectInvitationNotification extends Notification implements ShouldQueue
             ->subject('Project Invitation')
             ->greeting('Hello, '.$this->invitedBy->name)
             ->line('You have been invited to join the project: '.$this->project->name)
-            ->action('View Project', route('projects.show', $this->project->id))
+            ->action('View Project', route('projects.show', [
+                'workspace' => $this->project->workspace_id,
+                'project' => $this->project->slug,
+            ]))
             ->line('If you believe this invitation was a mistake, you can ignore this message.');
     }
 

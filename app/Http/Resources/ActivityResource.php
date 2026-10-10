@@ -6,6 +6,7 @@ use App\Models\Activity;
 use App\Models\Event;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,18 +15,29 @@ class ActivityResource extends JsonResource
     public static $wrap = null;
 
     /**
+     * @var array<string, string|null>
+     */
+    protected static array $userNames = [];
+
+    /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
+        $properties = $this->resolvedProperties();
+
         return [
             'id' => $this->id,
             'type' => $this->type,
-            'properties' => $this->properties,
+            'properties' => $properties,
             'user' => new UserResource($this->whenLoaded('user')),
-            'description' => $this->description(),
+            'subject' => $this->when(
+                $this->relationLoaded('subject'),
+                fn () => $this->subjectPayload(),
+            ),
+            'description' => $this->description($properties),
             'created_at' => $this->created_at,
         ];
     }
@@ -34,41 +46,196 @@ class ActivityResource extends JsonResource
      * Build a human-readable description for the activity, so the frontend
      * doesn't need any per-type rendering logic.
      */
-    protected function description(): string
+    /**
+     * @param  array<string, mixed>  $properties
+     */
+    protected function description(array $properties): string
     {
-        $noun = match ($this->subject_type) {
+        $noun = $this->subjectNoun();
+        $label = $this->subjectLabel();
+
+        return match ($this->type) {
+            Activity::TYPE_CREATED => "created {$label}",
+            Activity::TYPE_STATUS_CHANGED => sprintf(
+                'changed status of %s from "%s" to "%s"',
+                $label,
+                $properties['from'] ?? 'unknown',
+                $properties['to'] ?? 'unknown',
+            ),
+            Activity::TYPE_ASSIGNED => ($properties['to_name'] ?? $properties['to'] ?? null)
+                ? sprintf(
+                    'assigned %s to %s',
+                    $label,
+                    $properties['to_name'] ?? 'someone',
+                )
+                : "removed the assignee from {$label}",
+            Activity::TYPE_TITLE_CHANGED => sprintf(
+                'renamed %s from "%s" to "%s"',
+                $label,
+                $properties['from'] ?? 'untitled',
+                $properties['to'] ?? 'untitled',
+            ),
+            Activity::TYPE_DUE_DATE_CHANGED => ($properties['to'] ?? null)
+                ? sprintf(
+                    'changed the due date of %s%s to %s',
+                    $label,
+                    ($properties['from'] ?? null) ? ' from '.$properties['from'] : '',
+                    $properties['to'],
+                )
+                : "removed the due date from {$label}",
+            Activity::TYPE_FILE_UPLOADED => sprintf(
+                'uploaded "%s" to %s',
+                $properties['filename'] ?? 'a file',
+                $label,
+            ),
+            Activity::TYPE_DEPENDENCY_CHANGED => ($properties['to'] ?? null)
+                ? sprintf(
+                    'added a dependency on "%s" for %s',
+                    $properties['to_title'] ?? 'another task',
+                    $label,
+                )
+                : "removed the dependency from {$label}",
+            Activity::TYPE_SUBTASK_ADDED => sprintf(
+                'added subtask "%s" to %s',
+                $properties['title'] ?? 'Untitled',
+                $label,
+            ),
+            Activity::TYPE_MOVED => $noun === 'event'
+                ? "rescheduled {$label}"
+                : sprintf(
+                    'moved %s from "%s" to "%s"',
+                    $label,
+                    $properties['from'] ?? 'unknown',
+                    $properties['to'] ?? 'unknown',
+                ),
+            Activity::TYPE_COMPLETED => ($properties['completed'] ?? false)
+                ? "marked {$label} complete"
+                : "marked {$label} incomplete",
+            Activity::TYPE_COMMENTED => sprintf('commented on %s: "%s"', $label, $properties['excerpt'] ?? ''),
+            Activity::TYPE_LIKED => "liked {$label}",
+            Activity::TYPE_BRANCH_CREATED => sprintf('created branch "%s" on %s', $properties['branch'] ?? 'unknown', $label),
+            default => "updated {$label}",
+        };
+    }
+
+    /**
+     * @return array{id: mixed, type: string, name: ?string, url: ?string, project: ?array{id: mixed, name: string, slug: string}}
+     */
+    protected function subjectPayload(): ?array
+    {
+        $subject = $this->subject;
+
+        if (! $subject) {
+            return null;
+        }
+
+        $project = $subject instanceof Project
+            ? $subject
+            : ($subject->relationLoaded('project') ? $subject->project : null);
+
+        return [
+            'id' => $subject->getKey(),
+            'type' => $this->subjectNoun(),
+            'name' => $this->subjectName(),
+            'url' => $this->subjectUrl(),
+            'project' => $project ? [
+                'id' => $project->id,
+                'name' => $project->name,
+                'slug' => $project->slug,
+            ] : null,
+        ];
+    }
+
+    protected function subjectNoun(): string
+    {
+        return match ($this->subject_type) {
             Task::class => 'task',
             Project::class => 'project',
             Event::class => 'event',
             default => 'item',
         };
+    }
 
+    protected function subjectLabel(): string
+    {
+        $name = $this->subjectName();
+
+        if ($name) {
+            return $this->subjectNoun().' "'.$name.'"';
+        }
+
+        return 'this '.$this->subjectNoun();
+    }
+
+    protected function subjectName(): ?string
+    {
+        if (! $this->relationLoaded('subject') || ! $this->subject) {
+            return null;
+        }
+
+        return $this->subject->title ?? $this->subject->name ?? null;
+    }
+
+    protected function subjectUrl(): ?string
+    {
+        if (! $this->relationLoaded('subject') || ! $this->subject) {
+            return null;
+        }
+
+        $subject = $this->subject;
+
+        if ($subject instanceof Task && $subject->relationLoaded('project') && $subject->project) {
+            return route('projects.show', [
+                'workspace' => $subject->project->workspace_id,
+                'project' => $subject->project->slug,
+            ], false);
+        }
+
+        if ($subject instanceof Project) {
+            return route('projects.show', [
+                'workspace' => $subject->workspace_id,
+                'project' => $subject->slug,
+            ], false);
+        }
+
+        if ($subject instanceof Event && $subject->relationLoaded('project') && $subject->project) {
+            return route('projects.show', [
+                'workspace' => $subject->project->workspace_id,
+                'project' => $subject->project->slug,
+                'tab' => 'calendar',
+            ], false);
+        }
+
+        return null;
+    }
+
+    /**
+     * Fill assignee names when older records only stored user ids.
+     *
+     * @return array<string, mixed>
+     */
+    protected function resolvedProperties(): array
+    {
         $properties = $this->properties ?? [];
 
-        return match ($this->type) {
-            Activity::TYPE_CREATED => "created this {$noun}",
-            Activity::TYPE_STATUS_CHANGED => sprintf(
-                'changed status from "%s" to "%s"',
-                $properties['from'] ?? 'unknown',
-                $properties['to'] ?? 'unknown',
-            ),
-            Activity::TYPE_ASSIGNED => ($properties['to'] ?? null)
-                ? 'updated the assignee'
-                : 'removed the assignee',
-            Activity::TYPE_MOVED => $noun === 'event'
-                ? 'rescheduled this event'
-                : sprintf(
-                    'moved this task from "%s" to "%s"',
-                    $properties['from'] ?? 'unknown',
-                    $properties['to'] ?? 'unknown',
-                ),
-            Activity::TYPE_COMPLETED => ($properties['completed'] ?? false)
-                ? 'marked this event complete'
-                : 'marked this event incomplete',
-            Activity::TYPE_COMMENTED => sprintf('commented: "%s"', $properties['excerpt'] ?? ''),
-            Activity::TYPE_LIKED => "liked this {$noun}",
-            Activity::TYPE_BRANCH_CREATED => sprintf('created branch "%s"', $properties['branch'] ?? 'unknown'),
-            default => "updated this {$noun}",
-        };
+        if ($this->type !== Activity::TYPE_ASSIGNED) {
+            return $properties;
+        }
+
+        foreach (['from' => 'from_name', 'to' => 'to_name'] as $idKey => $nameKey) {
+            if (! empty($properties[$nameKey]) || empty($properties[$idKey])) {
+                continue;
+            }
+
+            $userId = (string) $properties[$idKey];
+
+            if (! array_key_exists($userId, self::$userNames)) {
+                self::$userNames[$userId] = User::query()->whereKey($userId)->value('name');
+            }
+
+            $properties[$nameKey] = self::$userNames[$userId];
+        }
+
+        return $properties;
     }
 }

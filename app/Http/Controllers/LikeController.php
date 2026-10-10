@@ -9,6 +9,7 @@ use App\Models\Media;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,7 +27,7 @@ class LikeController extends Controller
         'user' => User::class,
     ];
 
-    public function toggle(Request $request)
+    public function toggle(Workspace $workspace, Request $request)
     {
         $request->validate([
             'likeable_type' => 'required|string|in:' . implode(',', array_keys(self::LIKEABLE_MODELS)),

@@ -4,7 +4,6 @@ namespace App\Listeners;
 
 use App\Models\Workspace;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -28,10 +27,10 @@ class CreateDefaultWorkspace
             Log::info('Creating default workspace for user: ' . $user->id);
             $workspace = Workspace::create([
                 'name' => 'My Workspace',
-                'slug' => Str::slug($user->name),
+                'slug' => Workspace::uniqueSlugFor($user->name ?: 'My Workspace'),
                 'created_by' => $user->id,
             ]);
-            $workspace->users()->attach($user->id);
+            $workspace->users()->attach($user->id, ['role' => Workspace::ROLE_OWNER]);
             $user->currentWorkspace()->associate($workspace)->save();
             Log::info('Default workspace created for user: ' . $user->id);
         }, attempts: 3);

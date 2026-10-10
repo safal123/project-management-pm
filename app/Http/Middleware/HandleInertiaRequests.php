@@ -4,7 +4,9 @@ namespace App\Http\Middleware;
 
 use App\Http\Resources\UserResource;
 use App\Models\Project;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -38,7 +40,15 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-        $workspace = $user?->currentWorkspace;
+        $workspace = $request->route('workspace');
+        $workspace = $workspace instanceof Workspace
+            ? $workspace
+            : $user?->currentWorkspace;
+        $workspaceId = $workspace?->id ?? $user?->current_workspace_id;
+
+        if ($workspaceId) {
+            URL::defaults(['workspace' => $workspaceId]);
+        }
 
         return [
             ...parent::share($request),
@@ -59,35 +69,9 @@ class HandleInertiaRequests extends Middleware
                         ->load('workspaces', 'currentWorkspace', 'media')))
                     : null,
                 'permissions' => [
-                    'can' => [
-                        'workspace.create',
-                        'workspace.update',
-                        'workspace.delete',
-                        'workspace.view',
-                        'workspace.invite_members',
-                        'workspace.remove_members',
-                        'workspace.view_tasks',
-                        'workspace.view_members',
-                        'workspace.view_invitations',
-                        'project.create',
-                        'project.update',
-                        'project.delete',
-                        'project.view',
-                        'project.invite_members',
-                        'project.remove_members',
-                        'project.view_tasks',
-                        'project.view_members',
-                        'project.view_invitations',
-                        'task.create',
-                        'task.update',
-                        'task.delete',
-                        'task.view',
-                        'task.invite_members',
-                        'task.remove_members',
-                        'task.view_tasks',
-                        'task.view_members',
-                        'task.view_invitations',
-                    ]
+                    'can' => $user && $workspace
+                        ? $workspace->abilitiesFor($user)
+                        : ($user ? ['workspace.create'] : []),
                 ],
             ],
         ];

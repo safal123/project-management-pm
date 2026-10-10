@@ -18,7 +18,7 @@ import type { TaskActivityPoint } from '@/components/dashboard/task-activity-cha
 const breadcrumbs: BreadcrumbItem[] = [
   {
     title: 'Dashboard',
-    href: '/dashboard',
+    href: route('dashboard'),
   },
 ];
 

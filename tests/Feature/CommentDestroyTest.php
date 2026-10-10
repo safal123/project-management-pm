@@ -14,7 +14,7 @@ test('author can delete their own comment and its replies cascade', function () 
     $reply = $this->createCommentForTask($user, $task, ['parent_comment_id' => $comment->id]);
 
     actingAs($user)
-        ->deleteJson(route('comments.destroy', $comment))
+        ->deleteJson(wsRoute('comments.destroy', $comment))
         ->assertOk();
 
     expect(Comment::query()->find($comment->id))->toBeNull();
@@ -33,7 +33,7 @@ test('non-author cannot delete another user comment', function () {
     $project->users()->syncWithoutDetaching([$otherMember->id => ['role' => 'member', 'joined_at' => now()]]);
 
     actingAs($otherMember)
-        ->deleteJson(route('comments.destroy', $comment))
+        ->deleteJson(wsRoute('comments.destroy', $comment))
         ->assertForbidden();
 
     expect(Comment::query()->find($comment->id))->not->toBeNull();

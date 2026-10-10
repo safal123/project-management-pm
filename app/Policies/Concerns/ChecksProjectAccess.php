@@ -15,6 +15,7 @@ trait ChecksProjectAccess
 
         return Project::query()
             ->whereKey($projectId)
+            ->where('workspace_id', $workspaceId)
             ->forUser($user)
             ->exists();
     }

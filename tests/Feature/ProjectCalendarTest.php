@@ -29,7 +29,7 @@ test('project calendar tab lists only that project events', function () {
     ]);
 
     actingAs($user)
-        ->get(route('projects.show', ['project' => $project->slug, 'tab' => 'calendar']))
+        ->get(wsRoute('projects.show', ['project' => $project->slug, 'tab' => 'calendar']))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->component('projects/project/index')
@@ -48,14 +48,14 @@ test('creating an event from a project redirects to that project calendar', func
     $project = $this->createProjectsForUser($user, $workspaces->first())->first();
 
     actingAs($user)
-        ->post(route('events.store'), [
+        ->post(wsRoute('events.store'), [
             'title' => 'Design review',
             'type' => 'meeting',
             'start_date' => now()->addDay()->format('Y-m-d'),
             'start_time' => '09:00',
             'project_id' => $project->id,
         ])
-        ->assertRedirect(route('projects.show', ['project' => $project->slug, 'tab' => 'calendar']));
+        ->assertRedirect(wsRoute('projects.show', ['project' => $project->slug, 'tab' => 'calendar']));
 
     expect(Event::query()->where('title', 'Design review')->where('project_id', $project->id)->exists())->toBeTrue();
 });

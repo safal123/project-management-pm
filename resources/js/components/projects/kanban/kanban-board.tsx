@@ -7,7 +7,8 @@ import { useKanban } from '@/hooks/use-kanban'
 import { DragDropProvider, DragOverlay } from '@dnd-kit/react'
 import { move } from '@dnd-kit/helpers'
 import { toast } from 'sonner'
-import { TaskCardDragPreview } from './task-card-drag-preview'
+import { TaskCard } from './kanban-task'
+import { KANBAN_CARD_WIDTH } from '@/constants/kanban'
 
 type GroupedTasks = Record<string, Task[]>
 
@@ -105,7 +106,21 @@ export const KanbanBoard = () => {
         </div>
       </div>
       <DragOverlay>
-        {activeTask && <TaskCardDragPreview task={activeTask} floating />}
+        {activeTask && (
+          <div className={`${KANBAN_CARD_WIDTH} pointer-events-none rotate-1`}>
+            <TaskCard
+              task={activeTask}
+              isDragging={false}
+              isTaskDetailOpen={false}
+              setIsTaskDetailOpen={() => {}}
+              openTaskDetailSheet={() => {}}
+              availableColumns={[]}
+              moveTaskToColumn={() => {}}
+              deleteTask={() => {}}
+              className="shadow-lg"
+            />
+          </div>
+        )}
       </DragOverlay>
     </DragDropProvider>
   )

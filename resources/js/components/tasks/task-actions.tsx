@@ -36,7 +36,7 @@ const TaskActions = ({
 
   const handleDelete = () => {
     if (confirm('Are you sure you want to delete this task?')) {
-      router.delete(`/tasks/${task.id}`)
+      router.delete(route('tasks.destroy', { task: task.id }))
       onOpenChange(false)
     }
   }

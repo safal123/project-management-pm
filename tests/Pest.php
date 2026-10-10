@@ -41,7 +41,13 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function wsRoute(string $name, mixed $parameters = [], $workspace = null, bool $absolute = true): string
 {
-    // ..
+    $workspaceId = $workspace instanceof \App\Models\Workspace
+        ? $workspace->id
+        : ($workspace instanceof \App\Models\User
+            ? $workspace->current_workspace_id
+            : $workspace);
+
+    return workspace_route($name, $parameters, $workspaceId, $absolute);
 }

@@ -4,39 +4,49 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\InvitationRequest;
 use App\Http\Resources\InvitationResource;
-use App\Mail\ProjectInvitationMail;
 use App\Models\Invitation;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class InvitationController extends Controller
 {
-    public function store(InvitationRequest $request)
+    public function store(Workspace $workspace, InvitationRequest $request)
     {
         $validated = $request->validated();
 
-        // Check if user is already invited to the project.
-        if (Invitation::where('email', $validated['email'])
-            ->where('project_id', $validated['project_id'])
-            ->exists()
-        ) {
+        $projectId = $validated['project_id'] ?? null;
+
+        $alreadyInvited = Invitation::query()
+            ->where('email', $validated['email'])
+            ->where('workspace_id', $validated['workspace_id'])
+            ->when(
+                $projectId,
+                fn ($query) => $query->where('project_id', $projectId),
+                fn ($query) => $query->whereNull('project_id'),
+            )
+            ->exists();
+
+        if ($alreadyInvited) {
             return redirect()
                 ->back()
-                ->withErrors(['message' => 'User is already invited to the project.']);
+                ->withErrors([
+                    'message' => $projectId
+                        ? 'User is already invited to the project.'
+                        : 'User is already invited to the workspace.',
+                ]);
         }
 
         $user = User::where('email', $validated['email'])
             ->first();
         $invitation = Invitation::create([
             'workspace_id' => $validated['workspace_id'],
-            'project_id' => $validated['project_id'],
+            'project_id' => $projectId,
             'invited_by' => auth()->user()->id,
             'invited_to' => $user?->id,
             'email' => $validated['email'] ?? $user?->email,
@@ -67,13 +77,29 @@ class InvitationController extends Controller
                 ]);
         }
 
+        if ($invitation->isLinkInvite() && Auth::check()) {
+            $alreadyMember = $invitation->project
+                ? $invitation->project->users()->where('users.id', Auth::id())->exists()
+                : $invitation->workspace->users()->where('users.id', Auth::id())->exists();
+
+            if ($alreadyMember) {
+                return $invitation->project
+                    ? redirect()->route('projects.show', ['workspace' => $invitation->project->workspace_id, 'project' => $invitation->project->slug])
+                    : redirect()->route('people.index', $invitation->workspace_id);
+            }
+        }
+
+        if ($invitation->isLinkInvite() && ! Auth::check()) {
+            session(['url.intended' => url()->full()]);
+        }
+
         return Inertia::render('invitations/show', [
             'invitation' => new InvitationResource($invitation),
         ]);
     }
 
     // resend invitation email
-    public function resend(Invitation $invitation)
+    public function resend(Workspace $workspace, Invitation $invitation)
     {
         if ($invitation->status !== 'pending') {
             return redirect()
@@ -103,7 +129,7 @@ class InvitationController extends Controller
     }
 
     // approve invitation (admin only)
-    public function approve(Invitation $invitation)
+    public function approve(Workspace $workspace, Invitation $invitation)
     {
         // Authorization check
         if ($invitation->project->created_by !== auth()->id()) {
@@ -162,6 +188,12 @@ class InvitationController extends Controller
 
         $invitation = Invitation::where('token', $token)->firstOrFail();
 
+        if ($invitation->isLinkInvite() && $request->status === 'accepted' && ! Auth::check()) {
+            session(['url.intended' => $invitation->signedUrl()]);
+
+            return redirect()->route('login');
+        }
+
         if ($invitation->isExpired()) {
             return back()->withErrors([
                 'message' => 'Invitation expired.',
@@ -177,6 +209,10 @@ class InvitationController extends Controller
         DB::transaction(function () use ($invitation, $request) {
 
             if ($request->status === 'rejected') {
+                if ($invitation->isLinkInvite()) {
+                    return;
+                }
+
                 $invitation->update([
                     'status' => 'rejected',
                     'rejected_at' => now(),
@@ -185,13 +221,19 @@ class InvitationController extends Controller
                 return;
             }
 
-            $user = User::firstOrCreate(
-                ['email' => $invitation->email],
-                [
-                    'password' => Hash::make(Str::random(32)),
-                    'name' => $invitation->email,
-                ]
-            );
+            $user = $invitation->isLinkInvite()
+                ? Auth::user()
+                : User::firstOrCreate(
+                    ['email' => $invitation->email],
+                    [
+                        'password' => Hash::make(Str::random(32)),
+                        'name' => $invitation->email,
+                    ]
+                );
+
+            if (! $user) {
+                return;
+            }
 
             // Attach to workspace if not already attached
             if (! $user->workspaces()->where('workspace_id', $invitation->workspace_id)->exists()) {
@@ -203,24 +245,42 @@ class InvitationController extends Controller
             $user->save();
             $user->refresh(); // Refresh to load the relationship
 
-            // Attach to project
-            $invitation->project->users()->syncWithoutDetaching([
-                $user->id => ['joined_at' => now()],
-            ]);
+            if ($invitation->project) {
+                $invitation->project->users()->syncWithoutDetaching([
+                    $user->id => ['joined_at' => now()],
+                ]);
+            }
 
-            // Mark invitation accepted
-            $invitation->update([
-                'status' => 'accepted',
-                'accepted_at' => now(),
-                'invited_to' => $user->id,
-            ]);
+            if (! $invitation->isLinkInvite()) {
+                $invitation->update([
+                    'status' => 'accepted',
+                    'accepted_at' => now(),
+                    'invited_to' => $user->id,
+                ]);
 
-            // Magic login
-            Auth::login($user);
+                Auth::login($user);
+            }
         });
 
+        if ($invitation->isLinkInvite() && $request->status === 'rejected') {
+            return redirect()->route('dashboard', $invitation->workspace_id);
+        }
+
+        if ($invitation->project) {
+            return redirect()
+                ->route('projects.show', ['workspace' => $invitation->project->workspace_id, 'project' => $invitation->project->slug])
+                ->withSuccess(
+                    $request->status === 'accepted'
+                        ? 'Invitation accepted successfully.'
+                        : 'Invitation rejected.'
+                );
+        }
+
         return redirect()
-            ->route('projects.show', $invitation->project->slug)
+            ->route(
+                $request->status === 'accepted' ? 'people.index' : 'dashboard',
+                $invitation->workspace_id,
+            )
             ->withSuccess(
                 $request->status === 'accepted'
                     ? 'Invitation accepted successfully.'
@@ -228,10 +288,10 @@ class InvitationController extends Controller
             );
     }
 
-    public function destroy(Invitation $invitation)
+    public function destroy(Workspace $workspace, Invitation $invitation)
     {
         // Only allow the person who sent the invitation or project owner to cancel
-        if ($invitation->invited_by !== auth()->id() && $invitation->project->created_by !== auth()->id()) {
+        if ($invitation->invited_by !== auth()->id() && $invitation->project?->created_by !== auth()->id()) {
             return redirect()
                 ->back()
                 ->withErrors(['message' => 'You do not have permission to cancel this invitation.']);

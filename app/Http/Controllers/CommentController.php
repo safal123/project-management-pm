@@ -2,96 +2,47 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Comment\CreateComment;
+use App\Actions\Comment\ListComments;
 use App\Http\Requests\CommentCreateRequest;
+use App\Http\Requests\CommentDestroyRequest;
+use App\Http\Requests\CommentIndexRequest;
 use App\Http\Requests\CommentUpdateRequest;
 use App\Http\Resources\CommentResource;
-use App\Models\Activity;
 use App\Models\Comment;
-use App\Models\Task;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
+use App\Models\Workspace;
 
 class CommentController extends Controller
 {
-    /**
-     * Polymorphic model map — extend this when adding comments to new entities.
-     */
-    public const COMMENTABLE_MODELS = [
-        'task' => Task::class,
-    ];
-
-    /**
-     * List top-level comments (with one level of replies) for a commentable model.
-     */
-    public function index(Request $request)
-    {
-        $request->validate([
-            'commentable_type' => ['required', 'string', Rule::in(array_keys(self::COMMENTABLE_MODELS))],
-            'commentable_id' => ['required', 'string'],
-        ]);
-
-        $modelClass = self::COMMENTABLE_MODELS[$request->string('commentable_type')->toString()];
-        $commentable = $modelClass::query()->findOrFail($request->input('commentable_id'));
-
-        // Viewing comments requires the same project/workspace access as creating one.
-        $this->authorize('create', [Comment::class, $commentable]);
-
-        $userId = $request->user()->id;
-        $likeCounts = [
-            'likes',
-            'likes as is_liked_by_user' => fn ($query) => $query->where('user_id', $userId),
-        ];
-
-        $comments = $commentable->comments()
-            ->topLevel()
-            ->with(['user'])
-            ->withCount($likeCounts)
-            ->with(['replies' => fn ($query) => $query
-                ->with('user')
-                ->withCount($likeCounts)])
-            ->oldest()
-            ->get();
-
-        return CommentResource::collection($comments);
-    }
-
-    public function store(CommentCreateRequest $request)
+    public function index(Workspace $workspace, CommentIndexRequest $request, ListComments $listComments)
     {
         $commentable = $request->resolveCommentable();
-        $user = $request->user();
+        abort_unless($commentable, 404);
 
-        $comment = $commentable->comments()->create([
-            'user_id' => $user->id,
-            'workspace_id' => $commentable->workspace_id,
-            'parent_comment_id' => $request->input('parent_comment_id'),
-            'body' => $request->validated('body'),
-        ]);
+        return $listComments->execute($commentable, $request->user());
+    }
 
-        $comment->load('user');
-
-        if (method_exists($commentable, 'activities')) {
-            Activity::record($commentable, Activity::TYPE_COMMENTED, $commentable->workspace_id, $user, [
-                'excerpt' => Str::limit($comment->body, 80),
-            ]);
-        }
+    public function store(Workspace $workspace, CommentCreateRequest $request, CreateComment $createComment)
+    {
+        $comment = $createComment->execute(
+            $request->user(),
+            $request->resolveCommentable(),
+            $request->validated(),
+        );
 
         return new CommentResource($comment);
     }
 
-    public function update(Comment $comment, CommentUpdateRequest $request)
+    public function update(Workspace $workspace, Comment $comment, CommentUpdateRequest $request)
     {
         $comment->update($request->validated());
-
         $comment->load('user');
 
         return new CommentResource($comment);
     }
 
-    public function destroy(Comment $comment)
+    public function destroy(Workspace $workspace, Comment $comment, CommentDestroyRequest $request)
     {
-        $this->authorize('delete', $comment);
-
         $comment->delete();
 
         return response()->json(['message' => 'Comment deleted']);

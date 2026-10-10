@@ -1,24 +1,25 @@
-import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { Head, useForm } from '@inertiajs/react'
+import { LoaderCircle } from 'lucide-react'
+import { FormEventHandler } from 'react'
 
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
+import { AuthDivider, GoogleAuthButton } from '@/components/auth/google-auth-button'
+import InputError from '@/components/input-error'
+import TextLink from '@/components/text-link'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import AuthLayout from '@/layouts/auth-layout'
 
 type LoginForm = {
-  email: string;
-  password: string;
-  remember: boolean;
-};
+  email: string
+  password: string
+  remember: boolean
+}
 
 interface LoginProps {
-  status?: string;
-  canResetPassword: boolean;
+  status?: string
+  canResetPassword: boolean
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
@@ -26,23 +27,28 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     email: '',
     password: '',
     remember: false,
-  });
+  })
 
   const submit: FormEventHandler = (e) => {
-    e.preventDefault();
+    e.preventDefault()
     post(route('login'), {
       onFinish: () => reset('password'),
-    });
-  };
+    })
+  }
 
   return (
-    <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
+    <AuthLayout title="Welcome back" description="Log in to continue to your workspace.">
       <Head title="Log in" />
 
-      <form className="flex flex-col gap-6" onSubmit={submit}>
-        <div className="grid gap-6">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email address</Label>
+      <div className="space-y-4">
+        <GoogleAuthButton label="Continue with Google" />
+        <AuthDivider />
+
+        <form className="space-y-3.5" onSubmit={submit}>
+          <div className="grid gap-1.5">
+            <Label htmlFor="email" className="text-[12px]">
+              Email
+            </Label>
             <Input
               id="email"
               type="email"
@@ -52,16 +58,19 @@ export default function Login({ status, canResetPassword }: LoginProps) {
               autoComplete="email"
               value={data.email}
               onChange={(e) => setData('email', e.target.value)}
-              placeholder="email@example.com"
+              placeholder="you@company.com"
+              className="h-8 text-[13px]"
             />
             <InputError message={errors.email} />
           </div>
 
-          <div className="grid gap-2">
+          <div className="grid gap-1.5">
             <div className="flex items-center">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-[12px]">
+                Password
+              </Label>
               {canResetPassword && (
-                <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
+                <TextLink href={route('password.request')} className="ml-auto text-[12px]" tabIndex={5}>
                   Forgot password?
                 </TextLink>
               )}
@@ -75,31 +84,39 @@ export default function Login({ status, canResetPassword }: LoginProps) {
               value={data.password}
               onChange={(e) => setData('password', e.target.value)}
               placeholder="Password"
+              className="h-8 text-[13px]"
             />
             <InputError message={errors.password} />
           </div>
 
-          <div className="flex items-center space-x-3">
-            <Checkbox id="remember" name="remember" checked={data.remember} onClick={() => setData('remember', !data.remember)} tabIndex={3} />
-            <Label htmlFor="remember">Remember me</Label>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="remember"
+              name="remember"
+              checked={data.remember}
+              onClick={() => setData('remember', !data.remember)}
+              tabIndex={3}
+            />
+            <Label htmlFor="remember" className="text-[12px] font-normal text-muted-foreground">
+              Remember me
+            </Label>
           </div>
 
-          <Button
-            type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
-            {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+          <Button type="submit" className="w-full" tabIndex={4} disabled={processing}>
+            {processing && <LoaderCircle className="animate-spin" />}
             Log in
           </Button>
-        </div>
+        </form>
 
-        <div className="text-muted-foreground text-center text-sm">
-          Don't have an account?{' '}
-          <TextLink href={route('register')} tabIndex={5}>
+        <p className="text-center text-[12px] text-muted-foreground">
+          Don&apos;t have an account?{' '}
+          <TextLink href={route('register')} tabIndex={6} className="text-[12px]">
             Sign up
           </TextLink>
-        </div>
-      </form>
+        </p>
 
-      {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
+        {status && <p className="text-center text-[12px] font-medium text-foreground">{status}</p>}
+      </div>
     </AuthLayout>
-  );
+  )
 }

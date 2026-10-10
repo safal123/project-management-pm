@@ -5,6 +5,7 @@ import ColumnDropdown from './column-dropdown'
 import { KanbanTask } from './kanban-task'
 import { AddKanbanItem } from './add-kanban-item'
 import { useDroppable } from '@dnd-kit/react'
+import { KANBAN_COLUMN_WIDTH, kanbanColumnColor } from '@/constants/kanban'
 import { cn } from '@/lib/utils'
 
 interface KanbanColumnProps {
@@ -19,13 +20,16 @@ export const KanbanColumn = memo(({ column, columns, tasks }: KanbanColumnProps)
     type: 'column',
     accept: 'task',
   })
+  const color = kanbanColumnColor(column.color)
 
   return (
     <div
       ref={ref}
       className={cn(
-        'flex h-full max-h-[800px] w-[360px] shrink-0 flex-col rounded-lg border border-neutral-200 bg-neutral-100 transition-colors dark:border-white/10 dark:bg-neutral-950/80',
-        isDropTarget && 'border-neutral-300 bg-neutral-200/90 dark:border-white/20 dark:bg-neutral-900'
+        'flex h-full max-h-[800px] shrink-0 flex-col rounded-lg border transition-colors',
+        KANBAN_COLUMN_WIDTH,
+        color.surface,
+        isDropTarget && color.drop
       )}
     >
       <div className="flex shrink-0 items-center justify-between gap-1 px-2.5 py-2">

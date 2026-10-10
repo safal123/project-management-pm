@@ -40,7 +40,7 @@ export default function TaskAssignee({ task, className }: Props) {
   const assign = (assigned_to: string | null) => {
     setLoading(true)
     router.patch(
-      `/tasks/${task.id}`,
+      route('tasks.update', { task: task.id }),
       { assigned_to },
       {
         preserveScroll: true,

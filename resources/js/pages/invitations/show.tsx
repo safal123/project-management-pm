@@ -1,4 +1,5 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { SharedData } from '@/types';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 interface Invitation {
   id: string;
-  email: string;
+  email: string | null;
   status: 'pending' | 'accepted' | 'rejected';
   token: string;
   expires_at: string;
@@ -25,7 +26,7 @@ interface Invitation {
     name: string;
     slug: string;
     description?: string;
-  };
+  } | null;
   invited_by: {
     id: string;
     name: string;
@@ -44,8 +45,11 @@ interface Props {
 }
 
 export default function Show({ invitation, errors }: Props) {
+  const { auth } = usePage<SharedData>().props
   const [isAccepting, setIsAccepting] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
+  const isLinkInvite = !invitation.email
+  const needsLogin = isLinkInvite && !auth?.user
 
   const handleAccept = () => {
     setIsAccepting(true);
@@ -168,15 +172,17 @@ export default function Show({ invitation, errors }: Props) {
 
             {/* Project Details */}
             <div className="bg-muted/50 rounded-lg p-6 space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Project</p>
-                <p className="text-xl font-semibold">{invitation.project.name}</p>
-                {invitation.project.description && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {invitation.project.description}
-                  </p>
-                )}
-              </div>
+              {invitation.project && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Project</p>
+                  <p className="text-xl font-semibold">{invitation.project.name}</p>
+                  {invitation.project.description && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {invitation.project.description}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="border-t pt-4">
                 <p className="text-sm text-muted-foreground mb-1">Workspace</p>
@@ -186,7 +192,7 @@ export default function Show({ invitation, errors }: Props) {
               <div className="border-t pt-4 grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Invited to</p>
-                  <p className="text-sm font-medium">{invitation.email}</p>
+                  <p className="text-sm font-medium">{invitation.email ?? 'Anyone with the link'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">
@@ -206,7 +212,18 @@ export default function Show({ invitation, errors }: Props) {
             </div>
 
             {/* Action Buttons */}
-            {isPending && !isExpired && (
+            {isPending && !isExpired && needsLogin && (
+              <div className="flex gap-3 pt-4">
+                <Button asChild className="flex-1" size="lg">
+                  <Link href={route('login')}>Log in to join</Link>
+                </Button>
+                <Button asChild variant="outline" className="flex-1" size="lg">
+                  <Link href={route('register')}>Create account</Link>
+                </Button>
+              </div>
+            )}
+
+            {isPending && !isExpired && !needsLogin && (
               <div className="flex gap-3 pt-4">
                 <Button
                   onClick={handleAccept}
@@ -227,25 +244,27 @@ export default function Show({ invitation, errors }: Props) {
                   )}
                 </Button>
 
-                <Button
-                  onClick={handleReject}
-                  disabled={isAccepting || isRejecting}
-                  variant="outline"
-                  className="flex-1"
-                  size="lg"
-                >
-                  {isRejecting ? (
-                    <>
-                      <div className="h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      Rejecting...
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="h-4 w-4 mr-2" />
-                      Decline
-                    </>
-                  )}
-                </Button>
+                {!isLinkInvite && (
+                  <Button
+                    onClick={handleReject}
+                    disabled={isAccepting || isRejecting}
+                    variant="outline"
+                    className="flex-1"
+                    size="lg"
+                  >
+                    {isRejecting ? (
+                      <>
+                        <div className="h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        Rejecting...
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Decline
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             )}
 

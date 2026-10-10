@@ -1,46 +1,61 @@
-import AppLogoIcon from '@/components/app-logo-icon';
-import { type SharedData } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
-import { type PropsWithChildren } from 'react';
+import AppLogoIcon from '@/components/app-logo-icon'
+import { type SharedData } from '@/types'
+import { Link, usePage } from '@inertiajs/react'
+import { type PropsWithChildren } from 'react'
 
 interface AuthLayoutProps {
-  title?: string;
-  description?: string;
+  title?: string
+  description?: string
 }
 
-export default function AuthSplitLayout({ children, title, description }: PropsWithChildren<AuthLayoutProps>) {
-  const { name, quote } = usePage<SharedData>().props;
+const highlights = [
+  { title: 'Projects', copy: 'Boards, tables, and calendars in one workspace.' },
+  { title: 'People', copy: 'Invite the team and keep roles clear.' },
+  { title: 'Activity', copy: 'See what changed without digging through chat.' },
+]
 
+export default function AuthSplitLayout({ children, title, description }: PropsWithChildren<AuthLayoutProps>) {
+  const { name } = usePage<SharedData>().props
 
   return (
-    <div className="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
-      <div className="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-r">
-        <div className="absolute inset-0 bg-zinc-900" />
-        <Link href={route('home')} className="relative z-20 flex items-center text-lg font-medium">
-          <AppLogoIcon className="mr-2 size-8 fill-current text-white" />
+    <div className="grid min-h-dvh bg-background lg:grid-cols-2">
+      <div className="relative hidden flex-col justify-between border-r border-border bg-zinc-950 px-10 py-10 text-white lg:flex">
+        <Link href={route('home')} className="relative z-10 flex items-center gap-2 text-[13px] font-semibold">
+          <AppLogoIcon className="size-6 fill-current text-white" />
           {name}
         </Link>
-        {quote && (
-          <div className="relative z-20 mt-auto">
-            <blockquote className="space-y-2">
-              <p className="text-lg">&ldquo;{quote.message}&rdquo;</p>
-              <footer className="text-sm text-neutral-300">{quote.author}</footer>
-            </blockquote>
-          </div>
-        )}
+
+        <div className="relative z-10 max-w-sm">
+          <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-white/50">Workspace</p>
+          <h2 className="mt-2 text-[28px] font-semibold leading-tight tracking-tight">
+            Plan work, stay aligned, ship faster.
+          </h2>
+          <ul className="mt-8 space-y-4">
+            {highlights.map((item) => (
+              <li key={item.title}>
+                <p className="text-[13px] font-medium">{item.title}</p>
+                <p className="mt-0.5 text-[12px] text-white/60">{item.copy}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="relative z-10 text-[12px] text-white/40">Built for teams that want less noise.</p>
       </div>
-      <div className="w-full lg:p-8">
-        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[450px] shadow-sm px-4 py-6 rounded-lg">
-          <Link href={route('home')} className="relative z-20 flex items-center justify-center lg:hidden">
-            <AppLogoIcon className="h-10 fill-current text-black sm:h-12" />
+
+      <div className="flex items-center justify-center px-4 py-10 sm:px-8">
+        <div className="w-full max-w-[360px]">
+          <Link href={route('home')} className="mb-6 flex items-center gap-2 lg:hidden">
+            <AppLogoIcon className="size-6 fill-current" />
+            <span className="text-[13px] font-semibold">{name}</span>
           </Link>
-          <div className="flex flex-col items-start gap-2 text-left sm:items-center sm:text-center">
-            <h1 className="text-xl font-medium">{title}</h1>
-            <p className="text-muted-foreground text-sm text-balance">{description}</p>
+          <div className="mb-5">
+            <h1 className="text-[18px] font-semibold tracking-tight">{title}</h1>
+            <p className="mt-1 text-[12px] text-muted-foreground">{description}</p>
           </div>
           {children}
         </div>
       </div>
     </div>
-  );
+  )
 }

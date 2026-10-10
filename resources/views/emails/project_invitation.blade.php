@@ -13,11 +13,16 @@
             <p>Hello,</p>
 
             <p>
-                <strong>{{ $invitation->invitedBy->name }}</strong> has invited you to collaborate on the project:
+                <strong>{{ $invitation->invitedBy->name }}</strong> has invited you to collaborate
+                @if($invitation->project)
+                    on the project:
+                @else
+                    in the workspace:
+                @endif
             </p>
 
             <p style="font-weight: bold; font-size: 16px; margin: 10px 0;">
-                {{ $invitation->project->name }}
+                {{ $invitation->project->name ?? $invitation->workspace->name }}
             </p>
 
             <p>

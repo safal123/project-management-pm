@@ -37,7 +37,7 @@ export default function AppTextEditor({ task, className }: AppTextEditorProps) {
 
   const save = debounce((html: string) => {
     router.patch(
-      `/tasks/${task.id}`,
+      route('tasks.update', { task: task.id }),
       { description: html },
       { preserveScroll: true }
     )

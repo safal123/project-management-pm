@@ -46,7 +46,7 @@ export function RecentActivityTable({ tasks }: RecentActivityTableProps) {
             </CardDescription>
           </div>
           <Button variant="ghost" size="sm" className="h-7 px-2 text-[12px]" asChild>
-            <Link href="/projects">
+            <Link href={route('activity.index')}>
               View all
               <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Link>
@@ -70,7 +70,7 @@ export function RecentActivityTable({ tasks }: RecentActivityTableProps) {
                 <TableRow key={task.id}>
                   <TableCell className="px-2 py-2">
                     <Link
-                      href={`/projects/${task.project?.slug}/tasks`}
+                      href={task.project ? route('projects.show', task.project.slug) : route('dashboard')}
                       className="font-medium hover:underline"
                     >
                       {task.title}
@@ -79,7 +79,7 @@ export function RecentActivityTable({ tasks }: RecentActivityTableProps) {
                   <TableCell className="px-2 py-2">
                     {task.project ? (
                       <Link
-                        href={`/projects/${task.project.slug}`}
+                        href={route('projects.show', task.project.slug)}
                         className="text-muted-foreground hover:text-foreground"
                       >
                         {task.project.name}

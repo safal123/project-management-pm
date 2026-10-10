@@ -37,7 +37,7 @@ test('creating a branch persists branch fields and records an activity', functio
     connectGithubIntegration($project, $user);
 
     actingAs($user)
-        ->post(route('tasks.branch.store', $task), [
+        ->post(wsRoute('tasks.branch.store', $task), [
             'branch_name' => 'task/'.$task->slug,
         ])
         ->assertRedirect();
@@ -62,7 +62,7 @@ test('creating a branch fails gracefully when the project has no integration', f
     $task = $this->createTaskForProject($user, $project);
 
     actingAs($user)
-        ->post(route('tasks.branch.store', $task), [
+        ->post(wsRoute('tasks.branch.store', $task), [
             'branch_name' => 'task/'.$task->slug,
         ])
         ->assertStatus(422);
@@ -86,7 +86,7 @@ test('creating a branch fails gracefully when the branch already exists', functi
     connectGithubIntegration($project, $user);
 
     actingAs($user)
-        ->post(route('tasks.branch.store', $task), [
+        ->post(wsRoute('tasks.branch.store', $task), [
             'branch_name' => 'task/'.$task->slug,
         ])
         ->assertSessionHasErrors('branch_name');

@@ -11,7 +11,10 @@ class ProjectCreateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+        $workspace = $user?->currentWorkspace;
+
+        return $workspace !== null && $workspace->isOwnedBy($user);
     }
 
     /**

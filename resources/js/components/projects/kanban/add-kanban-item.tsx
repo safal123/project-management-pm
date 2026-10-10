@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { Plus, Loader2 } from 'lucide-react'
 import { Project, SharedData, Task } from '@/types'
+import { KANBAN_COLUMN_WIDTH } from '@/constants/kanban'
 import { cn } from '@/lib/utils'
 
 interface AddColumnProps {
@@ -70,7 +71,7 @@ export function AddKanbanItem(props: AddKanbanItemProps) {
   const isColumn = props.type === 'column'
 
   return (
-    <div className={cn(isColumn && 'w-[360px] shrink-0')}>
+    <div className={cn(isColumn && `${KANBAN_COLUMN_WIDTH} shrink-0`)}>
       <Button
         onClick={add}
         disabled={isAdding}

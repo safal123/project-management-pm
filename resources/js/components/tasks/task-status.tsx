@@ -26,7 +26,7 @@ export default function TaskStatus({ task, variant = 'compact' }: TaskStatusProp
   const handleStatusChange = (status: TaskStatus) => {
     setIsUpdating(true)
     router.patch(
-      `/tasks/${task.id}`,
+      route('tasks.update', { task: task.id }),
       { status },
       {
         preserveScroll: true,
@@ -44,7 +44,7 @@ export default function TaskStatus({ task, variant = 'compact' }: TaskStatusProp
           size="sm"
           disabled={isUpdating}
           className={cn(
-            variant === 'field' ? FIELD_TRIGGER : 'h-6 w-fit rounded-md px-2 py-0 text-[11px] font-medium',
+            variant === 'field' ? FIELD_TRIGGER : 'h-6 w-fit rounded-md border px-2 py-0 text-[11px] font-medium',
             taskStatusSurfaceClasses(task.status)
           )}
         >

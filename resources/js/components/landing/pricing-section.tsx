@@ -1,134 +1,103 @@
-import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { GradientBackground } from '@/components/ui/gradient-background';
+import { Link } from '@inertiajs/react';
+import { Check } from 'lucide-react';
+
+const plans = [
+    {
+        name: 'Free',
+        description: 'For individuals and small teams getting started.',
+        price: '$0',
+        period: 'forever',
+        features: ['Up to 5 team members', 'Up to 3 projects', 'Basic task management', 'File sharing up to 5GB', 'Email support'],
+        popular: false,
+        buttonText: 'Get started',
+    },
+    {
+        name: 'Pro',
+        description: 'For growing teams with more advanced needs.',
+        price: '$12',
+        period: 'per user / month',
+        features: [
+            'Unlimited team members',
+            'Unlimited projects',
+            'Advanced task management',
+            'File sharing up to 50GB',
+            'Priority email support',
+            'Custom workflows',
+            'Advanced analytics',
+            'API access',
+        ],
+        popular: true,
+        buttonText: 'Start free trial',
+    },
+    {
+        name: 'Enterprise',
+        description: 'For organizations with complex requirements.',
+        price: 'Custom',
+        period: 'contact for pricing',
+        features: [
+            'Everything in Pro',
+            'Unlimited storage',
+            '24/7 phone support',
+            'Dedicated account manager',
+            'Custom integrations',
+            'Advanced security',
+            'User provisioning (SCIM)',
+            'SAML SSO',
+        ],
+        popular: false,
+        buttonText: 'Contact sales',
+    },
+];
 
 export function PricingSection() {
-  const plans = [
-    {
-      name: "Free",
-      description: "For individuals and small teams getting started.",
-      price: "$0",
-      period: "forever",
-      features: [
-        "Up to 5 team members",
-        "Up to 3 projects",
-        "Basic task management",
-        "File sharing up to 5GB",
-        "Email support",
-      ],
-      popular: false,
-      buttonText: "Get Started",
-      buttonVariant: "outline" as const,
-    },
-    {
-      name: "Pro",
-      description: "For growing teams with more advanced needs.",
-      price: "$12",
-      period: "per user/month",
-      features: [
-        "Unlimited team members",
-        "Unlimited projects",
-        "Advanced task management",
-        "File sharing up to 50GB",
-        "Priority email support",
-        "Custom workflows",
-        "Advanced analytics",
-        "API access",
-      ],
-      popular: true,
-      buttonText: "Start Free Trial",
-      buttonVariant: "default" as const,
-    },
-    {
-      name: "Enterprise",
-      description: "For organizations with complex requirements.",
-      price: "Custom",
-      period: "contact for pricing",
-      features: [
-        "Everything in Pro",
-        "Unlimited storage",
-        "24/7 phone support",
-        "Dedicated account manager",
-        "Custom integrations",
-        "Advanced security",
-        "User provisioning (SCIM)",
-        "SAML SSO",
-      ],
-      popular: false,
-      buttonText: "Contact Sales",
-      buttonVariant: "outline" as const,
-    },
-  ];
+    return (
+        <section id="pricing">
+            <div className="landing-container landing-section">
+                <div className="mx-auto max-w-2xl text-center">
+                    <p className="landing-eyebrow">Pricing</p>
+                    <h2 className="landing-heading">Simple, transparent pricing</h2>
+                    <p className="landing-description">
+                        Start free. Upgrade when the team outgrows the basics. Every paid plan includes a 14-day trial.
+                    </p>
+                </div>
 
-  return (
-    <section id="pricing" className="relative w-full py-12 md:py-24 lg:py-32">
-      <GradientBackground variant="primary" intensity="light" />
-
-      <div className="container relative z-10 mx-auto px-4 md:px-6">
-        <div className="flex flex-col items-center justify-center space-y-4 text-center">
-          <div className="space-y-2">
-            <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm border border-primary/20">
-              <span className="font-semibold text-primary">
-                Pricing
-              </span>
+                <div className="mt-9 grid gap-5 md:grid-cols-3">
+                    {plans.map((plan) => (
+                        <div
+                            key={plan.name}
+                            className={cn(
+                                'bg-card relative flex flex-col rounded-lg border p-6',
+                                plan.popular ? 'border-primary ring-primary ring-1' : 'border-border',
+                            )}
+                        >
+                            {plan.popular && (
+                                <span className="bg-primary text-primary-foreground absolute top-5 right-5 rounded-full px-3 py-1 text-xs font-semibold">
+                                    Popular
+                                </span>
+                            )}
+                            <h3 className="text-lg font-semibold">{plan.name}</h3>
+                            <p className="text-muted-foreground mt-3 text-sm leading-relaxed">{plan.description}</p>
+                            <div className="mt-7 flex flex-wrap items-baseline gap-2">
+                                <span className="text-3xl font-semibold tracking-tight">{plan.price}</span>
+                                <span className="text-muted-foreground text-xs">/ {plan.period}</span>
+                            </div>
+                            <ul className="border-border mt-7 flex-1 space-y-3 border-t pt-6">
+                                {plan.features.map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-sm leading-relaxed">
+                                        <Check className="text-primary mt-0.5 size-4 shrink-0" />
+                                        <span>{feature}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button asChild variant={plan.popular ? 'default' : 'outline'} size="sm" className="landing-button mt-8 w-full">
+                                <Link href="/register">{plan.buttonText}</Link>
+                            </Button>
+                        </div>
+                    ))}
+                </div>
             </div>
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-              Simple, transparent pricing
-            </h2>
-            <p className="max-w-[900px] text-muted-foreground md:text-xl">
-              Choose the plan that's right for your team. All plans include a 14-day free trial.
-            </p>
-          </div>
-        </div>
-
-        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 md:grid-cols-2 lg:grid-cols-3">
-          {plans.map((plan, index) => (
-            <Card
-              key={index}
-              className={cn(
-                "flex flex-col backdrop-blur-sm bg-background/50 transition-all hover:shadow-xl",
-                plan.popular ? "border-primary shadow-lg scale-105 z-10" : "border-border hover:border-primary/50"
-              )}
-            >
-              {plan.popular && (
-                <div className="absolute right-0 top-0 rounded-bl-lg rounded-tr-lg bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
-                  Most Popular
-                </div>
-              )}
-              <CardHeader>
-                <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
-                <div className="mt-4 flex items-baseline text-foreground">
-                  <span className="text-4xl font-bold tracking-tight">{plan.price}</span>
-                  {plan.period && (
-                    <span className="ml-1 text-sm text-muted-foreground">/{plan.period}</span>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <ul className="space-y-3">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start">
-                      <Check className="mr-2 h-5 w-5 shrink-0 text-primary" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Link href={plan.name === "Enterprise" ? "/contact" : "/register"} className="w-full">
-                  <Button variant={plan.popular ? "default" : "outline"} className="w-full">
-                    {plan.buttonText}
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+        </section>
+    );
 }

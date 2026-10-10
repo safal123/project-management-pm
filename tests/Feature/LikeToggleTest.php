@@ -13,7 +13,7 @@ test('user can like a comment', function () {
     $comment = $this->createCommentForTask($user, $task);
 
     actingAs($user)
-        ->postJson(route('likes.toggle'), [
+        ->postJson(wsRoute('likes.toggle'), [
             'likeable_type' => 'comment',
             'likeable_id' => $comment->id,
         ])
@@ -35,10 +35,10 @@ test('liking a comment twice unlikes it', function () {
 
     $payload = ['likeable_type' => 'comment', 'likeable_id' => $comment->id];
 
-    actingAs($user)->postJson(route('likes.toggle'), $payload)->assertOk();
+    actingAs($user)->postJson(wsRoute('likes.toggle'), $payload)->assertOk();
 
     actingAs($user)
-        ->postJson(route('likes.toggle'), $payload)
+        ->postJson(wsRoute('likes.toggle'), $payload)
         ->assertOk()
         ->assertJson(['liked' => false, 'likes_count' => 0]);
 
@@ -52,7 +52,7 @@ test('an unsupported likeable type is rejected', function () {
     ['user' => $user] = $this->createUserWithWorkspace();
 
     actingAs($user)
-        ->postJson(route('likes.toggle'), [
+        ->postJson(wsRoute('likes.toggle'), [
             'likeable_type' => 'workspace',
             'likeable_id' => '01k00000000000000000000000',
         ])

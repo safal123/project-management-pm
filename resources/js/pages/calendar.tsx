@@ -8,7 +8,7 @@ const Project = () => {
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: 'Calendar',
-      href: '/calendar',
+      href: route('calendar.index'),
     },
   ];
   return (
