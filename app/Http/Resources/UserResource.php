@@ -18,6 +18,8 @@ class UserResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            ...$this->resource->visibleStatus(),
+            'notifications_muted' => $this->when($request->user()?->id === $this->id, (bool) $this->notifications_muted),
             'name' => $this->name,
             'email' => $this->email,
             'avatar' => $this->media ? $this->media->url : null,

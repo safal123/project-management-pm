@@ -1,249 +1,258 @@
 import { LucideIcon } from 'lucide-react';
 
 export interface Auth {
-  user: User;
-  permissions: {
-    can: string[];
-  };
+    user: User;
+    permissions: {
+        can: string[];
+    };
 }
 
 export interface BreadcrumbItem {
-  title: string;
-  href: string;
+    title: string;
+    href: string;
 }
 
 export interface NavGroup {
-  title: string;
-  items: NavItem[];
+    title: string;
+    items: NavItem[];
 }
 
 export interface NavItem {
-  title: string;
-  url: string;
-  icon?: LucideIcon | null;
-  isActive?: boolean;
+    title: string;
+    url: string;
+    icon?: LucideIcon | null;
+    isActive?: boolean;
 }
 
 export interface SharedData {
-  name: string;
-  quote: { message: string; author: string };
-  auth: Auth;
-  sidebar_projects?: { id: string; name: string; slug: string }[];
-  [key: string]: unknown;
+    name: string;
+    quote: { message: string; author: string };
+    auth: Auth;
+    sidebar_projects?: { id: string; name: string; slug: string }[];
+    [key: string]: unknown;
 }
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  profile_picture?: Media | null;
-  email_verified_at: string | null;
-  created_at: string;
-  updated_at: string;
-  current_workspace_id?: string;
-  current_workspace?: Workspace;
-  [key: string]: unknown; // This allows for additional properties...
+export interface UserStatus {
+    availability?: 'online' | 'offline';
+    status_text?: string | null;
+    status_emoji?: string | null;
+    status_expires_at?: string | null;
+}
+
+export interface User extends UserStatus {
+    notifications_muted?: boolean;
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+    profile_picture?: Media | null;
+    email_verified_at: string | null;
+    created_at: string;
+    updated_at: string;
+    current_workspace_id?: string;
+    current_workspace?: Workspace;
+    [key: string]: unknown; // This allows for additional properties...
 }
 
 export interface Workspace {
-  id: string;
-  name: string;
-  slug: string;
-  owner_id: number;
-  created_at: string;
-  updated_at: string;
-  logo: string;
-  description?: string | null;
-  users?: User[];
-  created_by?: User | null;
+    id: string;
+    name: string;
+    slug: string;
+    owner_id: number;
+    created_at: string;
+    updated_at: string;
+    logo: string;
+    description?: string | null;
+    users?: User[];
+    created_by?: User | null;
 }
 
 export interface Project {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  workspace_id: string;
-  created_by: string;
-  created_at: string;
-  users: User[]
-  invitations: Invitation[]
-  git_integration?: GitIntegration | null;
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    workspace_id: string;
+    created_by: string;
+    created_at: string;
+    users: User[];
+    invitations: Invitation[];
+    git_integration?: GitIntegration | null;
 }
 
 export interface GitIntegration {
-  provider: 'github';
-  repo_full_name: string;
-  repo_url: string;
-  default_branch: string;
-  masked_token: string;
-  connected_by: User | null;
-  connected_at: string;
+    provider: 'github';
+    repo_full_name: string;
+    repo_url: string;
+    default_branch: string;
+    masked_token: string;
+    connected_by: User | null;
+    connected_at: string;
 }
 
 export interface Invitation {
-  id: string;
-  email: string | null;
-  status: 'pending' | 'accepted' | 'rejected';
-  token: string;
-  expires_at: string;
-  invited_at: string;
-  accepted_at?: string | null;
-  rejected_at?: string | null;
-  invited_by?: User | null;
-  invited_to?: User | null;
-  project?: Project | null;
-  workspace?: Workspace | null;
-  last_sent_at?: string | null;
+    id: string;
+    email: string | null;
+    status: 'pending' | 'accepted' | 'rejected';
+    token: string;
+    expires_at: string;
+    invited_at: string;
+    accepted_at?: string | null;
+    rejected_at?: string | null;
+    invited_by?: User | null;
+    invited_to?: User | null;
+    project?: Project | null;
+    workspace?: Workspace | null;
+    last_sent_at?: string | null;
 }
 
 export interface Media {
-  id: string;
-  url: string;
-  filename?: string;
-  original_filename?: string;
-  mime_type?: string;
-  path?: string;
-  filesize?: number;
-  filetype?: string;
-  disk?: string;
-  created_by?: string;
-  workspace_id?: string;
-  created_at: string;
+    id: string;
+    url: string;
+    filename?: string;
+    original_filename?: string;
+    mime_type?: string;
+    path?: string;
+    filesize?: number;
+    filetype?: string;
+    disk?: string;
+    created_by?: string;
+    workspace_id?: string;
+    created_at: string;
 }
 
 export interface Task {
-  id: string;
-  title: string;
-  name: string;
-  slug: string;
-  parent_task_id: string | null;
-  depends_on_task_id?: string | null;
-  depends_on?: { id: string; title: string } | null;
-  description: string;
-  project_id: string;
-  workspace_id: string;
-  created_by: string;
-  assigned_by: User | null;
-  assigned_to: User | null;
-  due_date: string | null;
-  status: string | null;
-  priority: string | null;
-  order: number | null;
-  project: Project | null;
-  media?: Media[];
-  progress?: number | null;
-  color?: string | null;
-  likes_count?: number;
-  is_liked_by_user?: boolean;
-  comments_count?: number;
-  branch_name?: string | null;
-  branch_url?: string | null;
+    id: string;
+    title: string;
+    name: string;
+    slug: string;
+    parent_task_id: string | null;
+    depends_on_task_id?: string | null;
+    depends_on?: { id: string; title: string } | null;
+    description: string;
+    project_id: string;
+    workspace_id: string;
+    created_by: string;
+    assigned_by: User | null;
+    assigned_to: User | null;
+    due_date: string | null;
+    status: string | null;
+    priority: string | null;
+    order: number | null;
+    project: Project | null;
+    media?: Media[];
+    progress?: number | null;
+    color?: string | null;
+    likes_count?: number;
+    is_liked_by_user?: boolean;
+    comments_count?: number;
+    branch_name?: string | null;
+    branch_url?: string | null;
 }
 
 export interface Comment {
-  id: string;
-  body: string;
-  user: User;
-  parent_comment_id: string | null;
-  replies?: Comment[];
-  can_edit: boolean;
-  can_delete: boolean;
-  created_at: string;
-  likes_count?: number;
-  is_liked_by_user?: boolean;
+    id: string;
+    body: string;
+    user: User;
+    parent_comment_id: string | null;
+    replies?: Comment[];
+    can_edit: boolean;
+    can_delete: boolean;
+    created_at: string;
+    likes_count?: number;
+    is_liked_by_user?: boolean;
 }
 
 export interface ActivitySubject {
-  id: string;
-  type: 'task' | 'project' | 'event' | 'item';
-  name: string | null;
-  url: string | null;
-  project?: { id: string; name: string; slug: string } | null;
+    id: string;
+    type: 'task' | 'project' | 'event' | 'item';
+    name: string | null;
+    url: string | null;
+    project?: { id: string; name: string; slug: string } | null;
 }
 
 export interface Activity {
-  id: string;
-  type: string;
-  properties: Record<string, unknown> | null;
-  user: User | null;
-  subject?: ActivitySubject | null;
-  description: string;
-  created_at: string;
+    id: string;
+    type: string;
+    properties: Record<string, unknown> | null;
+    user: User | null;
+    subject?: ActivitySubject | null;
+    description: string;
+    created_at: string;
 }
 
-
 export interface Event {
-  id: string;
-  title: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-  start_time: string;
-  end_time: string;
-  location: string;
-  type: 'meeting' | 'deadline' | 'reminder' | 'call';
-  completed_at: string | null;
-  attendees: User[];
-  project_id?: string | null;
-  created_by: User;
-  created_at: string;
-  updated_at: string;
+    id: string;
+    title: string;
+    description: string;
+    start_date: string;
+    end_date: string;
+    start_time: string;
+    end_time: string;
+    location: string;
+    type: 'meeting' | 'deadline' | 'reminder' | 'call';
+    completed_at: string | null;
+    attendees: User[];
+    project_id?: string | null;
+    created_by: User;
+    created_at: string;
+    updated_at: string;
 }
 
 // Kanban Board Types
 export interface KanbanCard {
-  id: string;
-  userId: string;
-  name: string;
-  role: string;
-  avatarUrl: string;
-  assignedBy?: User | null;
-  assignedTo?: User | null;
-  dueDate?: string | null;
-  priority?: string | null;
-  status?: string | null;
-  parentTaskId?: string | null;
-  order?: number | null;
+    id: string;
+    userId: string;
+    name: string;
+    role: string;
+    avatarUrl: string;
+    assignedBy?: User | null;
+    assignedTo?: User | null;
+    dueDate?: string | null;
+    priority?: string | null;
+    status?: string | null;
+    parentTaskId?: string | null;
+    order?: number | null;
 }
 
 export interface ColumnType {
-  id: string | number;
-  title: string;
+    id: string | number;
+    title: string;
 }
 
 export interface ColumnMap {
-  [columnId: string]: ColumnType;
+    [columnId: string]: ColumnType;
 }
 
 export interface WorkspaceSelectorProps {
-  workspaces: Workspace[];
+    workspaces: Workspace[];
 }
 
 export interface TaskData {
-  data: Task[];
+    data: Task[];
 }
 
 export interface PaginatedData<T> {
-  data: T[];
-  current_page?: number;
-  last_page?: number;
-  per_page?: number;
-  total?: number;
-  from?: number | null;
-  to?: number | null;
-  links?: {
-    url: string | null;
-    label: string;
-    active: boolean;
-  }[] | null;
-  meta?: {
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-    from: number | null;
-    to: number | null;
-  };
+    data: T[];
+    current_page?: number;
+    last_page?: number;
+    per_page?: number;
+    total?: number;
+    from?: number | null;
+    to?: number | null;
+    links?:
+        | {
+              url: string | null;
+              label: string;
+              active: boolean;
+          }[]
+        | null;
+    meta?: {
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        from: number | null;
+        to: number | null;
+    };
 }

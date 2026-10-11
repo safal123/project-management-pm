@@ -21,14 +21,15 @@ class ProjectInvitationNotification extends Notification implements ShouldQueue
         public User $invitedBy,
     ) {}
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
+    public function shouldSend(object $notifiable, string $channel): bool
+    {
+        return ! $notifiable->notifications_muted;
+    }
+
+    /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return $notifiable->notifications_muted ? [] : ['mail'];
     }
 
     /**

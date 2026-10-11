@@ -30,7 +30,7 @@ export function AppStatCard({
   return (
     <Card
       className={cn(
-        'group relative gap-0 overflow-hidden py-0',
+        'group relative gap-0 overflow-hidden py-0 transition-colors duration-150 hover:border-foreground/30 motion-reduce:transition-none',
         className
       )}
     >

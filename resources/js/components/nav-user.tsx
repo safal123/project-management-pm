@@ -1,36 +1,29 @@
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
+import { UserDropdown } from '@/components/user-dropdown';
 import { UserInfo } from '@/components/user-info';
-import { UserMenuContent } from '@/components/user-menu-content';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { type SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { ChevronsUpDown } from 'lucide-react';
 
 export function NavUser() {
-  const { auth } = usePage<SharedData>().props;
-  const { state } = useSidebar();
-  const isMobile = useIsMobile();
+    const { auth } = usePage<SharedData>().props;
+    const { state } = useSidebar();
+    const isMobile = useIsMobile();
 
-  return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton size="lg" className="group border border-sidebar-border bg-background text-sidebar-accent-foreground hover:bg-sidebar-accent data-[state=open]:bg-sidebar-accent">
-              <UserInfo user={auth.user} showEmail />
-              <ChevronsUpDown className="ml-auto size-3.5 text-muted-foreground" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-72 rounded-xl p-1.5"
-            align="end"
-            side={isMobile ? 'bottom' : state === 'collapsed' ? 'left' : 'bottom'}
-          >
-            <UserMenuContent user={auth.user} />
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
-  );
+    return (
+        <SidebarMenu>
+            <SidebarMenuItem>
+                <UserDropdown user={auth.user} side={isMobile ? 'bottom' : state === 'collapsed' ? 'right' : 'top'}>
+                    <SidebarMenuButton
+                        size="lg"
+                        className="group border-sidebar-border bg-background text-sidebar-accent-foreground hover:bg-sidebar-accent data-[state=open]:bg-sidebar-accent border"
+                    >
+                        <UserInfo user={auth.user} showEmail />
+                        <ChevronsUpDown className="text-muted-foreground ml-auto size-3.5" />
+                    </SidebarMenuButton>
+                </UserDropdown>
+            </SidebarMenuItem>
+        </SidebarMenu>
+    );
 }

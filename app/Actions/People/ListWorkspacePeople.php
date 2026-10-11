@@ -42,6 +42,7 @@ class ListWorkspacePeople
             'people' => $members->map(fn (User $member) => [
                 'id' => $member->id,
                 'name' => $member->name,
+                ...$member->visibleStatus(),
                 'email' => $member->email,
                 'avatar' => $member->media?->url,
                 'role' => Workspace::resolveRole($member->pivot?->role, $workspace->created_by === $member->id),

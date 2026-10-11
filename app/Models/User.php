@@ -53,6 +53,20 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'status_expires_at' => 'datetime',
+            'notifications_muted' => 'boolean',
+        ];
+    }
+
+    public function visibleStatus(): array
+    {
+        $expired = $this->status_expires_at?->isPast() ?? false;
+
+        return [
+            'availability' => $this->availability ?? 'online',
+            'status_text' => $expired ? null : $this->status_text,
+            'status_emoji' => $expired ? null : $this->status_emoji,
+            'status_expires_at' => $expired ? null : $this->status_expires_at?->toIso8601String(),
         ];
     }
 

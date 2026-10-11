@@ -56,6 +56,7 @@ class GetPersonProfile
             'person' => [
                 'id' => $person->id,
                 'name' => $person->name,
+                ...$person->visibleStatus(),
                 'email' => $person->email,
                 'avatar' => $person->media?->url,
                 'role' => $role,
